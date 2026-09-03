@@ -627,3 +627,72 @@ added, split it into its own checkbox rather than bundling it under the same
 Accept — GDPR wants purpose-specific consent, and "analytics" and
 "advertising" are different purposes even though both are "not essential."
 Don't fold a second tracker into this binary without doing that.
+
+### Rooms, sixth pass — the slider is the hero now (3 Sep 2026)
+
+Frederik's read on the page-hero was blunt and correct: boring, type too big
+and clunky, and the photo didn't work. Worth recording exactly why, because
+the fix wasn't "pick a nicer photo."
+
+**The page-hero background was `img_d03y201734.webp` — 750x500 — shown up to
+700px tall.** A 3-4x upscale, hence the softness. But a proper replacement
+already existed on disk and unused: `assets/rooms/rooms-hero.webp`,
+1800x1013, sharp, well-composed — made during an earlier pass, then silently
+dropped when a later rebuild script regenerated the page-hero markup. So the
+image half of the complaint had a five-minute fix sitting right there.
+
+**Fixing the photo wouldn't have fixed the actual problem, which is pacing.**
+The page opened with one showcase photo (generic "arrival" mood), then
+immediately the room slider — three more showcase photos, each with its own
+headline. Two similar beats back to back, and Frederik's own words drew the
+line precisely: the slider "virker virkelig godt", the header "kedelig,
+klodset". That's not a resolution problem, it's a craft-level gap between two
+elements doing adjacent jobs. Polishing the weaker one has a lower ceiling
+than promoting the one that already works.
+
+**So `.page-hero` is gone from this page and `.rs` (the slider) is now the
+first section — the page's actual hero.** It was already sized close to one
+(`clamp(460px, 74vh, 760px)`, against `.page-hero`'s `62vh`), so this is a
+promotion, not a rebuild:
+
+- `.rs__stage` is now `100svh; min-height: 620px` — the same formula as
+  `.hero` on the homepage, since it now plays the same role.
+- A small `.rs__kicker` ("Accommodation") gives the page an identity anchor
+  that a bare tab row didn't carry on its own — the thing `.page-hero`'s
+  label used to do. An `<h1>Room Collection</h1>` still exists for SEO/a11y,
+  now `.visually-hidden` rather than a visible headline competing with the
+  per-room `.rs__h` headlines underneath the tabs.
+- `initNav()`'s hero selector gained `.rs` (`'.hero, .page-hero, .rs'`) so
+  the fixed nav goes transparent-over-photo here too, exactly as it does on
+  every other page's opener.
+- The intro paragraph ("Three bungalow styles...") moved from *before* the
+  slider to *after* it — now the calm settle-beat right after the big visual
+  opener, which is the order that pattern normally runs in.
+
+⚠️ **`.rs__tabs` and the new `.rs__kicker` position off `--nav-h`, not a flat
+vh guess — this is the bug this promotion actually exposed.** The tabs used
+to sit at `top: clamp(26px, 5vh, 54px)`, which is *inside* the fixed nav's
+own ~70px height on every breakpoint. That was invisible before because the
+slider sat well below the nav's transparent phase, scrolled past it. Making
+`.rs` the very first section put the tabs directly under the nav for the
+first time, and stacked mobile layout (logo/tabs/kicker all sharing the same
+left edge) made the overlap a literal text collision — caught in a mobile
+screenshot, not by the detector. Both offsets are now
+`calc(var(--nav-h, 70px) + clamp(...))`. Any future absolutely-positioned
+element inside `.rs` needs the same treatment, not a raw vh clamp.
+
+**The crossfade is slower and drifts, matching the homepage hero's language
+instead of its own flat 900ms cut.** `.rs__slide` opacity transition went
+from 900ms to 1.6s, and `.rs__shot img` now carries the same slow Ken Burns
+scale the homepage hero uses (`scale(1.05) → scale(1)` over 6s linear,
+restarting whenever a slide regains `.is-on`). Both are gated by
+`.no-motion` the same way the homepage hero is. This was the direct answer to
+"the transition between categories should be smoother" — a crossfade alone
+was never going to read as smooth at 900ms; the homepage's 1.8s/7s pairing is
+why that one already did.
+
+`accommodation.html`'s JSON-LD `image` now points at `rooms-hero.webp`
+instead of the 750x500 original, since that's the page's real representative
+photo now. `img_d03y201734.webp` is still used as a small thumbnail on
+`index.html` and `family.html` — leave those, only this page's use of it as
+a full-bleed background was the problem.

@@ -46,7 +46,7 @@ function initNav() {
   const nav = document.querySelector('.nav');
   if (!nav) return;
 
-  const hero = document.querySelector('.hero, .page-hero');
+  const hero = document.querySelector('.hero, .page-hero, .rs');
   if (!hero) { nav.classList.add('nav--solid'); return; }
 
   const sentinel = document.createElement('div');

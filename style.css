@@ -1136,22 +1136,41 @@ html { caret-color: var(--gold-dark); }
   font-variation-settings: 'opsz' 60;
 }
 
-/* ---------- the slider ---------- */
+/* ---------- the slider, promoted to this page's hero ----------
+   Was a mid-page block below a separate page-hero photo; that photo was a
+   generic 750x500 arrival shot doing the same job worse (soft, one more
+   showcase beat before the one that actually mattered). This section already
+   ran at 74vh, so making it the full hero is a promotion, not a rebuild. */
 .rs {
   position: relative; background: var(--charcoal);
   /* One duration drives both the countdown line and the JS timer — script.js
      reads this value, so they can never drift apart. */
   --rs-dur: 3s;
 }
-.rs__stage { position: relative; height: clamp(460px, 74vh, 760px); }
+/* Both offsets clear the fixed nav via --nav-h rather than a guessed vh
+   value -- the tabs previously sat at a flat clamp(26px,5vh,54px), which is
+   inside the nav's own ~70px height on every breakpoint. It read fine on
+   desktop only because the logo, tabs and menu don't share an x-range there;
+   promoting this section to the page's hero put it directly under the nav
+   for the first time, and stacked mobile made the collision plainly visible. */
+.rs__kicker {
+  position: absolute; z-index: 2;
+  top: calc(var(--nav-h, 70px) + clamp(20px, 3.5vh, 36px)); left: var(--gutter);
+  color: rgba(248, 246, 241, 0.8);
+}
+.rs__stage { position: relative; height: 100svh; min-height: 620px; }
 .rs__slide {
   position: absolute; inset: 0;
   opacity: 0; visibility: hidden;
-  transition: opacity 900ms var(--ease), visibility 0s linear 900ms;
+  transition: opacity 1.6s var(--ease), visibility 0s linear 1.6s;
 }
-.rs__slide.is-on { opacity: 1; visibility: visible; transition: opacity 900ms var(--ease); }
+.rs__slide.is-on { opacity: 1; visibility: visible; transition: opacity 1.6s var(--ease); }
 .rs__shot { position: absolute; inset: 0; overflow: hidden; }
-.rs__shot img { width: 100%; height: 100%; object-fit: cover; }
+.rs__shot img {
+  width: 100%; height: 100%; object-fit: cover;
+  transform: scale(1.05); transition: transform 6s linear;
+}
+.rs__slide.is-on .rs__shot img { transform: scale(1); }
 .rs__shot::after {
   content: ''; position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(28,26,24,0.5) 0%, rgba(28,26,24,0.18) 34%, rgba(28,26,24,0.74) 100%);
@@ -1191,7 +1210,8 @@ html { caret-color: var(--gold-dark); }
 
 /* Tabs, with the countdown line. */
 .rs__tabs {
-  position: absolute; inset: clamp(26px, 5vh, 54px) 0 auto 0; z-index: 2;
+  position: absolute; z-index: 2;
+  top: calc(var(--nav-h, 70px) + clamp(56px, 9vh, 88px)); left: 0; right: 0;
   display: flex; justify-content: center; flex-wrap: wrap;
   gap: clamp(16px, 3vw, 48px); padding-inline: var(--gutter);
 }
@@ -1231,6 +1251,8 @@ html { caret-color: var(--gold-dark); }
 /* No countdown and no auto-advance when reduced motion is asked for; the line
    simply sits gold under the active label. */
 .no-motion .rs__prog i { animation: none; }
+.no-motion .rs__shot img { transition: none; transform: none; }
+.no-motion .rs__slide { transition: opacity 0.4s linear; }
 
 .rs a:focus-visible, .rs button:focus-visible { outline-color: var(--warm-white); }
 
