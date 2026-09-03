@@ -552,3 +552,36 @@ cheaper filter. It adds no detail; only a photographer fixes this.
 preview pane — verified directly (with the transition suppressed a height applies
 correctly; with it active the computed value never moves). Final states of the
 unfold are verified; the motion itself is not, and cannot be from here.
+
+### Staging deploy on kohkoodbeach.com, noindex (3 Sep 2026)
+
+Frederik bought `kohkoodbeach.com` (One.com registrar) to preview this build
+without competing with the existing site in search. `ORIGIN` is now
+`https://kohkoodbeach.com` everywhere it was hard-coded (12 pages, robots.txt,
+sitemap.xml — was `kohkoodbeachresorts.com`).
+
+**This domain is deliberately not indexable.** Every page carries
+`<meta name="robots" content="noindex, nofollow">` and `robots.txt` is
+`Disallow: /`. Both together, belt-and-braces: a crawler that ignores the meta
+tag still can't fetch the page, and one that ignores robots.txt still sees the
+meta tag. **When this becomes the real production domain**, both need
+reverting — drop the meta tag from all 12 pages, restore `robots.txt` to
+`Allow: /` with the `Sitemap:` line pointing at `sitemap.xml`, and only then
+submit it in Search Console. Don't flip one without the other.
+
+Hosting is GitHub Pages from a public repo (`kohkoodbeach-website`, pushed from
+this folder) — Frederik's GitHub account is Free tier, which requires a public
+repo for Pages. That's fine here: there is no server logic or secret to leak,
+booking still goes through `book.html`'s `mailto:`, so a public repo exposes
+nothing a view-source on the live site wouldn't already show.
+
+`.gitignore` excludes `Visual inspiration/` (reference only) and the 152 unused
+JPEG/PNG originals + the unused 72 MB hero video — everything the pages load is
+already `.webp`, per the note under "Images" above. Repo is 22 MB, not 167 MB.
+Three raster exceptions stay tracked because pages reference them directly:
+`assets/og-image.jpg`, `assets/logo/apple-touch-icon.png` (favicon is `.svg`,
+already untouched by the excludes).
+
+A `CNAME` file at the repo root (containing `kohkoodbeach.com`) is what GitHub
+Pages needs for the custom domain; DNS at One.com points the apex at GitHub's
+four Pages IPs (185.199.108/109/110/111.153) via A records.
