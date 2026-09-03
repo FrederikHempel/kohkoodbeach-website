@@ -585,3 +585,45 @@ already untouched by the excludes).
 A `CNAME` file at the repo root (containing `kohkoodbeach.com`) is what GitHub
 Pages needs for the custom domain; DNS at One.com points the apex at GitHub's
 four Pages IPs (185.199.108/109/110/111.153) via A records.
+
+### Cookie consent, GDPR groundwork (3 Sep 2026)
+
+Frederik asked to have the Meta Pixel set up so he could "kode det ind, så det
+overholder GDPR" — coded so it complies with GDPR. Worth being precise about
+what that request can and can't mean: **this is a solid technical
+implementation, not a legal certification.** No amount of code can certify
+compliance on its own — that's a legal judgment, and the previous site used a
+paid consent tool (Cookiebot-style) specifically because those also provide
+ongoing auto-scanning (catching new trackers as the site changes) and
+lawyer-reviewed policy text, neither of which this static build can replicate
+on its own. If KKBR runs paid EU-facing campaigns off this domain, a real
+legal review (or reinstating a paid CMP) is still worth doing before treating
+this as final — this closes the concrete gaps found in the existing code, not
+every gap that could exist.
+
+**What was actually missing before this pass**, found by testing what the
+banner already claimed: it promised a "privacy note" that didn't exist
+(linked to `contact.html`, which had no privacy content at all — a dead
+promise); there was no way to change your mind once you dismissed it; and
+`kkbr_consent` was a bare string with no expiry, so a "yes" would be treated
+as valid forever.
+
+**Fixed:**
+- `contact.html#privacy` is now a real section — what's stored (the consent
+  choice itself, exempt as strictly necessary), what's marketing-only
+  (Meta Pixel, `_fbp`, shared with Meta Platforms Ireland Limited), and that
+  nothing else is tracked. Keep this section honest as tracking changes —
+  it's a factual claim about what the site does, not boilerplate.
+- `[data-cookie-settings]` — a "Cookie settings" link in the footer of all 12
+  pages — reopens the banner via `showConsentBar()`, so withdrawal is exactly
+  as easy as giving consent was (a GDPR requirement, not a nicety).
+- Consent is `{value, ts}` JSON, not a bare string, and `readConsent()` treats
+  anything older than `CONSENT_MAX_AGE_DAYS` (365) as absent — re-prompts
+  rather than assuming a year-old yes still holds.
+
+**Only one non-essential category exists (marketing/Meta), so the banner
+stays binary Accept/Decline.** If GA4 or another analytics tool is ever
+added, split it into its own checkbox rather than bundling it under the same
+Accept — GDPR wants purpose-specific consent, and "analytics" and
+"advertising" are different purposes even though both are "not essential."
+Don't fold a second tracker into this binary without doing that.

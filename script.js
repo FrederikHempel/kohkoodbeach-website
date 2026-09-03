@@ -488,15 +488,40 @@ function initContactForm() {
 
 /* Cookie consent scaffold. No analytics is wired up yet — when a GA4 property
    exists, uncomment the gtag consent call and load the tag after "accept". */
-function initConsent() {
-  const stored = localStorage.getItem('kkbr_consent');
-  if (stored === 'accept') loadMetaPixel();
-  if (stored) return;
+const CONSENT_KEY = 'kkbr_consent';
+const CONSENT_MAX_AGE_DAYS = 365;
+
+/* A stored choice is a JSON {value, ts}, not a bare string — so it can expire.
+   A "yes" from a year ago isn't consent given today; re-asking after a year
+   is standard regulator guidance (Datatilsynet included), not a design choice
+   we're free to skip. */
+function readConsent() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CONSENT_KEY));
+    if (!raw || !raw.value || !raw.ts) return null;
+    const ageDays = (Date.now() - raw.ts) / 86400000;
+    if (ageDays > CONSENT_MAX_AGE_DAYS) return null;
+    return raw.value;
+  } catch (err) {
+    return null;
+  }
+}
+
+function writeConsent(value) {
+  localStorage.setItem(CONSENT_KEY, JSON.stringify({ value, ts: Date.now() }));
+}
+
+/* Renders the bar and wires its two buttons. Called on first visit, once
+   stored consent expires, and any time the visitor reopens it from the
+   "Cookie settings" link in the footer — withdrawing has to be exactly as
+   easy as agreeing was, on every page, not just the one it was given on. */
+function showConsentBar() {
+  document.querySelector('.consent')?.remove();
 
   const bar = document.createElement('div');
   bar.className = 'consent';
   bar.innerHTML = `
-    <p>We use cookies to understand how guests use this site. Analytics stay off until you agree — see our <a href="contact.html">privacy note</a>.</p>
+    <p>We use cookies to understand how guests use this site. Marketing cookies stay off until you agree — see our <a href="contact.html#privacy">privacy and cookies note</a>.</p>
     <div class="consent__actions">
       <button type="button" class="btn btn--ghost" data-consent="decline">Decline</button>
       <button type="button" class="btn" data-consent="accept">Accept</button>
@@ -505,7 +530,7 @@ function initConsent() {
 
   bar.querySelectorAll('[data-consent]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      localStorage.setItem('kkbr_consent', btn.dataset.consent);
+      writeConsent(btn.dataset.consent);
       if (btn.dataset.consent === 'accept') loadMetaPixel();
       // window.gtag?.('consent', 'update', {
       //   analytics_storage:   btn.dataset.consent === 'accept' ? 'granted' : 'denied',
@@ -515,6 +540,19 @@ function initConsent() {
       // });
       bar.remove();
     });
+  });
+}
+
+function initConsent() {
+  const stored = readConsent();
+  if (stored === 'accept') loadMetaPixel();
+  if (!stored) showConsentBar();
+
+  /* The footer's "Cookie settings" link exists on all 12 pages, so this is
+     never a no-op query — it reopens the bar with the current choice already
+     reflected in whichever button the visitor clicks next. */
+  document.querySelectorAll('[data-cookie-settings]').forEach((btn) => {
+    btn.addEventListener('click', showConsentBar);
   });
 }
 
