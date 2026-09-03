@@ -1,0 +1,15 @@
+# Reference screenshots the design was built against — not part of the live site.
+Visual inspiration/
+
+# Every page loads the .webp twin; these originals are dead weight (see CLAUDE.md).
+# Three files are the exception — the OG image and the two icons — kept below.
+assets/**/*.jpg
+assets/**/*.jpeg
+assets/**/*.png
+assets/**/*.mp4
+assets/**/*.mov
+!assets/og-image.jpg
+!assets/logo/apple-touch-icon.png
+
+# OS/editor noise
+.DS_Store

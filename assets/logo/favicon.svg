@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Koh Kood Beach Resort">
+  <rect width="64" height="64" rx="12" fill="#2B2926"/>
+  <circle cx="32" cy="27" r="11" fill="#C98A3E"/>
+  <path d="M0 38h64v26H0z" fill="#21839F"/>
+  <path d="M0 38c8 0 8 5 16 5s8-5 16-5 8 5 16 5 8-5 16-5v5c-8 0-8 5-16 5s-8-5-16-5-8 5-16 5-8-5-16-5z" fill="#F8F6F1" opacity=".55"/>
+</svg>

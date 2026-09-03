@@ -1,0 +1,1045 @@
+{
+ "assets/activities/5_79_img_d07y201791.jpg": {
+  "webp": "assets/activities/5_79_img_d07y201791.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 142403,
+  "webp_bytes": 58544
+ },
+ "assets/activities/img_d06y201747.jpg": {
+  "webp": "assets/activities/img_d06y201747.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 121003,
+  "webp_bytes": 52930
+ },
+ "assets/activities/img_d07y201735.jpg": {
+  "webp": "assets/activities/img_d07y201735.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 157816,
+  "webp_bytes": 83046
+ },
+ "assets/activities/img_d10y201797.jpg": {
+  "webp": "assets/activities/img_d10y201797.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 206933,
+  "webp_bytes": 124368
+ },
+ "assets/activities/img_d27y201793.jpg": {
+  "webp": "assets/activities/img_d27y201793.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 422739,
+  "webp_bytes": 81936
+ },
+ "assets/gallery/activities/Kayaking.jpg": {
+  "webp": "assets/gallery/activities/Kayaking.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 72181,
+  "webp_bytes": 46648
+ },
+ "assets/gallery/activities/img41p69.jpg": {
+  "webp": "assets/gallery/activities/img41p69.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 106197,
+  "webp_bytes": 79360
+ },
+ "assets/gallery/activities/img42p10.jpg": {
+  "webp": "assets/gallery/activities/img42p10.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 129006,
+  "webp_bytes": 114340
+ },
+ "assets/gallery/activities/img43p94.jpg": {
+  "webp": "assets/gallery/activities/img43p94.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 53744,
+  "webp_bytes": 28078
+ },
+ "assets/gallery/activities/img44p10.jpg": {
+  "webp": "assets/gallery/activities/img44p10.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 153119,
+  "webp_bytes": 140836
+ },
+ "assets/gallery/activities/img45p25.jpg": {
+  "webp": "assets/gallery/activities/img45p25.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 130589,
+  "webp_bytes": 117470
+ },
+ "assets/gallery/activities/img46p82.jpg": {
+  "webp": "assets/gallery/activities/img46p82.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 52183,
+  "webp_bytes": 26228
+ },
+ "assets/gallery/activities/img47p95.jpg": {
+  "webp": "assets/gallery/activities/img47p95.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 67394,
+  "webp_bytes": 39816
+ },
+ "assets/gallery/activities/img48p78.jpg": {
+  "webp": "assets/gallery/activities/img48p78.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 78431,
+  "webp_bytes": 56864
+ },
+ "assets/gallery/activities/img49p22.jpg": {
+  "webp": "assets/gallery/activities/img49p22.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 160534,
+  "webp_bytes": 146858
+ },
+ "assets/gallery/activities/img67p20.jpg": {
+  "webp": "assets/gallery/activities/img67p20.webp",
+  "w": 1498,
+  "h": 1000,
+  "jpg_bytes": 392213,
+  "webp_bytes": 345940
+ },
+ "assets/gallery/activities/img68p53.jpg": {
+  "webp": "assets/gallery/activities/img68p53.webp",
+  "w": 1500,
+  "h": 842,
+  "jpg_bytes": 88862,
+  "webp_bytes": 42222
+ },
+ "assets/gallery/activities/img69p49.jpg": {
+  "webp": "assets/gallery/activities/img69p49.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 283178,
+  "webp_bytes": 233854
+ },
+ "assets/gallery/activities/img70p46.jpg": {
+  "webp": "assets/gallery/activities/img70p46.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 268031,
+  "webp_bytes": 213586
+ },
+ "assets/gallery/activities/img71p68.jpg": {
+  "webp": "assets/gallery/activities/img71p68.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 208952,
+  "webp_bytes": 137708
+ },
+ "assets/gallery/activities/img72p68.jpg": {
+  "webp": "assets/gallery/activities/img72p68.webp",
+  "w": 1333,
+  "h": 1000,
+  "jpg_bytes": 108881,
+  "webp_bytes": 58874
+ },
+ "assets/gallery/events/img73p59.jpg": {
+  "webp": "assets/gallery/events/img73p59.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 204129,
+  "webp_bytes": 126464
+ },
+ "assets/gallery/events/img74p18.jpg": {
+  "webp": "assets/gallery/events/img74p18.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 195986,
+  "webp_bytes": 112036
+ },
+ "assets/gallery/events/img75p73.jpg": {
+  "webp": "assets/gallery/events/img75p73.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 234734,
+  "webp_bytes": 153372
+ },
+ "assets/gallery/events/img76p39.jpg": {
+  "webp": "assets/gallery/events/img76p39.webp",
+  "w": 998,
+  "h": 1500,
+  "jpg_bytes": 166674,
+  "webp_bytes": 77554
+ },
+ "assets/gallery/events/img77p26.jpg": {
+  "webp": "assets/gallery/events/img77p26.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 114573,
+  "webp_bytes": 48022
+ },
+ "assets/gallery/events/img78p39.jpg": {
+  "webp": "assets/gallery/events/img78p39.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 312027,
+  "webp_bytes": 224636
+ },
+ "assets/gallery/facilities/img24p21.jpg": {
+  "webp": "assets/gallery/facilities/img24p21.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 178980,
+  "webp_bytes": 169340
+ },
+ "assets/gallery/facilities/img25p48.jpg": {
+  "webp": "assets/gallery/facilities/img25p48.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 107036,
+  "webp_bytes": 83084
+ },
+ "assets/gallery/facilities/img26p94.jpg": {
+  "webp": "assets/gallery/facilities/img26p94.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 206115,
+  "webp_bytes": 201676
+ },
+ "assets/gallery/facilities/img27p15.jpg": {
+  "webp": "assets/gallery/facilities/img27p15.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 208556,
+  "webp_bytes": 207920
+ },
+ "assets/gallery/facilities/img62p69.jpg": {
+  "webp": "assets/gallery/facilities/img62p69.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 350647,
+  "webp_bytes": 310430
+ },
+ "assets/gallery/facilities/img63p60.jpg": {
+  "webp": "assets/gallery/facilities/img63p60.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 373137,
+  "webp_bytes": 315120
+ },
+ "assets/gallery/facilities/img64p87.jpg": {
+  "webp": "assets/gallery/facilities/img64p87.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 224686,
+  "webp_bytes": 160596
+ },
+ "assets/gallery/panorama/img10p22.jpg": {
+  "webp": "assets/gallery/panorama/img10p22.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 127881,
+  "webp_bytes": 112334
+ },
+ "assets/gallery/panorama/img11p70.jpg": {
+  "webp": "assets/gallery/panorama/img11p70.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 135441,
+  "webp_bytes": 119730
+ },
+ "assets/gallery/panorama/img12p64.jpg": {
+  "webp": "assets/gallery/panorama/img12p64.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 160389,
+  "webp_bytes": 148756
+ },
+ "assets/gallery/panorama/img13p62.jpg": {
+  "webp": "assets/gallery/panorama/img13p62.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 168138,
+  "webp_bytes": 156496
+ },
+ "assets/gallery/panorama/img14p40.jpg": {
+  "webp": "assets/gallery/panorama/img14p40.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 155788,
+  "webp_bytes": 147102
+ },
+ "assets/gallery/panorama/img15p96.jpg": {
+  "webp": "assets/gallery/panorama/img15p96.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 93127,
+  "webp_bytes": 66548
+ },
+ "assets/gallery/panorama/img16p53.jpg": {
+  "webp": "assets/gallery/panorama/img16p53.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 116789,
+  "webp_bytes": 95280
+ },
+ "assets/gallery/panorama/img17p14.jpg": {
+  "webp": "assets/gallery/panorama/img17p14.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 122766,
+  "webp_bytes": 104646
+ },
+ "assets/gallery/panorama/img19p77.jpg": {
+  "webp": "assets/gallery/panorama/img19p77.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 144377,
+  "webp_bytes": 130472
+ },
+ "assets/gallery/panorama/img20p48.jpg": {
+  "webp": "assets/gallery/panorama/img20p48.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 153800,
+  "webp_bytes": 139740
+ },
+ "assets/gallery/panorama/img3p43.jpg": {
+  "webp": "assets/gallery/panorama/img3p43.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 162674,
+  "webp_bytes": 153260
+ },
+ "assets/gallery/panorama/img4p29.jpg": {
+  "webp": "assets/gallery/panorama/img4p29.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 111047,
+  "webp_bytes": 96090
+ },
+ "assets/gallery/panorama/img54p19.jpg": {
+  "webp": "assets/gallery/panorama/img54p19.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 213655,
+  "webp_bytes": 144134
+ },
+ "assets/gallery/panorama/img55p34.jpg": {
+  "webp": "assets/gallery/panorama/img55p34.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 375680,
+  "webp_bytes": 335442
+ },
+ "assets/gallery/panorama/img56p74.jpg": {
+  "webp": "assets/gallery/panorama/img56p74.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 138752,
+  "webp_bytes": 79786
+ },
+ "assets/gallery/panorama/img57p26.jpg": {
+  "webp": "assets/gallery/panorama/img57p26.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 243352,
+  "webp_bytes": 188470
+ },
+ "assets/gallery/panorama/img58p99.jpg": {
+  "webp": "assets/gallery/panorama/img58p99.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 174250,
+  "webp_bytes": 123262
+ },
+ "assets/gallery/panorama/img59p27.jpg": {
+  "webp": "assets/gallery/panorama/img59p27.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 384988,
+  "webp_bytes": 351672
+ },
+ "assets/gallery/panorama/img5p91.jpg": {
+  "webp": "assets/gallery/panorama/img5p91.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 147921,
+  "webp_bytes": 136008
+ },
+ "assets/gallery/panorama/img60p92.jpg": {
+  "webp": "assets/gallery/panorama/img60p92.webp",
+  "w": 1500,
+  "h": 842,
+  "jpg_bytes": 111645,
+  "webp_bytes": 62888
+ },
+ "assets/gallery/panorama/img61p92.jpg": {
+  "webp": "assets/gallery/panorama/img61p92.webp",
+  "w": 1500,
+  "h": 842,
+  "jpg_bytes": 153414,
+  "webp_bytes": 92716
+ },
+ "assets/gallery/panorama/img6p11.jpg": {
+  "webp": "assets/gallery/panorama/img6p11.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 148146,
+  "webp_bytes": 136816
+ },
+ "assets/gallery/panorama/img7p74.jpg": {
+  "webp": "assets/gallery/panorama/img7p74.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 138990,
+  "webp_bytes": 124890
+ },
+ "assets/gallery/panorama/img8p39.jpg": {
+  "webp": "assets/gallery/panorama/img8p39.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 160350,
+  "webp_bytes": 147038
+ },
+ "assets/gallery/panorama/img9p82.jpg": {
+  "webp": "assets/gallery/panorama/img9p82.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 145410,
+  "webp_bytes": 132536
+ },
+ "assets/gallery/restaurant/img28p75.jpg": {
+  "webp": "assets/gallery/restaurant/img28p75.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 112417,
+  "webp_bytes": 82770
+ },
+ "assets/gallery/restaurant/img29p55.jpg": {
+  "webp": "assets/gallery/restaurant/img29p55.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 115972,
+  "webp_bytes": 88494
+ },
+ "assets/gallery/restaurant/img30p28.jpg": {
+  "webp": "assets/gallery/restaurant/img30p28.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 121886,
+  "webp_bytes": 93490
+ },
+ "assets/gallery/restaurant/img31p64.jpg": {
+  "webp": "assets/gallery/restaurant/img31p64.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 112564,
+  "webp_bytes": 84718
+ },
+ "assets/gallery/restaurant/img32p12.jpg": {
+  "webp": "assets/gallery/restaurant/img32p12.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 128300,
+  "webp_bytes": 102034
+ },
+ "assets/gallery/restaurant/img33p89.jpg": {
+  "webp": "assets/gallery/restaurant/img33p89.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 115820,
+  "webp_bytes": 89738
+ },
+ "assets/gallery/restaurant/img34p70.jpg": {
+  "webp": "assets/gallery/restaurant/img34p70.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 116768,
+  "webp_bytes": 91380
+ },
+ "assets/gallery/restaurant/img35p42.jpg": {
+  "webp": "assets/gallery/restaurant/img35p42.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 120869,
+  "webp_bytes": 95678
+ },
+ "assets/gallery/restaurant/img36p94.jpg": {
+  "webp": "assets/gallery/restaurant/img36p94.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 90710,
+  "webp_bytes": 61956
+ },
+ "assets/gallery/restaurant/img37p37.jpg": {
+  "webp": "assets/gallery/restaurant/img37p37.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 87230,
+  "webp_bytes": 58538
+ },
+ "assets/gallery/restaurant/img38p97.jpg": {
+  "webp": "assets/gallery/restaurant/img38p97.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 96482,
+  "webp_bytes": 67040
+ },
+ "assets/gallery/restaurant/img39p93.jpg": {
+  "webp": "assets/gallery/restaurant/img39p93.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 101483,
+  "webp_bytes": 75966
+ },
+ "assets/gallery/restaurant/img65p35.jpg": {
+  "webp": "assets/gallery/restaurant/img65p35.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 256203,
+  "webp_bytes": 184354
+ },
+ "assets/gallery/restaurant/img66p25.jpg": {
+  "webp": "assets/gallery/restaurant/img66p25.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 138918,
+  "webp_bytes": 65636
+ },
+ "assets/hero-carousel/hero-1.jpg": {
+  "webp": "assets/hero-carousel/hero-1.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 148146,
+  "webp_bytes": 136816
+ },
+ "assets/hero-carousel/hero-2.jpg": {
+  "webp": "assets/hero-carousel/hero-2.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 174250,
+  "webp_bytes": 123262
+ },
+ "assets/hero-carousel/hero-3.jpg": {
+  "webp": "assets/hero-carousel/hero-3.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 138752,
+  "webp_bytes": 79786
+ },
+ "assets/hero-carousel/hero-4.jpg": {
+  "webp": "assets/hero-carousel/hero-4.webp",
+  "w": 900,
+  "h": 600,
+  "jpg_bytes": 178980,
+  "webp_bytes": 169340
+ },
+ "assets/hero-carousel/hero-5.jpg": {
+  "webp": "assets/hero-carousel/hero-5.webp",
+  "w": 1500,
+  "h": 998,
+  "jpg_bytes": 213655,
+  "webp_bytes": 144134
+ },
+ "assets/logo/logo-footer.png": {
+  "webp": "assets/logo/logo-footer.webp",
+  "w": 317,
+  "h": 77,
+  "jpg_bytes": 13195,
+  "webp_bytes": 7908
+ },
+ "assets/logo/logo.png": {
+  "webp": "assets/logo/logo.webp",
+  "w": 635,
+  "h": 154,
+  "jpg_bytes": 28491,
+  "webp_bytes": 17276
+ },
+ "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8136.jpg": {
+  "webp": "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8136.webp",
+  "w": 2000,
+  "h": 1500,
+  "jpg_bytes": 1992124,
+  "webp_bytes": 896414
+ },
+ "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8245.jpg": {
+  "webp": "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8245.webp",
+  "w": 2000,
+  "h": 1456,
+  "jpg_bytes": 993377,
+  "webp_bytes": 322606
+ },
+ "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8358.jpg": {
+  "webp": "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8358.webp",
+  "w": 2000,
+  "h": 1500,
+  "jpg_bytes": 640135,
+  "webp_bytes": 129624
+ },
+ "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8453.jpg": {
+  "webp": "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8453.webp",
+  "w": 2000,
+  "h": 1500,
+  "jpg_bytes": 995641,
+  "webp_bytes": 315258
+ },
+ "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8583.jpg": {
+  "webp": "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8583.webp",
+  "w": 1042,
+  "h": 1014,
+  "jpg_bytes": 325822,
+  "webp_bytes": 169220
+ },
+ "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8686.jpg": {
+  "webp": "assets/room-photos/bali-deluxe-partial-sea-view/img_9p8686.webp",
+  "w": 1188,
+  "h": 890,
+  "jpg_bytes": 261691,
+  "webp_bytes": 117818
+ },
+ "assets/room-photos/bali-house-garden-view/img_1p10765.jpg": {
+  "webp": "assets/room-photos/bali-house-garden-view/img_1p10765.webp",
+  "w": 600,
+  "h": 800,
+  "jpg_bytes": 418363,
+  "webp_bytes": 96182
+ },
+ "assets/room-photos/bali-house-garden-view/img_1p10893.jpg": {
+  "webp": "assets/room-photos/bali-house-garden-view/img_1p10893.webp",
+  "w": 800,
+  "h": 600,
+  "jpg_bytes": 445000,
+  "webp_bytes": 103296
+ },
+ "assets/room-photos/bali-house-garden-view/img_1p10980.jpg": {
+  "webp": "assets/room-photos/bali-house-garden-view/img_1p10980.webp",
+  "w": 600,
+  "h": 800,
+  "jpg_bytes": 498679,
+  "webp_bytes": 121268
+ },
+ "assets/room-photos/bali-house-garden-view/img_1p11029.jpg": {
+  "webp": "assets/room-photos/bali-house-garden-view/img_1p11029.webp",
+  "w": 600,
+  "h": 800,
+  "jpg_bytes": 354169,
+  "webp_bytes": 63558
+ },
+ "assets/room-photos/bali-house-garden-view/img_1p11117.jpg": {
+  "webp": "assets/room-photos/bali-house-garden-view/img_1p11117.webp",
+  "w": 800,
+  "h": 600,
+  "jpg_bytes": 266592,
+  "webp_bytes": 42668
+ },
+ "assets/room-photos/bali-house-garden-view/img_1p11256.jpg": {
+  "webp": "assets/room-photos/bali-house-garden-view/img_1p11256.webp",
+  "w": 600,
+  "h": 800,
+  "jpg_bytes": 242396,
+  "webp_bytes": 36130
+ },
+ "assets/room-photos/bali-house-garden-view/img_1p11350.jpg": {
+  "webp": "assets/room-photos/bali-house-garden-view/img_1p11350.webp",
+  "w": 600,
+  "h": 800,
+  "jpg_bytes": 254240,
+  "webp_bytes": 38472
+ },
+ "assets/room-photos/bali-house-garden-view/img_1p114.jpg": {
+  "webp": "assets/room-photos/bali-house-garden-view/img_1p114.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 212161,
+  "webp_bytes": 113802
+ },
+ "assets/room-photos/bali-house-garden-view/img_1p6451.jpg": {
+  "webp": "assets/room-photos/bali-house-garden-view/img_1p6451.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 236268,
+  "webp_bytes": 128410
+ },
+ "assets/room-photos/bali-house-garden-view/img_1p6992.jpg": {
+  "webp": "assets/room-photos/bali-house-garden-view/img_1p6992.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 157981,
+  "webp_bytes": 77824
+ },
+ "assets/room-photos/bali-house-partial-sea-view/img_3p10473.JPG": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view/img_3p10473.webp",
+  "w": 1500,
+  "h": 2000,
+  "jpg_bytes": 1042693,
+  "webp_bytes": 363500
+ },
+ "assets/room-photos/bali-house-partial-sea-view/img_3p10588.JPG": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view/img_3p10588.webp",
+  "w": 2000,
+  "h": 1500,
+  "jpg_bytes": 1147054,
+  "webp_bytes": 419708
+ },
+ "assets/room-photos/bali-house-partial-sea-view/img_3p7028.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view/img_3p7028.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 198778,
+  "webp_bytes": 109790
+ },
+ "assets/room-photos/bali-house-partial-sea-view/img_3p7280.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view/img_3p7280.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 201635,
+  "webp_bytes": 97370
+ },
+ "assets/room-photos/bali-house-partial-sea-view/img_3p7551.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view/img_3p7551.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 161789,
+  "webp_bytes": 76370
+ },
+ "assets/room-photos/bali-house-partial-sea-view/img_3p7622.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view/img_3p7622.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 135297,
+  "webp_bytes": 58666
+ },
+ "assets/room-photos/bali-house-partial-sea-view/img_3p7725.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view/img_3p7725.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 140881,
+  "webp_bytes": 65390
+ },
+ "assets/room-photos/bali-house-partial-sea-view/img_3p7859.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view/img_3p7859.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 129321,
+  "webp_bytes": 53894
+ },
+ "assets/room-photos/bali-house-partial-sea-view/img_3p7959.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view/img_3p7959.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 157026,
+  "webp_bytes": 73212
+ },
+ "assets/room-photos/bali-house-partial-sea-view/img_3p8096.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view/img_3p8096.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 82191,
+  "webp_bytes": 29662
+ },
+ "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11499.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11499.webp",
+  "w": 1500,
+  "h": 2000,
+  "jpg_bytes": 884222,
+  "webp_bytes": 353672
+ },
+ "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11559.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11559.webp",
+  "w": 2000,
+  "h": 1500,
+  "jpg_bytes": 943804,
+  "webp_bytes": 359340
+ },
+ "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11685.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11685.webp",
+  "w": 2000,
+  "h": 1500,
+  "jpg_bytes": 959951,
+  "webp_bytes": 348010
+ },
+ "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11723.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11723.webp",
+  "w": 2000,
+  "h": 1500,
+  "jpg_bytes": 962632,
+  "webp_bytes": 373866
+ },
+ "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11879.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11879.webp",
+  "w": 1477,
+  "h": 1108,
+  "jpg_bytes": 335792,
+  "webp_bytes": 144730
+ },
+ "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11964.jpg": {
+  "webp": "assets/room-photos/bali-house-partial-sea-view-twin/img_10p11964.webp",
+  "w": 1108,
+  "h": 1477,
+  "jpg_bytes": 333180,
+  "webp_bytes": 145820
+ },
+ "assets/room-photos/bali-house-sea-view/img_2p10111.jpg": {
+  "webp": "assets/room-photos/bali-house-sea-view/img_2p10111.webp",
+  "w": 800,
+  "h": 600,
+  "jpg_bytes": 266592,
+  "webp_bytes": 42668
+ },
+ "assets/room-photos/bali-house-sea-view/img_2p10317.jpg": {
+  "webp": "assets/room-photos/bali-house-sea-view/img_2p10317.webp",
+  "w": 600,
+  "h": 800,
+  "jpg_bytes": 254240,
+  "webp_bytes": 38472
+ },
+ "assets/room-photos/bali-house-sea-view/img_2p4973.jpg": {
+  "webp": "assets/room-photos/bali-house-sea-view/img_2p4973.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 236268,
+  "webp_bytes": 128410
+ },
+ "assets/room-photos/bali-house-sea-view/img_2p5029.jpg": {
+  "webp": "assets/room-photos/bali-house-sea-view/img_2p5029.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 161916,
+  "webp_bytes": 84396
+ },
+ "assets/room-photos/bali-house-sea-view/img_2p5831.jpg": {
+  "webp": "assets/room-photos/bali-house-sea-view/img_2p5831.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 140881,
+  "webp_bytes": 65390
+ },
+ "assets/room-photos/bali-house-sea-view/img_2p5917.jpg": {
+  "webp": "assets/room-photos/bali-house-sea-view/img_2p5917.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 157981,
+  "webp_bytes": 77824
+ },
+ "assets/room-photos/bali-house-sea-view/img_2p9896.JPG": {
+  "webp": "assets/room-photos/bali-house-sea-view/img_2p9896.webp",
+  "w": 2000,
+  "h": 1500,
+  "jpg_bytes": 1183276,
+  "webp_bytes": 501326
+ },
+ "assets/room-photos/bali-house-sea-view/img_2p9928.JPG": {
+  "webp": "assets/room-photos/bali-house-sea-view/img_2p9928.webp",
+  "w": 2000,
+  "h": 1500,
+  "jpg_bytes": 1098652,
+  "webp_bytes": 479426
+ },
+ "assets/room-photos/thai-twin-house-garden-view/img_4p1022.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-garden-view/img_4p1022.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 45906,
+  "webp_bytes": 14186
+ },
+ "assets/room-photos/thai-twin-house-garden-view/img_4p1126.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-garden-view/img_4p1126.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 222177,
+  "webp_bytes": 106338
+ },
+ "assets/room-photos/thai-twin-house-garden-view/img_4p1280.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-garden-view/img_4p1280.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 71733,
+  "webp_bytes": 25690
+ },
+ "assets/room-photos/thai-twin-house-garden-view/img_4p1591.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-garden-view/img_4p1591.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 100236,
+  "webp_bytes": 40524
+ },
+ "assets/room-photos/thai-twin-house-garden-view/img_4p1682.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-garden-view/img_4p1682.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 65294,
+  "webp_bytes": 22092
+ },
+ "assets/room-photos/thai-twin-house-garden-view/img_4p680.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-garden-view/img_4p680.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 201489,
+  "webp_bytes": 101324
+ },
+ "assets/room-photos/thai-twin-house-garden-view/img_4p718.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-garden-view/img_4p718.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 197839,
+  "webp_bytes": 102210
+ },
+ "assets/room-photos/thai-twin-house-garden-view/img_4p814.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-garden-view/img_4p814.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 233967,
+  "webp_bytes": 114140
+ },
+ "assets/room-photos/thai-twin-house-garden-view/img_4p958.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-garden-view/img_4p958.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 188424,
+  "webp_bytes": 96538
+ },
+ "assets/room-photos/thai-twin-house-partial-sea-view/img_6p2849.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-partial-sea-view/img_6p2849.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 224682,
+  "webp_bytes": 119368
+ },
+ "assets/room-photos/thai-twin-house-partial-sea-view/img_6p2997.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-partial-sea-view/img_6p2997.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 235990,
+  "webp_bytes": 113942
+ },
+ "assets/room-photos/thai-twin-house-partial-sea-view/img_6p3097.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-partial-sea-view/img_6p3097.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 84739,
+  "webp_bytes": 31684
+ },
+ "assets/room-photos/thai-twin-house-partial-sea-view/img_6p3182.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-partial-sea-view/img_6p3182.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 104222,
+  "webp_bytes": 43308
+ },
+ "assets/room-photos/thai-twin-house-partial-sea-view/img_6p3261.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-partial-sea-view/img_6p3261.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 233967,
+  "webp_bytes": 114140
+ },
+ "assets/room-photos/thai-twin-house-partial-sea-view/img_6p3342.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-partial-sea-view/img_6p3342.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 188424,
+  "webp_bytes": 96538
+ },
+ "assets/room-photos/thai-twin-house-sea-view/img_5p1851.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-sea-view/img_5p1851.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 235990,
+  "webp_bytes": 113942
+ },
+ "assets/room-photos/thai-twin-house-sea-view/img_5p1994.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-sea-view/img_5p1994.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 224682,
+  "webp_bytes": 119368
+ },
+ "assets/room-photos/thai-twin-house-sea-view/img_5p2052.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-sea-view/img_5p2052.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 100236,
+  "webp_bytes": 40524
+ },
+ "assets/room-photos/thai-twin-house-sea-view/img_5p2162.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-sea-view/img_5p2162.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 45906,
+  "webp_bytes": 14186
+ },
+ "assets/room-photos/thai-twin-house-sea-view/img_5p2210.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-sea-view/img_5p2210.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 215105,
+  "webp_bytes": 105996
+ },
+ "assets/room-photos/thai-twin-house-sea-view/img_5p2325.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-sea-view/img_5p2325.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 541042,
+  "webp_bytes": 108004
+ },
+ "assets/room-photos/thai-twin-house-sea-view/img_5p2437.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-sea-view/img_5p2437.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 233967,
+  "webp_bytes": 114140
+ },
+ "assets/room-photos/thai-twin-house-sea-view/img_5p2551.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-sea-view/img_5p2551.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 188424,
+  "webp_bytes": 96538
+ },
+ "assets/room-photos/thai-twin-house-sea-view/img_5p2626.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-sea-view/img_5p2626.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 201489,
+  "webp_bytes": 101324
+ },
+ "assets/room-photos/thai-twin-house-sea-view/img_5p2729.jpg": {
+  "webp": "assets/room-photos/thai-twin-house-sea-view/img_5p2729.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 197839,
+  "webp_bytes": 102210
+ },
+ "assets/rooms/img_d03y201734.jpg": {
+  "webp": "assets/rooms/img_d03y201734.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 213289,
+  "webp_bytes": 113802
+ },
+ "assets/rooms/img_d03y201758.jpg": {
+  "webp": "assets/rooms/img_d03y201758.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 162755,
+  "webp_bytes": 83432
+ },
+ "assets/rooms/img_d03y201788.jpg": {
+  "webp": "assets/rooms/img_d03y201788.webp",
+  "w": 750,
+  "h": 500,
+  "jpg_bytes": 230513,
+  "webp_bytes": 108370
+ },
+ "assets/rooms/img_d18y201943.jpg": {
+  "webp": "assets/rooms/img_d18y201943.webp",
+  "w": 2000,
+  "h": 1500,
+  "jpg_bytes": 1992124,
+  "webp_bytes": 896414
+ }
+}

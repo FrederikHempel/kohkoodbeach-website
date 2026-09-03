@@ -1,0 +1,23 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "fraunces",
+        "createdAt": "2026-08-20T10:55:23.598Z",
+        "reason": "Fraunces is KKBR's established brand display face (with Work Sans), documented in the project handover and carried across v1/v2/v3 — project design system, not a generic default"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "height",
+        "files": [
+          "/Users/FrederikJacobsen_1/Desktop/Claude/Claude Code Projects/KKBR Hjemmeside v3/style.css"
+        ],
+        "createdAt": "2026-09-03T08:35:26.503Z",
+        "reason": "user confirmed: Frederik asked for the See more panel to unfold in a smooth motion; grid-template-rows 0fr->1fr does not interpolate in this engine (verified — it jumped to full height), so height is the only option that animates. One element, one deliberate click, 520ms."
+      }
+    ]
+  }
+}
