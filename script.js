@@ -309,6 +309,35 @@ function initLightbox() {
 const RESORT_EMAIL = 'reservation@kohkoodbeachresorts.com';
 const RESORT_WA = '66819088966';
 
+/* Staging pixel for kohkoodbeach.com testing, kept separate from the pixel
+   already live on kohkoodbeachresorts.com so clicks made while building this
+   site don't mix into real campaign data. Swap to 876625588428207 (the
+   production pixel) in the same pass as removing noindex at go-live — see
+   CLAUDE.md under "Staging deploy on kohkoodbeach.com". */
+const META_PIXEL_ID = '2040247273287344';
+
+/* Injects the Meta Pixel base snippet and fires PageView. Only called from
+   initConsent() once the visitor has actually agreed — loading it eagerly in
+   <head> would contradict the consent banner's own "Analytics stay off until
+   you agree" copy. Guarded against double-injection since it can be reached
+   both from a stored prior consent and from clicking Accept in the same
+   session. */
+function loadMetaPixel() {
+  if (window.fbq) return;
+  /* eslint-disable */
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+  /* eslint-enable */
+  window.fbq('init', META_PIXEL_ID);
+  window.fbq('track', 'PageView');
+}
+
 /* Fires the conversion event once a pixel exists. No-op until then, wrapped
    so a tracking failure can never take the form down with it. */
 function trackEnquiry(kind) {
@@ -460,7 +489,9 @@ function initContactForm() {
 /* Cookie consent scaffold. No analytics is wired up yet — when a GA4 property
    exists, uncomment the gtag consent call and load the tag after "accept". */
 function initConsent() {
-  if (localStorage.getItem('kkbr_consent')) return;
+  const stored = localStorage.getItem('kkbr_consent');
+  if (stored === 'accept') loadMetaPixel();
+  if (stored) return;
 
   const bar = document.createElement('div');
   bar.className = 'consent';
@@ -475,6 +506,7 @@ function initConsent() {
   bar.querySelectorAll('[data-consent]').forEach((btn) => {
     btn.addEventListener('click', () => {
       localStorage.setItem('kkbr_consent', btn.dataset.consent);
+      if (btn.dataset.consent === 'accept') loadMetaPixel();
       // window.gtag?.('consent', 'update', {
       //   analytics_storage:   btn.dataset.consent === 'accept' ? 'granted' : 'denied',
       //   ad_storage:          btn.dataset.consent === 'accept' ? 'granted' : 'denied',
