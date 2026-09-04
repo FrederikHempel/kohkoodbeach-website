@@ -739,15 +739,196 @@ Every other on-photo CTA in this project solves the same problem the same
 way (`.rs__cta`, `.footer__social a:hover`): invert to light-on-dark, don't
 reach for a new brand colour.
 
-⚠️ **Deferred, deliberately: the "Getting Here" band.** Frederik wants the
-photo-locked, scroll-driven route animation (NIHI Sumba reference — bus from
-Bangkok to Laem Sok pier, then a ferry icon to Koh Kood, drawn over
-`assets/hero-carousel/hero-4.webp`, the resort's own drone shot). Worth
-recording why this didn't happen in the same pass as everything else here:
-it's a real interactive build (an illustrated SVG route, not a live map — the
-NIHI reference itself is a hand-drawn island outline, not real map data;
-scroll-pinning logic; a simpler non-locked fallback for mobile, confirmed
-explicitly rather than assumed), not a copy or asset swap. Frederik agreed
-it should be its own session. The homepage's existing Journey section
-(bus/ferry/pickup, three steps) is untouched for now, and still ends in a CTA
-to `getting-here.html` — that full page redesign is separately deferred too.
+**The "Getting Here" band was deferred out of this pass** and built in its own
+session — see the next section. The homepage's static Journey section is gone;
+that band replaced it. The `getting-here.html` page redesign is still deferred.
+
+### The Journey band — a scroll-drawn route (4 Sep 2026)
+
+Built to the NIHI Sumba "How to Get Here" reference in
+`Visual inspiration/New/How to get here.png`: a full-bleed photograph, a
+hand-drawn hairline map over it, dotted stops on hairline leaders, and a display
+serif set to one side. Here the drawing is the **route**, and it draws itself as
+you scroll. It **replaced** the homepage's static three-step Journey section
+rather than joining it — same three steps, same copy, same CTA to
+`getting-here.html`; two versions of one itinerary on one page was never the
+brief. `.steps` / `.step` in the stylesheet are still live on
+`getting-here.html`, so don't delete them.
+
+**It pins with `position: sticky`; it does not lock the scroll.** The plan
+recorded here said "scroll-lock only on desktop", and sticky is the honest way
+to deliver that: a real lock (preventDefault on wheel and touch, then translate
+the stage by hand) breaks the scrollbar, Page Down, trackpad momentum and every
+assistive scroll. Sticky gets the same "photo holds still while the route draws"
+effect out of the browser's own scrolling, and it degrades to a normal flowing
+band the moment the sticky context is removed — which is exactly what the
+un-pinning media queries do. Nothing in `initRoute()` calls `preventDefault`.
+
+**`initRoute()` reads scroll position on rAF, against the IO convention in the
+rest of `script.js`** — the second deliberate exception, after `initRoomNav()`.
+IntersectionObserver answers "is it on screen"; this needs "how far through it
+are we", continuously, to place a vehicle on a path. The listener is passive and
+only ever schedules a frame.
+
+**Nothing is hidden to make the animation work.** All three steps sit at full
+readable contrast the whole way through; what the scroll changes is which one is
+*marked* — its rule fills gold and its numeral lights. A version that faded the
+inactive steps down to 38% was built and dropped: step 01 carries the Boonsiri
+link, and a link at 38% opacity on a photograph is not a readable link at any
+point in the scroll.
+
+⚠️ **The photograph is blurred, and it is the only blurred photo on the site.**
+`hero-4.webp` is the overhead drone frame — palm crowns, roof ridges, footpaths,
+a bright turquoise bay, hundreds of small high-contrast lines. A 1.6px hairline
+route laid over that reads as a scratch on the print, not as a map; the first
+build did exactly that and it was the worst thing about it. NIHI gets away with
+an unblurred frame because its photograph has a large soft zone behind the
+drawing. This one has none, so the photo's job here is **ground, not subject**:
+blurred and dimmed it still reads unmistakably as the resort from the air, and
+the drawing becomes the thing you are looking at. Don't sharpen it back without
+also solving what the linework is then supposed to sit on.
+
+**Contrast was measured on the rendered composite, not estimated** — the
+lightest ground pixel in each band, which is the worst case for light text:
+
+| band | lightest ground | warm-white | body (.86) | `--gold` |
+|---|---|---|---|---|
+| whole stage | rgb(95,93,90) | 6.08:1 | 5.02:1 | — |
+| steps row | rgb(64,61,60) | 9.97:1 | 7.86:1 | **3.68:1** |
+
+The gold numerals and the gold marker rule are the tight ones, and they only
+clear because they are large text (27–42px) and a UI component — both floors are
+3:1. That is why the vertical scrim's bottom stop runs to 0.58: at the 0.48 it
+started at, the numerals measured 3.41:1 with no margin. Lighten that gradient
+and the numerals fail first, the hairline drawing second.
+
+**Three things the build got wrong first and the fixes worth keeping:**
+
+1. **The mainland had a faint land tint too, and it had to go.** The coastline is
+   an *open* path, so filling it needs closing edges off the left of the frame —
+   and the frame then cuts those into visible straight diagonals across the
+   photo. Koh Kood is a closed shape and fills cleanly, and one tinted landmass
+   is enough to make the coastline opposite it read as a shore.
+2. **The route needed a dark halo.** At Laem Sok the road and the coastline meet
+   at a point, and without layering they merged into one continuous squiggle
+   with the pier lost in the junction. One `drop-shadow` filter on the legs,
+   stops and vehicles does every crossing at once. It is deliberately *not* on
+   the coast — putting it there removes the layering it exists to create.
+3. ⚠️ **`.route__copy h2` is sized off the viewport's HEIGHT as well as its
+   width, and it is the only heading on the site that is.** A pinned stage
+   cannot grow and cannot scroll, so anything taller than its row overflows into
+   the steps underneath instead of pushing them down. The site's own
+   `h2` (`clamp(2.2rem, 6vw, 5rem)`) reads width only, so at **1024×640** — wide
+   enough to stay pinned, short enough to have no room — it set a 3.8rem
+   headline into a row with space for half that, and the CTA landed on top of
+   steps 02 and 03. Caught in a screenshot at that size, not by reasoning. Any
+   new element inside the pinned stage needs the same check.
+
+**Three un-pinning thresholds, and the stylesheet and `initRoute()` must agree
+on all of them** (`(min-width: 821px) and (min-height: 561px)` in JS):
+
+- **≤820px** — the phone breakpoint. Unpinned outright rather than shortened: a
+  sticky stage costs a phone 3.2 screens of scroll to deliver three sentences,
+  and iOS is the platform this project has already had to stop pinning on once
+  (see `.reveal-img`).
+- **≤560px tall** — no arrangement fits a pinned stage that short, so it stops
+  pretending and flows.
+- **≤840px tall** (still pinned) — everything that takes vertical space is
+  tightened rather than the pin being dropped, since that band covers most
+  laptops.
+
+In every unpinned case `settle()` paints the finished drawing, so nothing is
+ever left half-drawn in a band that never pins. `prefers-reduced-motion` gets
+the same: unpinned, complete, no vehicles — the travel *is* the effect here, so
+there is nothing to soften, only to remove.
+
+**Without JS the route is simply drawn, stops and all** — the dash offsets that
+hide it are set by `initRoute()`, not by CSS, so a script failure leaves a
+finished map rather than an empty photograph. The three vehicles are the one
+exception and are hidden unconditionally in CSS: JS is what puts them on the
+path, so without it they pile up at the SVG's origin as a stack of discs in the
+corner. That was visible in the first no-JS render.
+
+**The map is `aria-hidden`.** Every fact it draws is written out in
+`.route__steps` beneath it, which is what a screen reader, a crawler and a
+no-JS visitor get.
+
+**The dashed crossing is revealed through a `<mask>`, not by its own dash
+offset.** One `stroke-dasharray` cannot both make the dashes and animate the
+draw-on. The mask holds a fat stroked copy of the same path and grows *that*,
+which leaves the visible dashes intact. The two road legs animate directly.
+
+### The map became real geography (4 Sep 2026)
+
+The first version of the band drew a hand-invented squiggle of coastline and a
+hand-drawn blob for Koh Kood. Frederik's verdict was exact: *"if you look at the
+'map' it's impossible to see where in Thailand it is"*, plus a more precise
+island and the resort marker actually on its beach. All three are the same root
+problem — invented geometry — so the geometry is now real.
+
+⚠️ **The coastlines are GENERATED. Do not hand-edit the long `d` attributes.**
+Rebuild with `scratchpad/build_route.py`, which re-projects and re-simplifies
+from source and prints a complete `<svg>` to splice into `index.html`. Its
+header carries the two `curl` commands that re-fetch the source polygons; they
+are not committed, because Thailand's is 1.1 MB.
+
+| what | source | detail |
+|---|---|---|
+| Thailand outline | OpenStreetMap via Nominatim | 50,452 pts → **471** at 0.022° |
+| Koh Kood, national scale | same island polygon | 1,069 pts → **43** |
+| Koh Kood, inset | same | → **271** at 0.00045° (~0.8 drawn px) |
+
+Projection is equirectangular with a `cos(lat)` correction, fitted to a box —
+right for a country-sized illustration and two orders of magnitude simpler than
+pulling in a projection library on a site with no build step.
+
+**Every marked place is a real geocode**, not a guess: Bangkok, Laem Sok Pier
+(12.0404, 102.5861), Ao Salad (11.7051, 102.5711) and Hat Bang Bao (11.6118,
+102.5370). **Bang Bao is the resort's own beach** — that is the site's own claim,
+from `index.html`'s "Bang Bao Bay" caption over the private-beach photo, not
+something inferred here. The two island markers are **snapped to the nearest
+coastline vertex** (both moved under 70 m), which is what makes the resort dot sit
+*on* the beach rather than near it, as asked.
+
+**Two scales, because one cannot work.** At national scale Koh Kood is about six
+pixels across — you can show where in Thailand it is, or you can show a coastline
+worth looking at, but not both in one frame. So the island is ringed on the
+national map and enlarged in an inset panel beside it, and **the crossing is
+drawn as a single line that leaves the map and lands in the panel** — it is the
+ferry and the connector between the two scales at once. Two hairlines from the
+ring to the panel corners say which thing is enlarged; without them the ring
+sits 14px below Laem Sok's dot and reads as part of that marker, because at that
+scale the pier and the island really are that close.
+
+**Thailand is outline only; only Koh Kood is tinted.** The country carried the
+same faint land tint at first and a 0.07 wash over an area that size stopped
+reading as a tint and started reading as a pale blob with a soft edge — the
+opposite of the recognisable silhouette the country is there to provide.
+
+**Three bugs this pass, all found by looking rather than reasoning:**
+
+1. ⚠️ **`initRoute()` kept its drawable paths in an object keyed by
+   `data-draw`, and two paths legitimately share the key `coast`** (Thailand and
+   the island draw on together). The dict silently kept only the last one, so
+   Thailand was left at a full dash offset and **never appeared at all**. The
+   land tint underneath was the only reason its shape showed, which made it look
+   like a stroke-weight problem and sent two rounds of styling in the wrong
+   direction. It is a **list** now; `draw(key, t)` updates every entry with that
+   key. Don't reintroduce the dict.
+2. **The last leg was a bowed cubic and the bow put it in the sea** — a road
+   drawn in the water off the west coast. `spine()` now walks the latitudes
+   between the two stops and takes the midpoint of the island's own width at
+   each, so every interior point is on land by construction.
+3. **The crossing was drawn straight through the island.** Ao Salad is on the
+   north-east coast, so from the mainland the boat goes *round* the north. The
+   arc does that now.
+
+⚠️ **Mobile gets its own label set, and this is not cosmetic.** Below 820px the
+1000-unit viewBox is drawn into ~350 CSS px, so the desktop labels render at
+about **5px**. Simply enlarging them cannot work — they sit in two columns
+positioned for 15px type, and at a legible size they collide with the maps and
+run off the frame. So `.route__mlabels` carries the two labels that matter (the
+mainland pair is spelled out in step 01 anyway) at 30 units — about 10.5px on a
+390px phone — right-aligned to the frame, and the desktop set plus its leaders
+are hidden. The positions have to live in markup: `x` on `<text>` is an SVG
+attribute, not a stylable CSS property, so a media query alone could not move them.

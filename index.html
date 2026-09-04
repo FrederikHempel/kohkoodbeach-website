@@ -304,31 +304,148 @@
   </div>
 </section>
 
-<!-- ============ THE JOURNEY ============ -->
-<section class="band band--sand">
-  <div class="wrap">
-    <div style="max-width:52ch;margin-bottom:clamp(36px,5vw,70px)">
-      <span class="label" data-reveal>The Journey</span>
-      <h2 style="margin-top:16px;" data-reveal>Getting here is half of what keeps it quiet</h2>
+<!-- ============ THE JOURNEY — scroll-drawn route ============ -->
+<!-- The map is an ILLUSTRATION, not map data (see the NIHI Sumba reference in
+     Visual inspiration/New/). It is aria-hidden on purpose: every fact it draws
+     is written out in .route__steps below it, which is what a screen reader,
+     a crawler and a no-JS visitor get. -->
+<section class="route" data-route aria-labelledby="route-h">
+  <div class="route__stage">
+    <div class="route__photo" role="img" aria-label="Koh Kood Beach Resort and its bay seen from the air"></div>
+
+    <div class="route__art">
+      <svg class="route__map" viewBox="0 0 1000 640" fill="none" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+        <!-- ⚠️ GENERATED GEOMETRY — do not hand-edit the long `d` attributes.
+             Thailand and Koh Kood are real OpenStreetMap coastlines; every marked
+             place is a real geocode and the two island markers are snapped onto
+             the coastline itself. Regenerate with scratchpad/build_route.py. -->
+        <defs>
+          <mask id="route-sea" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="640">
+            <path data-draw="leg1" d="M234.4 362.6C351.2 279.9 495.7 250.1 635.6 279.8" fill="none" stroke="#fff" stroke-width="20" stroke-linecap="round"/>
+          </mask>
+        </defs>
+
+        <!-- Only KOH KOOD is tinted. Thailand was too, and a 0.07 wash over an
+             area that size stopped reading as a tint and started reading as a
+             pale blob with a soft edge — the opposite of the recognisable
+             outline the country is here to provide. Outline only. -->
+        <path class="route__land" data-fade d="M560.16 358.16L561.11 359.39L565.73 358.28L569.03 362.19L570.50 361.08L571.27 358.18L573.41 357.56L571.61 358.33L570.91 360.79L572.77 363.27L575.17 364.06L581.40 376.04L581.41 379.72L583.17 382.50L581.40 385.10L581.81 386.09L584.24 387.53L585.54 390.76L592.49 388.53L594.70 401.15L593.24 403.88L594.21 409.10L593.06 410.79L594.91 414.33L592.54 417.77L590.15 416.59L589.57 418.43L591.51 422.01L590.34 420.08L588.44 421.25L587.43 420.16L582.58 419.93L578.67 421.72L574.47 420.69L571.25 426.28L569.25 427.19L571.21 427.66L578.33 425.52L580.14 428.05L580.06 431.94L578.98 434.30L576.70 435.79L574.36 433.30L566.47 435.96L563.54 439.42L564.51 444.67L565.51 445.80L573.70 446.90L582.15 445.39L584.52 446.24L589.83 450.76L592.52 458.35L594.18 460.00L595.48 458.31L597.72 459.04L597.93 460.63L596.82 461.56L597.64 465.59L598.94 466.66L599.28 463.67L600.20 464.45L601.64 461.90L600.11 463.43L598.79 461.64L599.62 460.71L600.23 461.43L600.68 459.73L603.80 457.28L605.14 459.36L608.58 457.53L612.72 460.17L614.25 462.13L611.88 465.46L614.96 464.76L618.85 466.44L622.63 464.92L626.32 461.04L628.55 461.70L634.25 466.56L636.53 470.07L635.93 480.67L635.13 482.85L632.30 484.60L631.91 491.02L634.51 492.06L636.72 494.82L643.63 495.93L648.33 498.42L648.88 500.35L651.37 500.90L658.27 508.92L666.56 513.62L671.53 515.00L673.19 513.62L673.20 506.91L674.54 502.68L672.73 502.37L672.03 499.59L675.77 488.13L674.94 484.53L671.79 481.23L674.64 480.46L672.66 476.83L673.36 472.46L672.14 470.00L671.44 462.41L673.54 459.03L675.33 458.73L677.06 456.63L678.12 448.57L676.55 444.61L683.80 442.21L684.71 439.77L683.16 436.37L676.51 436.24L667.13 443.23L667.00 444.36L664.82 441.79L662.68 441.51L664.04 439.11L663.47 431.74L665.28 429.43L669.24 429.57L669.03 424.74L672.20 423.43L674.75 424.01L676.31 422.60L672.04 421.15L669.84 418.96L669.96 417.72L672.55 416.23L677.22 415.88L678.57 414.43L680.31 415.35L684.02 413.35L687.91 408.96L687.44 406.97L686.13 406.59L681.64 405.87L678.40 407.40L675.10 405.76L675.34 404.20L678.77 401.77L683.34 401.20L689.69 395.87L692.71 387.15L692.05 383.88L696.04 376.50L694.71 371.25L696.77 368.74L695.06 361.76L696.30 359.63L692.17 352.42L692.53 348.93L688.21 340.85L688.51 335.68L683.66 324.38L686.21 318.89L685.55 310.70L687.58 307.97L692.73 307.23L694.61 305.60L696.40 305.93L696.31 304.99L690.60 293.95L683.56 287.32L682.64 290.88L680.63 291.60L680.13 296.88L672.05 295.98L668.49 296.71L666.19 295.57L663.74 289.38L665.73 281.52L660.21 280.41L657.72 278.48L656.61 273.51L654.68 270.47L648.89 267.67L647.89 274.38L643.98 274.17L640.14 276.00L637.75 275.46L636.38 272.81L636.17 284.42L626.78 287.60L625.39 286.77L624.57 284.56L626.22 277.10L624.01 272.68L624.84 270.75L622.75 268.52L622.36 264.39L627.33 257.52L624.34 251.56L626.33 245.24L627.81 244.76L628.59 247.16L630.37 245.61L627.93 239.06L630.22 237.55L631.33 238.36L632.73 236.40L635.99 235.22L632.85 230.97L628.50 228.63L628.99 221.30L625.67 214.12L621.34 208.15L620.83 209.57L616.55 204.73L617.38 202.25L616.28 195.62L612.80 189.18L608.58 185.00L600.77 188.33L599.98 187.61L591.97 200.04L592.52 201.42L595.56 201.97L596.08 208.44L594.28 217.74L597.55 219.23L597.87 224.98L593.35 226.83L585.79 233.61L585.92 236.25L588.78 239.08L585.70 244.15L580.36 243.40L576.99 247.27L577.17 252.56L579.26 255.55L579.62 261.66L584.46 266.84L584.17 274.27L587.88 277.91L585.97 285.43L583.09 285.28L581.38 289.79L579.33 290.54L579.45 292.83L577.38 291.61L575.34 293.17L573.03 293.02L572.35 291.23L573.70 289.13L571.49 288.44L567.49 290.42L565.65 295.11L566.55 298.37L565.41 304.51L565.94 309.90L570.89 313.01L569.69 318.65L572.50 316.05L572.15 317.46L575.95 324.00L575.11 328.93L577.72 331.58L574.33 331.68L573.85 329.80L572.86 330.83L574.57 338.61L576.42 339.40L576.67 342.85L578.11 344.11L575.74 343.32L570.46 346.54L569.86 350.31L560.16 358.16Z"/>
+
+        <!-- Thailand, and Koh Kood at national scale -->
+        <path class="route__line route__coast" data-draw="coast" d="M26.7 96.8L33.0 109.4L35.3 106.4L38.4 108.5L37.2 110.6L39.9 113.6L40.1 117.7L42.3 121.3L39.7 125.2L44.5 133.3L57.1 145.2L57.1 147.9L62.4 151.7L61.7 152.6L64.4 154.8L63.8 156.2L65.5 156.4L64.6 157.1L65.5 158.3L69.1 158.7L72.9 163.0L71.8 163.5L74.1 166.5L72.9 165.8L72.2 167.3L74.4 168.5L71.9 169.5L71.1 171.9L73.2 173.3L73.0 175.3L75.3 175.9L75.6 178.9L78.5 182.4L79.4 190.5L85.6 184.4L89.1 185.8L89.6 188.2L86.5 192.6L86.3 196.4L84.6 197.3L80.4 196.1L77.6 199.8L76.1 198.5L75.0 199.7L76.7 202.0L75.9 204.9L76.9 206.6L74.4 214.4L75.9 223.1L74.9 228.6L72.5 226.4L70.5 226.7L68.2 228.6L68.6 231.9L64.5 229.5L63.0 233.1L60.6 232.7L59.9 237.8L61.9 240.4L61.0 243.0L62.7 245.7L62.8 249.8L70.0 258.0L71.0 261.3L72.2 260.9L76.5 269.8L90.7 279.0L93.2 285.1L96.6 287.3L97.1 292.1L99.0 294.1L100.7 312.9L100.3 315.7L97.2 315.7L97.5 319.6L96.3 320.6L100.1 324.0L98.8 326.5L101.8 334.7L109.8 340.6L108.2 345.5L111.5 353.1L111.1 358.9L115.0 358.4L113.6 363.6L115.8 364.6L115.6 369.4L118.7 371.4L114.7 379.4L110.9 379.9L111.1 383.2L107.9 386.2L108.3 389.1L104.7 392.0L105.2 393.4L101.3 400.5L96.5 404.3L95.5 406.7L93.3 406.1L92.8 410.7L90.7 412.6L89.3 412.0L83.7 417.8L84.8 426.5L75.1 448.0L68.8 447.4L66.1 450.3L61.8 460.1L57.5 463.7L51.9 464.9L41.5 461.6L40.3 463.5L38.2 469.8L41.5 476.1L37.6 481.1L38.2 487.9L36.4 491.7L31.4 496.4L30.3 504.1L31.6 510.4L34.5 514.4L38.4 515.8L42.7 515.0L46.9 511.2L48.7 506.6L47.1 501.4L52.7 496.9L53.5 492.2L51.8 488.3L53.6 485.1L55.2 485.1L53.1 506.7L56.5 521.5L55.3 525.4L56.6 540.0L59.1 543.7L57.6 547.4L57.9 552.2L62.7 556.5L67.8 556.4L71.9 553.1L75.4 545.3L76.4 545.4L79.9 548.6L80.0 552.7L81.7 556.2L86.8 558.8L89.0 565.5L94.4 567.8L99.8 566.0L104.3 572.6L104.6 577.0L96.8 577.3L92.5 581.3L90.7 588.5L95.0 595.0L105.0 597.2L110.4 595.8L112.5 588.6L114.3 587.7L118.1 588.8L127.2 586.5L131.9 590.9L136.9 591.1L138.3 588.7L138.2 584.7L139.2 585.0L138.8 580.0L140.1 578.7L141.0 580.1L143.5 579.4L144.9 581.3L144.0 583.6L146.5 586.3L151.4 586.9L157.8 590.3L161.2 587.5L161.8 589.6L164.1 590.3L165.8 598.8L166.5 597.5L169.4 598.4L170.3 596.7L172.2 598.2L176.0 598.0L176.6 600.4L173.9 602.5L176.6 603.9L175.5 606.2L176.5 609.2L174.9 612.0L172.6 611.8L170.9 616.1L174.9 619.6L176.9 624.0L181.5 620.5L182.5 615.9L185.3 616.0L187.1 613.3L190.8 613.5L194.6 610.9L197.7 613.4L199.0 618.2L201.4 616.5L204.2 619.1L204.7 616.8L209.0 613.5L208.1 611.6L209.1 608.6L214.9 602.3L214.4 599.1L221.3 581.7L218.7 549.9L167.4 505.5L143.6 459.5L142.8 453.1L139.0 444.5L131.5 434.7L117.3 421.7L120.9 418.2L121.6 415.5L120.8 407.6L123.0 403.0L122.9 395.5L124.7 388.5L130.8 383.5L133.6 375.9L133.4 368.7L140.8 358.7L141.6 353.8L140.5 348.6L162.6 348.3L168.5 352.6L172.4 352.8L176.8 349.7L178.1 346.5L181.3 345.6L184.3 350.4L186.7 351.9L191.0 351.8L195.3 355.5L200.9 355.4L204.6 352.9L207.3 357.2L212.8 358.9L212.5 363.4L215.2 369.9L227.0 387.0L233.4 390.8L241.2 388.6L247.4 378.3L247.0 373.6L244.2 370.1L241.7 361.2L239.1 357.2L239.9 349.4L242.4 347.4L236.8 339.4L231.2 336.5L232.4 332.4L230.4 324.5L232.2 323.5L228.4 319.9L225.0 312.3L224.7 300.8L232.1 300.6L235.9 298.8L233.0 296.5L240.2 292.2L242.2 285.6L247.3 282.2L248.4 275.0L257.5 269.3L265.9 268.6L268.1 267.0L269.3 268.1L270.6 266.1L273.7 265.3L275.4 266.5L276.9 265.0L278.9 265.3L278.9 267.5L288.1 269.5L293.5 268.9L294.7 267.5L299.1 268.0L301.3 266.3L308.8 268.9L310.2 267.6L312.8 268.5L315.8 265.7L317.6 266.7L318.6 265.3L319.1 266.5L322.4 265.1L323.6 266.7L325.0 265.9L329.8 267.5L329.4 270.0L331.0 273.1L333.3 274.4L335.9 273.1L337.0 268.9L339.1 269.3L342.7 266.7L347.1 266.0L351.2 260.2L350.5 254.6L351.7 253.2L350.3 250.4L353.0 247.2L351.9 244.3L354.8 243.2L348.5 236.9L349.6 233.9L353.5 231.2L353.2 229.5L348.6 228.0L353.4 225.1L355.2 215.3L352.1 211.8L347.4 211.6L345.7 209.6L343.6 204.7L346.6 201.1L331.9 197.4L330.6 191.7L319.9 180.1L320.7 173.1L319.3 160.6L322.2 154.2L322.1 144.9L318.5 139.7L309.1 134.4L304.5 127.5L301.5 126.0L289.4 106.5L284.8 108.7L283.2 106.5L278.4 106.3L274.9 103.8L267.0 102.0L263.1 102.6L260.5 105.6L262.6 108.0L257.4 109.9L256.7 113.2L254.0 115.2L252.5 121.0L249.0 120.0L245.1 121.4L238.5 125.5L238.2 128.2L234.5 126.6L235.1 122.1L228.3 120.9L222.5 117.8L217.7 111.9L214.5 111.3L207.5 119.0L202.5 117.5L200.3 123.8L196.0 124.6L195.1 126.4L194.3 125.5L193.4 127.5L194.3 129.0L192.2 129.3L191.0 131.5L190.7 130.0L187.4 131.1L188.7 131.7L187.8 132.9L183.7 134.4L180.7 139.1L178.5 139.6L177.9 141.9L170.3 137.7L171.9 132.5L170.7 129.9L172.8 127.0L172.3 124.7L176.2 122.2L178.9 117.6L178.0 115.2L179.2 111.6L177.3 109.7L178.8 106.4L174.9 104.7L173.7 102.3L182.4 92.2L180.4 90.5L181.8 87.4L181.3 84.1L185.7 77.5L181.7 74.5L181.2 66.4L179.0 63.4L179.9 60.3L182.1 60.4L183.0 56.5L181.2 55.0L176.4 56.3L173.0 54.0L167.3 53.8L162.5 59.8L157.8 56.9L155.0 59.3L151.2 57.5L151.1 54.8L148.9 52.2L149.6 50.8L148.0 49.0L149.8 45.1L152.6 42.8L154.9 32.1L152.5 33.1L150.0 30.8L145.1 22.7L141.8 23.2L140.7 26.0L138.6 26.8L138.3 29.0L135.8 28.2L135.1 23.4L130.4 20.0L126.9 20.8L124.4 25.2L121.3 24.7L119.3 26.0L110.5 22.9L113.0 29.4L114.7 30.5L113.7 32.9L108.2 35.4L100.7 33.5L95.4 34.8L93.2 41.9L93.6 45.6L90.5 48.3L88.3 48.4L86.0 46.5L83.6 49.0L80.9 48.3L76.1 50.5L75.1 52.2L72.9 50.4L62.6 52.1L60.0 48.6L54.6 46.5L54.2 53.4L47.2 56.2L48.3 59.2L44.2 63.4L46.5 67.7L44.1 68.7L46.6 70.8L46.3 75.7L43.6 76.6L42.3 80.4L39.5 81.7L42.5 84.4L43.6 96.7L38.9 96.8L34.7 98.7L34.3 100.3L30.7 100.1L29.1 97.2L27.5 97.5L27.4 95.9L26.7 96.8Z"/>
+        <path class="route__line route__coast" data-draw="coast" d="M232.0 378.2L232.3 378.2L232.8 379.3L232.7 379.8L232.3 379.7L232.2 379.9L232.4 380.0L232.1 380.3L232.6 380.4L232.9 380.9L233.0 380.7L233.2 380.9L233.6 380.8L233.8 381.0L233.7 381.5L234.7 382.1L234.7 380.8L235.0 380.2L234.6 380.3L234.5 380.0L235.1 379.5L234.8 379.4L235.3 378.7L235.0 377.4L235.3 376.9L235.0 376.4L234.9 376.7L234.6 376.6L234.6 376.3L234.1 376.0L233.6 376.4L233.5 375.6L233.8 375.2L233.1 373.9L232.7 374.3L232.9 374.9L232.4 375.5L232.6 376.2L232.4 376.6L232.1 376.5L232.1 376.9L232.4 377.9L232.0 378.2Z"/>
+
+        <!-- the inset: Koh Kood enlarged -->
+        <g class="route__inset" data-fade>
+          <!-- The magnifier: ring the real island on the national map, then two
+               hairlines to the panel it is enlarged in. Without them the ring
+               sits 14px below Laem Sok's dot and reads as part of that marker —
+               at this scale the pier and the island really are that close. -->
+          <path class="route__zoom" d="M242.8 371.2L500 150M242.8 381.2L500 550"/>
+          <rect class="route__panel" x="500" y="150" width="430" height="400" rx="3"/>
+          <circle class="route__ring" cx="233.8" cy="376.2" r="9"/>
+          <text class="route__name route__name--panel" x="518" y="178">Koh Kood</text>
+        </g>
+        <path class="route__line route__coast route__isle" data-draw="isle" d="M560.16 358.16L561.11 359.39L565.73 358.28L569.03 362.19L570.50 361.08L571.27 358.18L573.41 357.56L571.61 358.33L570.91 360.79L572.77 363.27L575.17 364.06L581.40 376.04L581.41 379.72L583.17 382.50L581.40 385.10L581.81 386.09L584.24 387.53L585.54 390.76L592.49 388.53L594.70 401.15L593.24 403.88L594.21 409.10L593.06 410.79L594.91 414.33L592.54 417.77L590.15 416.59L589.57 418.43L591.51 422.01L590.34 420.08L588.44 421.25L587.43 420.16L582.58 419.93L578.67 421.72L574.47 420.69L571.25 426.28L569.25 427.19L571.21 427.66L578.33 425.52L580.14 428.05L580.06 431.94L578.98 434.30L576.70 435.79L574.36 433.30L566.47 435.96L563.54 439.42L564.51 444.67L565.51 445.80L573.70 446.90L582.15 445.39L584.52 446.24L589.83 450.76L592.52 458.35L594.18 460.00L595.48 458.31L597.72 459.04L597.93 460.63L596.82 461.56L597.64 465.59L598.94 466.66L599.28 463.67L600.20 464.45L601.64 461.90L600.11 463.43L598.79 461.64L599.62 460.71L600.23 461.43L600.68 459.73L603.80 457.28L605.14 459.36L608.58 457.53L612.72 460.17L614.25 462.13L611.88 465.46L614.96 464.76L618.85 466.44L622.63 464.92L626.32 461.04L628.55 461.70L634.25 466.56L636.53 470.07L635.93 480.67L635.13 482.85L632.30 484.60L631.91 491.02L634.51 492.06L636.72 494.82L643.63 495.93L648.33 498.42L648.88 500.35L651.37 500.90L658.27 508.92L666.56 513.62L671.53 515.00L673.19 513.62L673.20 506.91L674.54 502.68L672.73 502.37L672.03 499.59L675.77 488.13L674.94 484.53L671.79 481.23L674.64 480.46L672.66 476.83L673.36 472.46L672.14 470.00L671.44 462.41L673.54 459.03L675.33 458.73L677.06 456.63L678.12 448.57L676.55 444.61L683.80 442.21L684.71 439.77L683.16 436.37L676.51 436.24L667.13 443.23L667.00 444.36L664.82 441.79L662.68 441.51L664.04 439.11L663.47 431.74L665.28 429.43L669.24 429.57L669.03 424.74L672.20 423.43L674.75 424.01L676.31 422.60L672.04 421.15L669.84 418.96L669.96 417.72L672.55 416.23L677.22 415.88L678.57 414.43L680.31 415.35L684.02 413.35L687.91 408.96L687.44 406.97L686.13 406.59L681.64 405.87L678.40 407.40L675.10 405.76L675.34 404.20L678.77 401.77L683.34 401.20L689.69 395.87L692.71 387.15L692.05 383.88L696.04 376.50L694.71 371.25L696.77 368.74L695.06 361.76L696.30 359.63L692.17 352.42L692.53 348.93L688.21 340.85L688.51 335.68L683.66 324.38L686.21 318.89L685.55 310.70L687.58 307.97L692.73 307.23L694.61 305.60L696.40 305.93L696.31 304.99L690.60 293.95L683.56 287.32L682.64 290.88L680.63 291.60L680.13 296.88L672.05 295.98L668.49 296.71L666.19 295.57L663.74 289.38L665.73 281.52L660.21 280.41L657.72 278.48L656.61 273.51L654.68 270.47L648.89 267.67L647.89 274.38L643.98 274.17L640.14 276.00L637.75 275.46L636.38 272.81L636.17 284.42L626.78 287.60L625.39 286.77L624.57 284.56L626.22 277.10L624.01 272.68L624.84 270.75L622.75 268.52L622.36 264.39L627.33 257.52L624.34 251.56L626.33 245.24L627.81 244.76L628.59 247.16L630.37 245.61L627.93 239.06L630.22 237.55L631.33 238.36L632.73 236.40L635.99 235.22L632.85 230.97L628.50 228.63L628.99 221.30L625.67 214.12L621.34 208.15L620.83 209.57L616.55 204.73L617.38 202.25L616.28 195.62L612.80 189.18L608.58 185.00L600.77 188.33L599.98 187.61L591.97 200.04L592.52 201.42L595.56 201.97L596.08 208.44L594.28 217.74L597.55 219.23L597.87 224.98L593.35 226.83L585.79 233.61L585.92 236.25L588.78 239.08L585.70 244.15L580.36 243.40L576.99 247.27L577.17 252.56L579.26 255.55L579.62 261.66L584.46 266.84L584.17 274.27L587.88 277.91L585.97 285.43L583.09 285.28L581.38 289.79L579.33 290.54L579.45 292.83L577.38 291.61L575.34 293.17L573.03 293.02L572.35 291.23L573.70 289.13L571.49 288.44L567.49 290.42L565.65 295.11L566.55 298.37L565.41 304.51L565.94 309.90L570.89 313.01L569.69 318.65L572.50 316.05L572.15 317.46L575.95 324.00L575.11 328.93L577.72 331.58L574.33 331.68L573.85 329.80L572.86 330.83L574.57 338.61L576.42 339.40L576.67 342.85L578.11 344.11L575.74 343.32L570.46 346.54L569.86 350.31L560.16 358.16Z"/>
+
+        <!-- 01 the road down to the pier -->
+        <path class="route__line route__leg" data-draw="leg0" data-geo="0" d="M151.8 292.8C169.2 325.9 198.9 351.0 234.4 362.6"/>
+        <!-- 02 the crossing — it leaves the national map and lands in the inset -->
+        <path class="route__line route__leg route__leg--sea" data-geo="1" mask="url(#route-sea)" d="M234.4 362.6C351.2 279.9 495.7 250.1 635.6 279.8"/>
+        <!-- 03 the last stretch by road, on the island -->
+        <path class="route__line route__leg" data-draw="leg2" data-geo="2" d="M635.6 279.8C634.9 284.1 632.0 296.7 631.0 305.2C630.0 313.6 630.0 322.1 629.5 330.5C629.1 339.0 627.0 347.4 628.4 355.9C629.8 364.3 636.0 372.8 638.0 381.2C639.9 389.7 649.6 398.1 640.0 406.6C630.3 415.0 590.0 427.7 580.1 431.9"/>
+
+        <!-- Both mainland labels run to one column at x=112, mirroring the
+             island's column on the right. Laem Sok's used to sit where its own
+             leader put it, which was directly on top of the Gulf coastline. -->
+        <g class="route__stop" data-stop="0">
+          <path class="route__leader" d="M151.8 292.8H112"/>
+          <circle class="route__dot" cx="151.8" cy="292.8" r="5"/>
+          <text class="route__name" x="102" y="297.8" text-anchor="end">Bangkok</text>
+        </g>
+        <!-- Laem Sok's label goes right, into the Gulf. Left, in the column with
+             Bangkok, it landed on the peninsula's own coastline; the water east
+             of Trat is the only empty space anywhere near the pier. -->
+        <g class="route__stop" data-stop="1">
+          <path class="route__leader" d="M234.4 362.6l40 56h40"/>
+          <circle class="route__dot" cx="234.4" cy="362.6" r="4.5"/>
+          <text class="route__name" x="324.4" y="423.6" text-anchor="start">Laem Sok</text>
+        </g>
+        <g class="route__stop" data-stop="2">
+          <path class="route__leader" d="M635.6 279.8H770"/>
+          <circle class="route__dot" cx="635.6" cy="279.8" r="5"/>
+          <text class="route__name" x="780" y="284.8" text-anchor="start">Ao Salad</text>
+        </g>
+        <g class="route__stop" data-stop="3">
+          <path class="route__leader" d="M580.1 431.9H770"/>
+          <circle class="route__dot route__dot--end" cx="580.1" cy="431.9" r="6.5"/>
+          <text class="route__name route__name--end" x="780" y="431.9" text-anchor="start">Koh Kood<tspan x="780" dy="17">Beach Resort</tspan></text>
+        </g>
+
+        <!-- ⚠️ MOBILE LABELS. Below 820px the whole 1000-unit viewBox is drawn
+             into ~350 CSS px, so the desktop labels above render at about 5px —
+             type too small to read is worse than no type. These are the two
+             that matter (the mainland pair is spelled out in step 01 anyway),
+             set large and right-aligned to the frame, and the desktop set is
+             hidden. Positions cannot come from CSS: `x` on <text> is an SVG
+             attribute, not a stylable property. -->
+        <g class="route__mlabels" aria-hidden="true">
+          <path class="route__leader" d="M635.6 279.8H800"/>
+          <text class="route__name route__name--m" x="985" y="288.8" text-anchor="end">Ao Salad</text>
+          <path class="route__leader" d="M580.1 431.9H720"/>
+          <text class="route__name route__name--m route__name--end" x="985" y="429.9" text-anchor="end">Koh Kood<tspan x="985" dy="34">Beach Resort</tspan></text>
+        </g>
+
+        <g class="route__glyph" data-glyph="0">
+          <circle class="route__disc" r="16"/>
+          <rect class="route__ico" x="-9" y="-7.5" width="18" height="11" rx="2.6"/>
+          <rect class="route__ico-cut" x="-6.6" y="-5.1" width="5.4" height="3.9" rx="0.8"/>
+          <rect class="route__ico-cut" x="1.2" y="-5.1" width="5.4" height="3.9" rx="0.8"/>
+          <circle class="route__ico" cx="-4.8" cy="5" r="2.1"/>
+          <circle class="route__ico" cx="4.8" cy="5" r="2.1"/>
+        </g>
+        <g class="route__glyph" data-glyph="1">
+          <circle class="route__disc" r="16"/>
+          <path class="route__ico" d="M-9.4 1.4h18.8l-3.6 6.2h-11.6z"/>
+          <rect class="route__ico" x="-4.8" y="-5.4" width="8" height="6.2" rx="1.2"/>
+          <path class="route__ico" d="M4.6-7.6h1.6v8.4h-1.6z"/>
+        </g>
+        <g class="route__glyph" data-glyph="2">
+          <circle class="route__disc" r="16"/>
+          <path class="route__ico" d="M-9.6 2.6v-3.8c0-1.1.6-2.1 1.6-2.6l3.4-1.6c.4-.2.9-.3 1.4-.3h5.4c1.7 0 3 1.4 3 3v5.3z"/>
+          <circle class="route__ico" cx="-5" cy="4.4" r="2.1"/>
+          <circle class="route__ico" cx="5" cy="4.4" r="2.1"/>
+        </g>
+      </svg>
     </div>
-    <div class="steps" data-reveal-group>
-      <div class="step" data-reveal>
-        <div class="step__no">01</div>
-        <h4>Bus from Bangkok</h4>
-        <p>A <a href="https://boonsiriferry.com/en/news/koh-kood" target="_blank" rel="noopener" class="link">Boonsiri</a> VIP bus runs from Khaosan Road or Rama 9 to Laem Sok pier in about 5–6 hours.</p>
-      </div>
-      <div class="step" data-reveal>
-        <div class="step__no">02</div>
-        <h4>High-speed ferry</h4>
+
+    <div class="route__copy">
+      <span class="label">The Journey</span>
+      <h2 id="route-h">Getting here is half of what keeps it quiet</h2>
+      <p>A Boonsiri VIP bus runs from Bangkok down to Laem Sok pier in five to six hours. A high-speed catamaran crosses to Ao Salad in about one. We meet you at the pier &mdash; roughly seven hours, door to door.</p>
+      <a href="getting-here.html" class="btn btn--ghost">Full timetable &amp; fares <span class="arrow" aria-hidden="true">&#8594;</span></a>
+    </div>
+
+    <ol class="route__steps">
+      <li class="route__step" data-step="0">
+        <span class="route__step-rule" aria-hidden="true"></span>
+        <span class="route__no">01</span>
+        <h3>Bus from Bangkok</h3>
+        <p>A <a href="https://boonsiriferry.com/en/news/koh-kood" target="_blank" rel="noopener" class="link">Boonsiri</a> VIP bus runs from Khaosan Road or Rama 9 to Laem Sok pier in about 5&ndash;6 hours.</p>
+      </li>
+      <li class="route__step" data-step="1">
+        <span class="route__step-rule" aria-hidden="true"></span>
+        <span class="route__no">02</span>
+        <h3>High-speed ferry</h3>
         <p>A catamaran crosses from Laem Sok to Ao Salad pier on Koh Kood in about an hour.</p>
-      </div>
-      <div class="step" data-reveal>
-        <div class="step__no">03</div>
-        <h4>Pickup to the resort</h4>
+      </li>
+      <li class="route__step" data-step="2">
+        <span class="route__step-rule" aria-hidden="true"></span>
+        <span class="route__no">03</span>
+        <h3>Pickup to the resort</h3>
         <p>We meet you at Ao Salad pier and drive you the last stretch to the beach.</p>
-      </div>
-    </div>
-    <a href="getting-here.html" class="btn btn--ghost" style="margin-top:clamp(34px,4vw,56px)" data-reveal>Full timetable &amp; fares <span class="arrow" aria-hidden="true">&#8594;</span></a>
+      </li>
+    </ol>
   </div>
 </section>
 

@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initContactForm();
   initConsent();
   initMarquee();
+  initRoute();
 });
 
 /* Respect the OS "reduce motion" setting. Note it *reduces* rather than removes:
@@ -789,4 +790,145 @@ function initRoomDetail() {
       if (open !== a.dataset.rsSee) openFor(a.dataset.rsSee);
     });
   });
+}
+
+/* ==========================================================================
+   The Journey — scroll-drawn route (index.html)
+   --------------------------------------------------------------------------
+   This is the one place in the file that genuinely needs a scroll POSITION
+   rather than an IntersectionObserver. IO answers "is it on screen"; this needs
+   "how far through it are we", continuously, to place a vehicle on a path. So
+   it follows the same exception initRoomNav() already makes: a passive scroll
+   listener that only ever schedules a rAF, and the rAF does the writing.
+
+   It does not lock the scroll. The pin is CSS `position: sticky` (see the block
+   in style.css) — the browser scrolls normally throughout and this function
+   only reads where it got to. Nothing here calls preventDefault.
+
+   Below 820px, and under prefers-reduced-motion, the stage is not sticky at all
+   and settle() paints the finished drawing once. Both breakpoints are matched
+   here and in the stylesheet; if you move one, move the other.
+   ========================================================================== */
+function initRoute() {
+  const root = document.querySelector('[data-route]');
+  if (!root) return;
+
+  const stage = root.querySelector('.route__stage');
+  const stops = [...root.querySelectorAll('.route__stop')];
+  const glyphs = [...root.querySelectorAll('.route__glyph')];
+  const steps = [...root.querySelectorAll('.route__step')];
+  const geo = [...root.querySelectorAll('[data-geo]')];
+  const fades = [...root.querySelectorAll('[data-fade]')];   // the land tints
+
+  // Prepare every drawable line: dash the whole length, then hide it by
+  // offsetting a full length. Doing this in JS rather than CSS is what keeps
+  // the no-JS page showing a complete drawing instead of an empty photograph.
+  // ⚠️ A LIST, not an object keyed by name. Several paths legitimately share a
+  // key — Thailand and Koh Kood are both `coast` and draw on together — and a
+  // dict silently kept only the last one. The country was left at a full dash
+  // offset and simply never appeared; the tint underneath it was the only
+  // reason the shape showed at all, which made it look like a styling problem.
+  const lines = [];
+  root.querySelectorAll('[data-draw]').forEach((el) => {
+    const len = el.getTotalLength();
+    el.style.strokeDasharray = `${len} ${len}`;
+    el.style.strokeDashoffset = String(len);
+    lines.push({ key: el.dataset.draw, el, len });
+  });
+
+  const draw = (key, t) => {
+    lines.forEach((l) => {
+      if (l.key === key) l.el.style.strokeDashoffset = String(l.len * (1 - t));
+    });
+  };
+
+  // Progress windows. One per leg, in the order the journey happens, so each of
+  // the three steps below the photograph has a leg of its own being drawn while
+  // it is the marked one. The coastline and island are only the stage being
+  // set, so they are over quickly.
+  const SEG = {
+    map:  [0.02, 0.18],
+    leg0: [0.18, 0.46],
+    leg1: [0.48, 0.76],
+    leg2: [0.78, 0.94],
+  };
+  const STOP_AT = [0.15, 0.45, 0.75, 0.93];
+
+  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const span = (p, [a, b]) => clamp01((p - a) / (b - a));
+
+  // Ride a glyph along its path. getPointAtLength is exact for the curve, so
+  // the vehicle sits ON the line rather than on a straight-line approximation
+  // between its endpoints.
+  const ride = (i, t, visible) => {
+    const g = glyphs[i];
+    const path = geo[i];
+    if (!g || !path) return;
+    g.style.opacity = visible ? '1' : '0';
+    if (!visible) return;
+    const pt = path.getPointAtLength(path.getTotalLength() * t);
+    g.setAttribute('transform', `translate(${pt.x} ${pt.y})`);
+  };
+
+  const paint = (p) => {
+    const m = span(p, SEG.map);
+    draw('coast', m);
+    draw('isle', m);
+    fades.forEach((el) => { el.style.opacity = String(m); });
+
+    const legs = [span(p, SEG.leg0), span(p, SEG.leg1), span(p, SEG.leg2)];
+    legs.forEach((t, i) => {
+      draw(`leg${i}`, t);
+      // The vehicle leaves once its leg is drawn — a bus parked at the pier for
+      // the rest of the scroll reads as a bug, not as an arrival.
+      ride(i, t, t > 0 && t < 1);
+    });
+
+    stops.forEach((s, i) => { s.style.opacity = p >= STOP_AT[i] ? '1' : '0'; });
+
+    steps.forEach((s, i) => {
+      s.style.setProperty('--fill', String(legs[i]));
+      s.classList.toggle('is-lit', legs[i] > 0.02);
+    });
+  };
+
+  // Everything drawn, every stop named, no vehicles mid-journey.
+  const settle = () => {
+    lines.forEach((l) => { l.el.style.strokeDashoffset = '0'; });
+    stops.forEach((s) => { s.style.opacity = '1'; });
+    fades.forEach((el) => { el.style.opacity = '1'; });
+    glyphs.forEach((g) => { g.style.opacity = '0'; });
+    steps.forEach((s) => { s.style.setProperty('--fill', '1'); s.classList.add('is-lit'); });
+  };
+
+  // Matches the stylesheet's two un-pinning queries exactly: too narrow, or
+  // too short for a pinned stage to hold its own content. Change one, change
+  // the other, or the drawing is left half-finished in a band that never pins.
+  const pinned = window.matchMedia('(min-width: 821px) and (min-height: 561px)');
+  const isLive = () => pinned.matches && !document.documentElement.classList.contains('no-motion');
+
+  let ticking = false;
+  const read = () => {
+    ticking = false;
+    if (!isLive()) return;
+    const box = root.getBoundingClientRect();
+    // Distance the stage is actually pinned for = the section's height minus
+    // one stage. Guard the divide: a zero-height section (display:none, a print
+    // stylesheet) would otherwise produce NaN and blank the drawing.
+    const travel = root.offsetHeight - stage.offsetHeight;
+    if (travel <= 0) { settle(); return; }
+    paint(clamp01(-box.top / travel));
+  };
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(read);
+  };
+
+  const sync = () => { if (isLive()) onScroll(); else settle(); };
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', sync);
+  pinned.addEventListener('change', sync);
+  sync();
 }

@@ -1500,3 +1500,266 @@ html { caret-color: var(--gold-dark); }
   .rs__tabs { gap: 14px; }
   .rs__tabs button { font-size: 0.66rem; letter-spacing: 0.12em; }
 }
+
+/* ==========================================================================
+   The Journey — scroll-drawn route (index.html)
+   --------------------------------------------------------------------------
+   NIHI Sumba's "How to Get Here" is the reference: a full-bleed photograph, a
+   hand-drawn hairline island over it, dotted stops on hairline leaders, and a
+   display-serif headline set to one side. Here the drawing is a ROUTE — the
+   road down to Laem Sok, then the crossing — and it draws itself as you scroll.
+
+   Two things about the mechanics, because both were deliberate choices:
+
+   1. It PINS WITH `position: sticky`, it does not lock the scroll. A real
+      scroll-lock (preventDefault on wheel/touch, then translate the stage by
+      hand) breaks the scrollbar, Page Down, trackpad momentum and every
+      assistive scroll. Sticky gets the same "photo holds still while the route
+      draws" effect using the browser's own scrolling, and it degrades to a
+      normal band the moment the sticky context is removed — which is exactly
+      what the <=820px and .no-motion rules below do.
+   2. Nothing is ever hidden to make the animation work. The three steps are
+      readable at full contrast the whole way through; what the scroll changes
+      is which one is MARKED — its rule fills gold and its number lights. A
+      version that faded the inactive steps down was tried and dropped: step 01
+      carries the Boonsiri link, and a link at 38% opacity on a photograph is
+      not a readable link at any point in the scroll.
+   ========================================================================== */
+
+.route { position: relative; background: var(--charcoal); }
+/* Total height = one pinned viewport + the scroll that drives the drawing.
+   The 220vh tail is ~2.2 screens of wheel; longer reads as the page having
+   stalled, shorter and the crossing is over before you have seen it. */
+.route { height: calc(100svh + 220vh); }
+.route__stage {
+  position: sticky; top: 0;
+  height: 100svh; min-height: 620px;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.88fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: clamp(20px, 3vw, 56px);
+  padding: calc(var(--nav-h, 70px) + clamp(18px, 3vh, 44px)) var(--gutter) clamp(26px, 4vh, 54px);
+}
+
+/* The photograph. background-attachment stays `scroll` — the stage is already
+   pinned, so `fixed` would fight it (and iOS ignores it; see .reveal-img). */
+.route__photo { position: absolute; inset: 0; overflow: hidden; }
+/* ⚠️ This photo is BLURRED, and it is the only blurred photograph on the site.
+   hero-4 is the overhead drone frame: palm crowns, roof ridges, footpaths and
+   a bright turquoise bay — hundreds of small high-contrast lines. A 1.6px
+   hairline route laid over that reads as a scratch on the print, not as a map.
+   The NIHI reference gets away with an unblurred frame because its photograph
+   has a large soft zone behind the drawing; this one has none.
+   So the photo's job here is ground, not subject: blurred and dimmed, it still
+   reads unmistakably as the resort from the air, and the drawing becomes the
+   thing you are looking at. Do not sharpen it back without also solving what
+   the linework is then supposed to sit on. The inset:-3% is what keeps blur
+   from leaving soft edges at the stage's own borders. */
+.route__photo::before {
+  content: ''; position: absolute; inset: -3%;
+  background-image: url('assets/hero-carousel/hero-4.webp');
+  background-size: cover; background-position: center;
+  filter: blur(4px) saturate(0.66) brightness(0.86);
+}
+/* Heavier than .cta-band's 0.5 for the same reason. Measured by sampling the
+   rendered composite at 1440x900, taking the LIGHTEST ground pixel in each band
+   (the worst case for light text on it):
+
+     whole stage, lightest ground rgb(95,93,90)  warm-white 6.08:1
+     steps band,  lightest ground rgb(64,61,60)  warm-white 9.97:1
+                                                 body at .86 alpha  7.86:1
+                                                 --gold numerals    3.68:1
+                                                 muted numerals     4.28:1
+
+   The gold numerals and the gold marker rule are the tight ones at 3.68:1, and
+   they only clear because they are large text (27-42px) and a UI component,
+   both of which the floor is 3:1 for. That is why the bottom of the vertical
+   scrim runs to 0.58 rather than the 0.48 it started at — at 0.48 the numerals
+   measured 3.41:1 and had almost no margin left. Lighten this gradient and the
+   numerals fail before anything else does; the hairline drawing goes next. */
+.route__photo::after {
+  content: ''; position: absolute; inset: 0;
+  background:
+    linear-gradient(100deg, rgba(20,18,16,0.68) 0%, rgba(20,18,16,0.5) 44%, rgba(20,18,16,0.64) 100%),
+    linear-gradient(180deg, rgba(20,18,16,0.4), rgba(20,18,16,0.1) 30%, rgba(20,18,16,0.58));
+}
+
+.route__art { position: relative; z-index: 1; height: 100%; min-height: 0; display: flex; }
+.route__map { width: 100%; height: 100%; overflow: visible; }
+
+/* ---- the drawing ---- */
+.route__line { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.route__coast { stroke: rgba(248, 246, 241, 0.82); stroke-width: 1.9; }
+/* The route has to read as sitting ON TOP of the coastline, not woven through
+   it — at Laem Sok the two meet at a point, and without this the road and the
+   shore merge into one continuous squiggle and the pier disappears into the
+   junction. A dark halo is the ordinary cartographic answer, and one filter
+   does every crossing at once. It goes on the route and its labels only; put it
+   on the coast too and the layering it exists to create goes away. */
+.route__leg, .route__stop, .route__glyph {
+  filter: drop-shadow(0 0 3px rgba(20, 18, 16, 0.85));
+}
+.route__land { fill: rgba(248, 246, 241, 0.13); stroke: none; }
+.js .route__land { opacity: 0; }
+.route__leg { stroke: var(--warm-white); stroke-width: 2.2; }
+/* The crossing is dashed and the road is solid — the same distinction a printed
+   itinerary makes between a drive and a boat, and it survives being small. */
+.route__leg--sea { stroke-dasharray: 7 9; }
+.route__leader { stroke: rgba(248, 246, 241, 0.62); stroke-width: 1; fill: none; }
+.route__dot { fill: var(--warm-white); }
+.route__dot--end { fill: var(--gold); stroke: var(--warm-white); stroke-width: 2; }
+.route__name {
+  font-family: var(--font-body);
+  font-size: 15px; font-weight: 500; letter-spacing: 0.13em;
+  text-transform: uppercase; fill: rgba(248, 246, 241, 0.92);
+}
+.route__name--end { fill: var(--warm-white); letter-spacing: 0.12em; }
+.route__name--panel { fill: rgba(248, 246, 241, 0.82); letter-spacing: 0.2em; font-size: 12px; }
+/* The inset. Koh Kood is 6px across at national scale, so the only way to show
+   both "where in Thailand" and a coastline you can actually read is two scales
+   at once — the ringed island on the map, and the same island enlarged beside
+   it. The crossing is drawn as one line that leaves the map and lands in the
+   panel: it is the ferry AND the connector between the two scales. */
+.route__panel { fill: none; stroke: rgba(248, 246, 241, 0.34); stroke-width: 1; }
+.route__zoom { fill: none; stroke: rgba(248, 246, 241, 0.22); stroke-width: 1; }
+.route__ring { fill: none; stroke: rgba(248, 246, 241, 0.7); stroke-width: 1.4; }
+.route__mlabels { display: none; }
+.route__name--m { font-size: 30px; letter-spacing: 0.08em; }
+.route__disc { fill: var(--warm-white); }
+.route__ico { fill: var(--charcoal); }
+.route__ico-cut { fill: var(--warm-white); }
+
+/* Hidden state is scoped to `.js`, the same guard the rest of the site uses:
+   without JS the whole route is simply drawn, stops and all.
+   The three vehicles are the exception and are hidden unconditionally: JS is
+   what puts them on the path, so without it they pile up at the SVG's origin as
+   a stack of discs in the top-left corner. They carry no information a still
+   drawing needs, so not-drawn is the right no-JS state for them. */
+.route__glyph { opacity: 0; }
+.js .route__stop, .js [data-fade] { opacity: 0; }
+.js .route__stop, .js .route__glyph { transition: opacity 420ms var(--ease); }
+.js [data-fade] { transition: opacity 520ms var(--ease); }
+
+/* ---- copy column ---- */
+.route__copy { position: relative; z-index: 1; color: var(--warm-white); max-width: 46ch; justify-self: end; }
+.route__copy .label { color: rgba(248, 246, 241, 0.7); }
+/* ⚠️ Sized off BOTH axes, unlike every other heading on the site. The stage is
+   pinned, so it cannot grow and it cannot scroll: anything taller than the row
+   overflows into the steps underneath instead of pushing them down. The site's
+   own h2 (`clamp(2.2rem, 6vw, 5rem)`) reads only the width, so at 1024x640 —
+   wide enough to stay pinned, short enough to have no room — it set a 3.8rem
+   headline in a row with space for about half that, and the CTA landed on top
+   of steps 02 and 03. Seen at 1024x640, not reasoned about. The `min()` with a
+   vh term is what makes the viewport's height able to win. */
+.route__copy h2 {
+  color: var(--warm-white); margin-top: 16px;
+  font-size: clamp(1.75rem, min(4.4vw, 6vh), 4.2rem);
+}
+.route__copy p { color: rgba(248, 246, 241, 0.88); margin-top: clamp(14px, 1.6vw, 22px); }
+.route__copy .btn { margin-top: clamp(22px, 2.6vw, 34px); color: var(--warm-white); border-color: rgba(248, 246, 241, 0.42); }
+@media (hover: hover) and (pointer: fine) {
+  .route__copy .btn:hover { background: var(--warm-white); color: var(--charcoal); border-color: var(--warm-white); }
+}
+
+/* ---- the three steps ---- */
+.route__steps {
+  grid-column: 1 / -1; position: relative; z-index: 1;
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 3vw, 56px);
+}
+.route__step { color: var(--warm-white); padding-top: clamp(14px, 1.6vw, 20px); }
+.route__step-rule {
+  display: block; height: 1px; background: rgba(248, 246, 241, 0.26);
+  margin-bottom: clamp(12px, 1.5vw, 18px); position: relative;
+}
+/* The marker. It fills left-to-right as its leg of the route is drawn, so the
+   rule and the line on the photograph are showing the same progress. */
+.route__step-rule::after {
+  content: ''; position: absolute; inset: 0;
+  background: var(--gold); transform-origin: left;
+  transform: scaleX(var(--fill, 0));
+  transition: transform 260ms var(--ease-quick);
+}
+.route__no {
+  display: block; font-family: var(--font-display); font-weight: 300; line-height: 1;
+  font-size: clamp(1.7rem, 2.6vw, 2.6rem);
+  color: rgba(248, 246, 241, 0.55);
+  transition: color var(--t-panel) var(--ease-quick);
+  margin-bottom: clamp(8px, 1vw, 14px);
+}
+.route__step.is-lit .route__no { color: var(--gold); }
+.route__step h3 { font-size: clamp(1rem, 1.25vw, 1.12rem); color: var(--warm-white); margin-bottom: 8px; }
+.route__step p { font-size: 0.93rem; color: rgba(248, 246, 241, 0.86); }
+.route__step .link { color: var(--warm-white); text-decoration-color: rgba(248, 246, 241, 0.5); }
+@media (hover: hover) and (pointer: fine) {
+  .route__step .link:hover { text-decoration-color: var(--warm-white); }
+}
+.route :focus-visible { outline: 2px solid var(--warm-white); outline-offset: 3px; }
+
+/* Short viewports get the same treatment on everything else that takes space:
+   there is no scroll to give back, so the only lever is size. */
+@media (min-width: 821px) and (max-height: 840px) {
+  /* The one heading on the site sized off the viewport's HEIGHT. Everything
+     else can push the page longer; this cannot. */
+  .route__copy h2 { font-size: clamp(1.7rem, min(4vw, 5.4vh), 3rem); }
+  .route__stage { padding-bottom: clamp(18px, 2.6vh, 34px); }
+  .route__copy p { margin-top: clamp(10px, 1.4vh, 18px); }
+  .route__copy .btn { margin-top: clamp(14px, 2vh, 26px); }
+  .route__no { font-size: clamp(1.5rem, 4.4vh, 2.4rem); margin-bottom: clamp(6px, 1vh, 12px); }
+  .route__step { padding-top: clamp(10px, 1.4vh, 16px); }
+  .route__step-rule { margin-bottom: clamp(9px, 1.3vh, 15px); }
+}
+/* Below this there is no arrangement that fits a pinned stage, so it stops
+   pretending and becomes the same flowing band the phone breakpoint gets.
+   initRoute() matches this query exactly — change one, change the other. */
+@media (max-height: 560px) {
+  .route { height: auto; }
+  .route__stage {
+    position: static; height: auto; min-height: 0;
+    grid-template-columns: 1fr; grid-template-rows: auto;
+    row-gap: clamp(26px, 5vw, 44px);
+    padding-block: clamp(56px, 11vw, 96px);
+  }
+  .route__art { height: auto; }
+  .route__map { height: auto; aspect-ratio: 1000 / 640; }
+  .route__copy { justify-self: start; max-width: none; }
+  .route__steps { grid-template-columns: 1fr; gap: clamp(22px, 5vw, 32px); }
+}
+
+/* ---- unpinned fallback ----
+   Below 820px the pin is removed outright rather than shortened. A sticky
+   stage costs a phone 3.2 screens of scroll to deliver three sentences, and
+   iOS is the platform this project has already had to stop pinning on once
+   (.reveal-img). initRoute() watches the same breakpoint and settles the
+   drawing to its finished state, so nothing is left half-drawn. */
+@media (max-width: 820px) {
+  .route { height: auto; }
+  .route__stage {
+    position: static; height: auto; min-height: 0;
+    grid-template-columns: 1fr; grid-template-rows: auto;
+    row-gap: clamp(26px, 5vw, 44px);
+    padding-block: clamp(56px, 11vw, 96px);
+  }
+  .route__art { height: auto; }
+  .route__map { height: auto; aspect-ratio: 1000 / 640; }
+  .route__copy { justify-self: start; max-width: none; }
+  .route__steps { grid-template-columns: 1fr; gap: clamp(22px, 5vw, 32px); }
+}
+/* Swap label sets at the same breakpoint the pin is dropped at. Raising the
+   desktop labels' size instead was tried first and cannot work: they are placed
+   in two columns sized for 15px type, so at a legible size they collide with
+   the maps and run off the frame. */
+@media (max-width: 820px) {
+  .route__stop .route__name, .route__stop .route__leader, .route__name--panel { display: none; }
+  .route__mlabels { display: block; }
+}
+
+/* Reduced motion gets the finished drawing and no pin — the travel is the
+   whole effect here, so there is nothing to soften, only to remove. */
+.no-motion .route { height: auto; }
+.no-motion .route__stage { position: static; height: auto; min-height: 0; padding-block: clamp(70px, 10vw, 130px); }
+.no-motion .route__art { height: auto; }
+.no-motion .route__map { height: auto; aspect-ratio: 1000 / 640; }
+.no-motion .route__stop, .no-motion .route__glyph, .no-motion [data-fade] { transition: none; }
