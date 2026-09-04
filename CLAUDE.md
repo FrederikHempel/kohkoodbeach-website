@@ -1776,3 +1776,25 @@ not; it was stale.
 superseded instruction is worse than no instruction, because it reads as
 current. When a plan changes, delete the sentence that described the old one in
 the same edit that records the new one.
+
+### Two open items are deliberate, not oversights (4 Sep 2026)
+
+Both had been reported as blockers across several sessions. Frederik has ruled
+on them; stop re-raising them.
+
+**The Web3Forms recipient stays `frja91@outlook.com` for now.** Not an
+oversight — he forwards every enquiry on himself and sees them the moment they
+land, and he wants that direct view while he confirms the form actually works
+end to end. It moves to `reservation@kohkoodbeachresorts.com` when real traffic
+starts. Nothing in the code changes when it does: the recipient lives in the
+Web3Forms dashboard, and the access key stays the same.
+
+⚠️ **The one thing to flag when that day comes**, and only then: a forwarded
+enquiry replied to from a personal inbox reaches the guest from a personal
+address, not from reservations. That is a hand-off detail, not a code problem.
+
+**`noindex` + `robots.txt: Disallow` stay as they are.** Also deliberate — the
+site is not being opened to search yet. Paid traffic works fine with both in
+place; only organic discovery is off. The revert is still a single coordinated
+pass when he asks for it: the meta tag on all 11 pages, `robots.txt`, and
+keeping the `facebookexternalhit` exception.
