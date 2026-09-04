@@ -868,6 +868,19 @@ function initBookPage() {
     checkin.min = today;
     checkin.addEventListener('change', floorDeparture);
   }
+  /* ⚠️ Watch DEPARTURE as well. Listening only on arrival left the other half
+     open: pick a departure earlier than the arrival — by typing, or by setting
+     it first — and nothing corrected it. The field went `rangeUnderflow` and
+     simply stayed on screen showing an impossible stay. Snapping up to the
+     first legal night is never a dead end, and the picker already greys out
+     everything below `min`, so this only fires on a typed or pasted value. */
+  if (checkout) {
+    checkout.addEventListener('change', () => {
+      if (checkout.value && checkout.min && checkout.value < checkout.min) {
+        checkout.value = checkout.min;
+      }
+    });
+  }
   floorDeparture();
 
   /* The transport request, in words rather than a field name. It is the one
@@ -922,6 +935,14 @@ function initBookPage() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    /* ⚠️ preventDefault means the browser's own validation no longer guards the
+       send — it runs before this event, and a programmatic submit skips it
+       entirely. An enquiry with a departure before the arrival went straight
+       through. reportValidity() re-runs every constraint, focuses the first
+       offender and shows the browser's own message, in the visitor's language.
+       Every required field lives in a section that is open at this point, so
+       there is nothing it cannot focus. */
+    if (!form.reportValidity()) return;
     const { subject, body } = compose();
     const key = form.querySelector('[name="access_key"]')?.value.trim();
 
@@ -978,6 +999,14 @@ function initContactForm() {
   // more to read than it saves.
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    /* ⚠️ preventDefault means the browser's own validation no longer guards the
+       send — it runs before this event, and a programmatic submit skips it
+       entirely. An enquiry with a departure before the arrival went straight
+       through. reportValidity() re-runs every constraint, focuses the first
+       offender and shows the browser's own message, in the visitor's language.
+       Every required field lives in a section that is open at this point, so
+       there is nothing it cannot focus. */
+    if (!form.reportValidity()) return;
     const { subject, body } = compose();
     const key = form.querySelector('[name="access_key"]')?.value.trim();
 

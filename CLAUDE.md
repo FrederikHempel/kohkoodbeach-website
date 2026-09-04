@@ -1587,3 +1587,30 @@ Dead in the contact form (it queries a `[data-transfer]` box that page does not
 have) but wrong; removed. **When patching one of these two near-identical
 handlers, anchor on something unique to it.**
 
+### The date guard had two halves, and only one was built (4 Sep 2026)
+
+Frederik could still put a departure before the arrival. The floor added in the
+previous pass was real but covered one direction only.
+
+⚠️ **The `change` listener sat on ARRIVAL alone.** Moving the arrival past an
+existing departure cleared it correctly — but changing the *departure* to
+something earlier did nothing at all. The field went `rangeUnderflow` and stayed
+on screen showing an impossible stay, because `min` on a date input marks a
+value invalid; it does not refuse it. Departure now snaps up to the first legal
+night when a value below `min` arrives. The picker already greys those dates
+out, so this only fires on a typed or pasted value.
+
+⚠️ **And an invalid enquiry could still be SENT.** `preventDefault()` in the
+submit handler means the browser's own validation no longer guards the send —
+it runs before that event, and a programmatic submit skips it entirely. A
+16 Sept → 15 Sept enquiry POSTed happily. The handler now calls
+`form.reportValidity()` first, which re-runs every constraint, focuses the first
+offender and shows the browser's own message in the visitor's language. **Any
+handler on this site that calls `preventDefault()` on a submit owes the form
+that call** — the constraints in the markup are otherwise decoration.
+
+Verified across every ordering: departure-then-arrival clears; arrival-then-
+earlier-departure snaps to arrival + 1; same-day snaps to the next night; a
+legal stay is left untouched; a bad range no longer submits; a good one still
+does.
+
