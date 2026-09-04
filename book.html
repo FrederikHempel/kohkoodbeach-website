@@ -138,6 +138,13 @@
      the steps say what they carry, where they are.
      ⚠️ The houses and their overlays are GENERATED from accommodation.html by
      scratchpad/build_book.py — edit the rooms there. -->
+<!-- ============ THE ENQUIRY ============
+     One <form>, three steps, in the order the visitor decides: when → which
+     room → who you are. Each finished step collapses to a line stating what it
+     holds, with Change to reopen; the next opens in its place. No sticky bar —
+     the steps say what they carry, where they are.
+     ⚠️ The houses and their overlays are GENERATED from accommodation.html by
+     scratchpad/build_book.py — edit the rooms there. -->
 <form class="enq" data-book-form data-endpoint="https://api.web3forms.com/submit">
   <!-- ⚠️ Empty on purpose. Paste the Web3Forms access key here and the form
        starts POSTing for real; while blank it falls back to the mailto draft.
@@ -349,6 +356,36 @@
           <div class="radios" role="radiogroup" aria-label="Are your dates fixed?">
             <label><input type="radio" name="dates" value="fixed" checked> <span>Fixed dates</span></label>
             <label><input type="radio" name="dates" value="flexible"> <span>Flexible by 2&ndash;3 days</span></label>
+          </div>
+          <!-- The resort really does arrange both routes — see getting-here.html,
+               where the times, fares and the 30-day lead time already live. This
+               only asks whether to quote them; it does not repeat the prices,
+               which move with the season. -->
+          <div class="offer">
+            <label class="offer__ask">
+              <input type="checkbox" name="transfer" value="yes" data-transfer>
+              <span class="offer__ask-text">I&rsquo;d like an offer for transport from Bangkok</span>
+            </label>
+            <div class="offer__opts" data-transfer-opts hidden>
+              <div class="offer__opts-inner" role="radiogroup" aria-label="Which route?">
+                <p class="offer__hint">Both end the same way &mdash; we meet you at Ao Salad pier and drive you the last stretch. In high season the seats want about 30 days&rsquo; notice. <a href="getting-here.html" class="link">Times and fares</a>.</p>
+                <label class="offer__opt">
+                  <input type="radio" name="transfer_route" value="bus-ferry">
+                  <span class="offer__opt-name">Boonsiri bus + ferry</span>
+                  <span class="offer__opt-note">One ticket from Bangkok. Roughly 7&ndash;8 hours door to door.</span>
+                </label>
+                <label class="offer__opt">
+                  <input type="radio" name="transfer_route" value="minivan-ferry">
+                  <span class="offer__opt-name">Private minivan + ferry</span>
+                  <span class="offer__opt-note">Collected from your Bangkok hotel, then the same crossing.</span>
+                </label>
+                <label class="offer__opt">
+                  <input type="radio" name="transfer_route" value="either">
+                  <span class="offer__opt-name">Not sure &mdash; recommend one</span>
+                  <span class="offer__opt-note">Tell us your arrival time and we will suggest the simpler of the two.</span>
+                </label>
+              </div>
+            </div>
           </div>
           <label><span class="label">Anything else we should know?</span><textarea name="message" rows="4"></textarea></label>
           <div class="step__send">

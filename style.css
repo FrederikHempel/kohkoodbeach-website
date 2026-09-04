@@ -1984,3 +1984,31 @@ html { caret-color: var(--gold-dark); }
   .cats__grid { grid-template-columns: 1fr; }
   .step__toggle { padding-block: clamp(18px, 4vw, 26px); }
 }
+
+/* ---- the transport offer ----
+   A bordered block, not another form row: it is an offer the resort is making,
+   and it has to read as one thing the visitor can accept. The routes appear
+   only once the box is ticked — three unasked-for radios would be noise for
+   everyone who is arranging their own way here. */
+.offer { border: 1px solid rgba(43, 41, 38, 0.2); padding: clamp(16px, 2vw, 22px); }
+/* ⚠️ `label.` on both, not the bare class. These sit inside `.step__inner form`,
+   where `.form label { display: grid; gap: 10px }` (0,1,1) outranks a bare class
+   (0,1,0) — the checkbox was stacking above its own text. Matching specificity
+   and coming later in the file is what wins it back. */
+label.offer__ask { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+.offer__ask input { width: 18px; height: 18px; margin: 2px 0 0; flex: none; accent-color: var(--gold); }
+.offer__ask-text { font-size: 1rem; }
+.offer:has(input[data-transfer]:checked) { border-color: var(--gold); }
+.offer__opts { overflow: hidden; height: 0; transition: height var(--t-panel) var(--ease-quick); }
+.offer__opts[hidden] { display: block; }
+.no-motion .offer__opts { transition: none; }
+.offer__opts-inner { padding-top: 16px; margin-top: 16px; border-top: var(--rule); display: grid; gap: 4px; }
+.offer__hint { font-size: 0.88rem; color: var(--ink-muted); margin-bottom: 10px; max-width: 60ch; }
+label.offer__opt {
+  display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: baseline;
+  padding: 11px 0; cursor: pointer;
+}
+.offer__opt input { grid-row: 1 / span 2; width: 17px; height: 17px; margin: 2px 0 0; accent-color: var(--gold); }
+.offer__opt-name { font-size: 0.97rem; }
+.offer__opt-note { grid-column: 2; font-size: 0.85rem; color: var(--warm-gray-strong); }
+

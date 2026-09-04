@@ -559,21 +559,31 @@ function glideTo(y, still) {
    because it does not fire when the value did not change. */
 function unfold(region, open, still, after) {
   const inner = region.firstElementChild;
-  if (still) { region.hidden = !open; region.style.height = open ? 'auto' : '0'; if (after) after(); return; }
+  if (still) { region.hidden = !open; region.style.height = open ? 'auto' : '0'; region.style.overflow = open ? 'visible' : 'hidden'; if (after) after(); return; }
 
   // ⚠️ Generation token. Each call claims the region; the settle below only
   // acts if it is still the newest. Without it the 700ms fallback from an
   // EARLIER unfold fires later and undoes the current one — opening step 2 and
   // choosing a room inside 700ms left the rooms expanded again, because the
   // open-timeout set height back to `auto` after the collapse had run.
+  region.style.overflow = 'hidden';        // clip again for the duration of the move
   const gen = (region._unfoldGen = (region._unfoldGen || 0) + 1);
   let settled = false;
   const settle = () => {
     if (settled || region._unfoldGen !== gen) return;
     settled = true;
     region.removeEventListener('transitionend', onEnd);
-    if (open) region.style.height = 'auto';
-    else region.hidden = true;
+    if (open) {
+      region.style.height = 'auto';
+      // ⚠️ Release the clip once the fold is at rest. `overflow: hidden` is what
+      // makes the height animation possible, but it also crops anything drawn
+      // outside a child's box — and a focus ring is drawn outside, with
+      // `outline-offset: 3px`. The message field sits flush against this edge,
+      // so its ring lost its left side. At rest there is nothing to clip.
+      region.style.overflow = 'visible';
+    } else {
+      region.hidden = true;
+    }
     if (after) after();
   };
   // Height transitions on nested regions bubble; only this element's own
@@ -739,6 +749,16 @@ function initFlow() {
     });
   });
 
+  // The routes appear only once the offer is accepted.
+  const ask = form.querySelector('[data-transfer]');
+  const opts = form.querySelector('[data-transfer-opts]');
+  if (ask && opts) {
+    ask.addEventListener('change', () => {
+      unfold(opts, ask.checked, still);
+      if (!ask.checked) form.querySelectorAll('[name="transfer_route"]').forEach((r) => { r.checked = false; });
+    });
+  }
+
   window.__flow = { markDone, goto, roomSummary };
 }
 
@@ -829,6 +849,18 @@ function initBookPage() {
   }
   if (checkout) checkout.min = checkin?.value || today;
 
+  /* The transport request, in words rather than a field name. It is the one
+     answer here the resort has to act on separately from the room. */
+  const transferLine = () => {
+    const on = form.querySelector('[data-transfer]')?.checked;
+    if (!on) return null;
+    const route = form.querySelector('input[name="transfer_route"]:checked')?.value;
+    const named = { 'bus-ferry': 'Boonsiri bus + ferry',
+                    'minivan-ferry': 'private minivan + ferry',
+                    'either': 'no preference — please recommend' }[route];
+    return `Transport from Bangkok: YES, please quote${named ? ` (${named})` : ''}`;
+  };
+
   const compose = () => {
     const get = (n) => form.querySelector(`[name="${n}"]`)?.value.trim() || '';
     const or = (v, fallback) => (v === '' ? fallback : v);
@@ -848,6 +880,7 @@ function initBookPage() {
       flexible ? 'Flexible: yes, by 2–3 days either way' : null,
       `Guests: ${guests}`,
       `Extra bed: ${or(get('extrabed'), 'no')}`,
+      transferLine(),
       '',
       `Name: ${or(get('name'), 'not given')}`,
       `Email: ${or(get('email'), 'not given')}`,
@@ -897,6 +930,18 @@ function initBookPage() {
 function initContactForm() {
   const form = document.querySelector('[data-contact-form]');
   if (!form) return;
+
+  /* The transport request, in words rather than a field name. It is the one
+     answer here the resort has to act on separately from the room. */
+  const transferLine = () => {
+    const on = form.querySelector('[data-transfer]')?.checked;
+    if (!on) return null;
+    const route = form.querySelector('input[name="transfer_route"]:checked')?.value;
+    const named = { 'bus-ferry': 'Boonsiri bus + ferry',
+                    'minivan-ferry': 'private minivan + ferry',
+                    'either': 'no preference — please recommend' }[route];
+    return `Transport from Bangkok: YES, please quote${named ? ` (${named})` : ''}`;
+  };
 
   const compose = () => {
     const get = (n) => form.querySelector(`[name="${n}"]`)?.value.trim() || '';

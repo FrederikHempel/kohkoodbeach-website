@@ -1496,3 +1496,29 @@ editorial speed's job. The house views inside a card keep `--t-panel`.
 cancels it. Verified — interrupted at 225px, still at 225px 700ms later. Under
 `prefers-reduced-motion` it jumps outright (measured in place at 50ms).
 
+### Book Now, eighth pass — the clipped focus ring, and the transport offer (4 Sep 2026)
+
+⚠️ **`overflow: hidden` on a folding region crops the focus ring of anything
+flush against its edge.** The message field sits at the step body's left edge,
+and the site's focus ring is drawn *outside* the element (`outline-offset: 3px`)
+— so its left side was cut off. The clip is what makes the height animation
+possible, but only while the region is moving: `unfold()` now sets
+`overflow: hidden` for the duration and releases it to `visible` on settle.
+Anything else that folds and contains focusable controls needs the same.
+
+**New: an offer for transport from Bangkok.** A bordered block in step 3 with one
+checkbox — *I'd like an offer for transport from Bangkok* — which reveals three
+routes when ticked: Boonsiri bus + ferry, private minivan + ferry, or "not sure,
+recommend one". Hidden until asked for, because three unrequested radios are
+noise to everyone arranging their own way here. It carries no prices: the times,
+fares and the 30-day lead time already live on `getting-here.html`, which it
+links to, and rates move with the season. The enquiry gains one line —
+`Transport from Bangkok: YES, please quote (private minivan + ferry)` — so
+reception can act on it separately from the room.
+
+⚠️ **`label.offer__ask`, not `.offer__ask`.** These labels sit inside
+`.step__inner form`, where `.form label { display: grid; gap: 10px }` scores
+(0,1,1) and a bare class scores (0,1,0) — the checkbox stacked *above* its own
+text. Matching the specificity with `label.` and coming later in the file is
+what wins it back. Worth remembering for any new label inside `.form`.
+
