@@ -316,8 +316,11 @@ const RESORT_WA = '66819088966';
    already live on kohkoodbeachresorts.com so clicks made while building this
    site don't mix into real campaign data. Swap to 876625588428207 (the
    production pixel) in the same pass as removing noindex at go-live — see
-   CLAUDE.md under "Staging deploy on kohkoodbeach.com". */
-const META_PIXEL_ID = '2040247273287344';
+   CLAUDE.md under "Staging deploy on kohkoodbeach.com".
+   4 Sep 2026: replaced 2040247273287344 — Frederik had created that one
+   under the wrong ad account. This is "KKBR kohkoodbeach.com (correct
+   pixel)", verified live on the Koh Kood Beach Resort business. */
+const META_PIXEL_ID = '1600958241509815';
 
 /* Injects the Meta Pixel base snippet and fires PageView. Only called from
    initConsent() once the visitor has actually agreed — loading it eagerly in
