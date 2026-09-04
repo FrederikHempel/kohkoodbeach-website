@@ -15,3 +15,7 @@ assets/**/*.mov
 
 # OS/editor noise
 .DS_Store
+
+# Sandbox temp copies — two of these (3.5 MB of half-written book-hero.mp4)
+# were committed and served publicly before anyone noticed.
+*.sb-*
