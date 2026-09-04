@@ -163,12 +163,14 @@ BODY = f'''<!-- ============ THE ENQUIRY ============
 
   <ol class="flow wrap">
     <li class="step is-open" data-step="room">
-      <div class="step__head">
-        <h2 class="step__h">Your room</h2>
-        <p class="step__sum" data-step-sum hidden></p>
-        <button type="button" class="step__change" data-step-change="room" hidden>Change</button>
-      </div>
-      <div class="step__body" data-step-body>
+      <h2 class="step__h">
+        <button type="button" class="step__toggle" data-step-toggle="room" aria-expanded="true" aria-controls="body-room">
+          <span class="step__title">Your room</span>
+          <span class="step__sum" data-step-sum hidden></span>
+          <span class="step__chev" aria-hidden="true"></span>
+        </button>
+      </h2>
+      <div class="step__body" id="body-room" data-step-body>
         <div class="step__inner">
           <div class="cats__grid">
 {houses}
@@ -182,10 +184,14 @@ BODY = f'''<!-- ============ THE ENQUIRY ============
     </li>
 
     <li class="step" data-step="you">
-      <div class="step__head">
-        <h2 class="step__h">Tell us about you</h2>
-      </div>
-      <div class="step__body" data-step-body>
+      <h2 class="step__h">
+        <button type="button" class="step__toggle" data-step-toggle="you" aria-expanded="false" aria-controls="body-you">
+          <span class="step__title">Tell us about you</span>
+          <span class="step__sum" data-step-sum hidden></span>
+          <span class="step__chev" aria-hidden="true"></span>
+        </button>
+      </h2>
+      <div class="step__body" id="body-you" data-step-body>
         <div class="step__inner form">
           <div class="form__row">
             <label><span class="label">Name</span><input type="text" name="name" required autocomplete="name"></label>

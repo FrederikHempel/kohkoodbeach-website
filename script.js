@@ -503,9 +503,9 @@ function initBookHero() {
    animates. The flush is a synchronous offsetHeight read — a rAF never runs in
    a throttled or backgrounded tab — and transitionend carries a timeout,
    because it does not fire when the value did not change. */
-function unfold(region, open, still) {
+function unfold(region, open, still, after) {
   const inner = region.firstElementChild;
-  if (still) { region.hidden = !open; region.style.height = open ? 'auto' : '0'; return; }
+  if (still) { region.hidden = !open; region.style.height = open ? 'auto' : '0'; if (after) after(); return; }
 
   // ⚠️ Generation token. Each call claims the region; the settle below only
   // acts if it is still the newest. Without it the 700ms fallback from an
@@ -520,6 +520,7 @@ function unfold(region, open, still) {
     region.removeEventListener('transitionend', onEnd);
     if (open) region.style.height = 'auto';
     else region.hidden = true;
+    if (after) after();
   };
   // Height transitions on nested regions bubble; only this element's own
   // transition may settle it.
@@ -571,25 +572,49 @@ function initFlow() {
     return `${on.dataset.label.replace(' – ', ', ')} · from ${on.dataset.price} THB`;
   };
 
-  const open = (name) => {
+  /* ⚠️ `after` is not a nicety. scrollIntoView computes its target from the
+     layout at the moment it is called, and opening a step collapses the one
+     above it — the document shrank ~350px mid-animation, so a smooth scroll
+     begun beforehand kept going to a position that no longer existed and
+     landed at the foot of the page. Measured: target 1903, ended 1904 with the
+     step 1031px above the viewport. So the scroll waits for every height to
+     settle, and then offsets for the fixed nav, which `block: 'start'` would
+     otherwise hide the header behind. */
+  const open = (name, after) => {
+    let pending = 0;
+    const settled = () => { if (--pending <= 0 && after) after(); };
     steps.forEach((s) => {
       const body = s.querySelector('[data-step-body]');
       const is = s.dataset.step === name;
       s.classList.toggle('is-open', is);
-      if (is === Boolean(body.hidden)) unfold(body, is, still);
+      s.querySelector('[data-step-toggle]')?.setAttribute('aria-expanded', String(is));
+      if (is === Boolean(body.hidden)) { pending += 1; unfold(body, is, still, settled); }
     });
+    if (pending === 0 && after) after();
+  };
+
+  const closeAll = () => {
+    steps.forEach((s) => {
+      const body = s.querySelector('[data-step-body]');
+      s.classList.remove('is-open');
+      s.querySelector('[data-step-toggle]')?.setAttribute('aria-expanded', 'false');
+      if (!body.hidden) unfold(body, false, still);
+    });
+  };
+
+  const scrollToStep = (name) => {
+    const s = byName(name); if (!s) return;
+    const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
+    window.scrollTo({ top: Math.max(0, s.getBoundingClientRect().top + window.scrollY - navH - 18),
+                      behavior: still ? 'auto' : 'smooth' });
   };
   const markDone = (name, text) => {
     const s = byName(name); if (!s) return;
-    const sum = s.querySelector('[data-step-sum]'), ch = s.querySelector('[data-step-change]');
+    const sum = s.querySelector('[data-step-sum]');
     s.classList.add('is-done');
     if (sum) { sum.textContent = text; sum.hidden = false; }
-    if (ch) ch.hidden = false;
   };
-  const goto = (name) => {
-    open(name);
-    byName(name)?.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
-  };
+  const goto = (name) => open(name, () => scrollToStep(name));
 
   steps.forEach((s) => {
     const body = s.querySelector('[data-step-body]');
@@ -597,6 +622,7 @@ function initFlow() {
     body.hidden = !first;
     body.style.height = first ? 'auto' : '0';
     s.classList.toggle('is-open', first);
+    s.querySelector('[data-step-toggle]')?.setAttribute('aria-expanded', String(first));
   });
 
   document.querySelector('[data-step-next]').addEventListener('click', () => {
@@ -619,11 +645,10 @@ function initFlow() {
     try { form.checkout.showPicker(); } catch (err) { form.checkout.focus(); }
   });
 
+  // Any step, any time. The flow suggests an order; it does not lock one.
   steps.forEach((s) => {
-    s.querySelector('[data-step-change]')?.addEventListener('click', () => {
-      s.classList.remove('is-done');
-      s.querySelector('[data-step-sum]').hidden = true;
-      s.querySelector('[data-step-change]').hidden = true;
+    s.querySelector('[data-step-toggle]').addEventListener('click', () => {
+      if (s.classList.contains('is-open')) { closeAll(); return; }
       goto(s.dataset.step);
     });
   });

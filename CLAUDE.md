@@ -1420,3 +1420,36 @@ the rooms and opens the details; `showPicker` is called on the departure field
 after an arrival change; no horizontal overflow at 390; no console errors;
 Impeccable detector 0 findings; guard green on all 12 pages.
 
+### Book Now, sixth pass — the scroll landed at the foot of the page (4 Sep 2026)
+
+Two faults, both reported by Frederik, both traced before touching anything.
+
+⚠️ **Choosing a room scrolled to the bottom of the page, not to "Tell us about
+you". `scrollIntoView` computes its target from the layout at the moment it is
+called** — and opening a step collapses the one above it, so the document was
+still shrinking while the smooth scroll ran. Traced frame by frame: the target
+was document y≈1903, the room body then collapsed and `scrollHeight` fell
+3353 → 3008, and the scroll finished at 1904 with the step **1031px above the
+viewport**, i.e. the foot of the page.
+
+The fix is sequencing, not easing. `unfold()` takes an `after` callback and
+`open()` counts the regions it animates, firing the callback when the last one
+settles; only then does the page scroll. It also scrolls to
+`rect.top + scrollY - --nav-h - 18` rather than `block: 'start'`, which would
+have parked the header behind the 114px fixed nav. Verified: the step lands at
+viewport y=132, clear of the nav, and not at the bottom.
+
+**Every step opens at any time.** The headers are now buttons (the `<button>` is
+inside the `<h2>`, which keeps both the heading semantics and valid HTML — a
+heading inside a button is not phrasing content). Clicking a closed step opens
+it and closes the others; clicking the open one collapses it; `aria-expanded`
+tracks on each. "Tell us about you" no longer requires a room to have been
+chosen. The separate *Change* button is gone — the header is the control, and
+the chosen summary stays beside the title.
+
+**A brace went missing while editing.** Removing `.step__change` and the old
+`.house` rules by pattern took the closing `}` of the final `@media` block with
+them; the stylesheet parsed as one unterminated rule. Caught by counting braces
+after every CSS edit, which is worth keeping in the loop — the brace count is
+cheap and the failure is silent.
+
