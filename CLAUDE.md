@@ -1163,3 +1163,67 @@ paraphrased TripAdvisor review sits under the form; and the thank-you reads as
 Frederik wrote it, at **24 hours** — the figure the rest of the site already
 promises, chosen over 48 so the page does not make two different promises.
 
+### Book Now, second pass — one form, and a rule that can now bite (4 Sep 2026)
+
+Frederik's verdict on the first pass was fair: three same-size cards, a heading
+over them, the form a full scroll below the hero, and — worse — a charcoal
+review band sitting last above the footer, **breaking the warm-white rule the
+afternoon after it was written as a hard rule.** A rule in a document did not
+stop a hand. So:
+
+⚠️ **`scratchpad/check_last_band.py` now refuses any page whose last
+`<section>`/`<aside>` before the footer is a coloured band, and it is installed
+as `.git/hooks/pre-commit` on this machine.** Commits with a violating page fail
+with the page and class named. The hook lives in `.git/`, so it is per-clone —
+re-install it after a fresh clone (`cp` the three-line script into
+`.git/hooks/pre-commit`, `chmod +x`). Allowed closers: plain `.band`, or the
+`rev--light` variant. `.rev` alone, `band--sand/--ink/--sage`, `.cta-band`,
+`.reveal-img`, `.route` and any inline background are refused.
+
+**The page is now one form in four fieldsets, in the order a visitor decides:**
+When (fixed/flexible, arrival, departure) → Who's coming (adults 13+, children
+2–12, infants under 2, extra bed) → Your bungalow (optional, folded) → Your
+details → Send. Nothing sits between the hero and the first field; the hero is
+`.page-hero--short` (42vh, not 62) so "Arrival" is inside the first viewport on
+a laptop (measured: 628px down in a 900px window). Legends are the group
+headings, set in the display serif at a modest size — headings, not eyebrows.
+
+⚠️ **The rule between groups is drawn at the BOTTOM of each fieldset, never the
+top.** A `<legend>` renders straddling its fieldset's top edge — with `border:0`
+as much as with a border, and an inset top shadow lands there too. `border-top`
+cut "Who's coming" in half; an inset top shadow did exactly the same. The
+bottom edge has no legend on it. If you add a group, keep the rule there.
+
+**The bungalow chooser is a native `<details>`.** It opens without JS, the
+summary is a real keyboard control, and JS only keeps the summary's text in
+step with the chosen chip (and opens the fold when `?room=` arrives from
+accommodation.html or when "Choose this room" is pressed inside an overlay).
+Folded by default because the choice is optional, the resort is glad to
+recommend, and open it would push the visitor's own details below three
+photographs.
+
+**Inside the fold, each house is a row, left to right: photo · name and one line
+· the views as chips · More info.** Chips are one line each — name · where ·
+from-price — with `white-space: nowrap` on the name so "Partial Sea View" never
+breaks. The first pass had them as three-line blocks stacking in a 300px column,
+520px per house; now 43px per chip and 265px per house at 1440. **The chip is the
+choice** — the view is what changes the price, so a separate "choose" button
+would only have to pick a view on the visitor's behalf.
+
+⚠️ **`.enq` is 1100px wide; the input groups cap at 760px inside it.** The row
+list needs the width to lay out horizontally; the inputs want a reading measure.
+Both are true, so the form is wide and `.radios`, `.form__row`, `.guests__grid`,
+the message label and `.enq__send` carry `max-width: 760px`. Don't narrow the
+form again to "fix" the inputs — narrow the inputs.
+
+**The review under the form is `rev--light`** (warm-white ground, charcoal text,
+gold stars): the same component as the dark `.rev` used mid-page on
+accommodation.html, in the one colour a closer is allowed to be.
+
+Verified in one batched round (desktop 1440×900 top / fold open / overlay, mobile
+390 top / fold open), one fix batch, one confirmation: no horizontal overflow at
+390, no console errors, Impeccable detector 0 findings on book.html, style.css
+and script.js, guard green on all 12 pages. Known residual, not a defect: a chip
+whose "where" line is long wraps its price to a second line inside the 575px
+chip column; a 12rem text column instead of 14rem would give the chips the room.
+

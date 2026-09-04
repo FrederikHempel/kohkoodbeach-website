@@ -474,48 +474,50 @@ function chosenRoom(form) {
 
 function initRoomChooser() {
   const form = document.querySelector('[data-book-form]');
-  const views = Array.from(document.querySelectorAll('.rc__view'));
-  if (!form || !views.length) return;
+  const chips = Array.from(document.querySelectorAll('.chip'));
+  if (!form || !chips.length) return;
 
   const roomField = form.querySelector('[name="room"]');
   const labelField = form.querySelector('[name="room_label"]');
-  const chosenText = document.querySelector('[data-chosen-text]');
+  const fold = document.querySelector('[data-fold]');
+  const current = document.querySelector('[data-fold-current]');
 
-  const select = (btn, focusForm) => {
-    views.forEach((v) => {
-      const on = v === btn;
-      v.classList.toggle('is-on', on);
-      v.setAttribute('aria-checked', String(on));
+  // The <details> summary is the one place the choice is stated in words, so
+  // it must never disagree with the chips. Everything routes through here.
+  const select = (btn) => {
+    chips.forEach((c) => {
+      const on = c === btn;
+      c.classList.toggle('is-on', on);
+      c.setAttribute('aria-checked', String(on));
     });
     const id = btn.dataset.room || '';
     const label = btn.dataset.label || 'Not sure yet';
     if (roomField) roomField.value = id;
     if (labelField) labelField.value = label;
-    if (chosenText) chosenText.innerHTML = id ? label : 'Not sure yet &mdash; we will recommend a room';
-    if (focusForm) {
-      const target = document.getElementById('enquiry');
-      if (target) target.scrollIntoView({ behavior: document.documentElement.classList.contains('no-motion') ? 'auto' : 'smooth', block: 'start' });
-    }
+    if (current) current.innerHTML = id ? label : 'Not sure yet &mdash; we&rsquo;ll recommend one';
   };
 
-  views.forEach((btn) => btn.addEventListener('click', () => select(btn, Boolean(btn.dataset.room))));
+  chips.forEach((btn) => btn.addEventListener('click', () => select(btn)));
 
-  // A "Choose this room" inside an overlay picks the matching chip, so the two
-  // surfaces can never disagree about what is selected.
+  // "Choose this room" inside an overlay picks the matching chip, so the two
+  // surfaces can never disagree about what is selected. Closing the dialog
+  // returns focus to the fold, which is where the choice now reads.
   document.querySelectorAll('[data-choose]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const match = views.find((v) => v.dataset.room === btn.dataset.choose);
+      const match = chips.find((c) => c.dataset.room === btn.dataset.choose);
       if (!match) return;
       btn.closest('dialog')?.close();
-      select(match, true);
+      select(match);
+      if (fold) { fold.open = true; fold.querySelector('summary')?.focus(); }
     });
   });
 
-  // accommodation.html links here as book.html?room=<id>; honour it.
+  // accommodation.html links here as book.html?room=<id>. Honour it, and open
+  // the fold so the visitor can see what arrived preselected.
   const wanted = new URLSearchParams(window.location.search).get('room');
   if (wanted) {
-    const match = views.find((v) => v.dataset.room === wanted);
-    if (match) select(match, false);
+    const match = chips.find((c) => c.dataset.room === wanted);
+    if (match) { select(match); if (fold) fold.open = true; }
   }
 }
 
