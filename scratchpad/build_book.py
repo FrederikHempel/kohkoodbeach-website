@@ -168,13 +168,15 @@ BODY = f'''<!-- ============ THE ENQUIRY ============
 <form class="enq" data-book-form data-endpoint="https://api.web3forms.com/submit">
   <!-- ⚠️ The Web3Forms access key. With it present the form POSTs for real;
        blank it out and the submit handler falls back to the mailto draft.
-       This key is NOT the one in contact.html — two forms, two keys, and each
-       key is bound to whatever address its form was created with. This one was
-       set up pointing at frja91@outlook.com as a test; repoint the form to
-       reservation@kohkoodbeachresorts.com in the Web3Forms dashboard before the
-       site takes real bookings. The key is public by design — it only permits
-       sending TO that mailbox. -->
-  <input type="hidden" name="access_key" value="8a3f2c91-4b7d-4e2a-9f16-c05d8e7b3a44">
+       ⚠️ SAME key as contact.html, on purpose. There is ONE form in the
+       Web3Forms account ("Booking form", recipient frja91@outlook.com), and a
+       key identifies the destination, not the markup — several forms may post
+       to it. Both pages therefore share this key, and the `subject` field is
+       what tells a booking enquiry from a contact message in the inbox.
+       Repoint the recipient to reservation@kohkoodbeachresorts.com in the
+       dashboard before the site takes real bookings; the key does not change.
+       The key is public by design — it only permits sending TO that mailbox. -->
+  <input type="hidden" name="access_key" value="c5260114-8255-4e7d-8b9c-0e7c568001ce">
   <input type="hidden" name="subject" value="Booking enquiry — Koh Kood Beach Resort">
   <input type="hidden" name="from_name" value="Koh Kood Beach Resort website">
   <input type="checkbox" name="botcheck" class="visually-hidden" style="display:none" tabindex="-1" autocomplete="off">
