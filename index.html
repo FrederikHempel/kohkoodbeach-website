@@ -155,7 +155,7 @@
 <!-- ============ PINNED PARALLAX IMAGE ============ -->
 <section class="reveal-img" style="background-image:url('assets/gallery/panorama/img4p29.webp')" aria-label="The beach at Koh Kood Beach Resort">
   <div class="reveal-img__cap wrap">
-    <span class="label" data-reveal>Bang Bao Bay</span>
+    <span class="label" data-reveal>Koh Kood, west coast</span>
     <h3 data-reveal>A private beach that stays quiet, even in high season.</h3>
   </div>
 </section>
@@ -353,7 +353,7 @@
         <!-- 02 the crossing — it leaves the national map and lands in the inset -->
         <path class="route__line route__leg route__leg--sea" data-geo="1" mask="url(#route-sea)" d="M234.4 362.6C351.2 279.9 495.7 250.1 635.6 279.8"/>
         <!-- 03 the last stretch by road, on the island -->
-        <path class="route__line route__leg" data-draw="leg2" data-geo="2" d="M635.6 279.8C634.9 284.1 632.0 296.7 631.0 305.2C630.0 313.6 630.0 322.1 629.5 330.5C629.1 339.0 627.0 347.4 628.4 355.9C629.8 364.3 636.0 372.8 638.0 381.2C639.9 389.7 649.6 398.1 640.0 406.6C630.3 415.0 590.0 427.7 580.1 431.9"/>
+        <path class="route__line route__leg" data-draw="leg2" data-geo="2" d="M635.6 279.8C634.3 281.5 628.5 286.7 627.6 290.1C626.6 293.6 630.1 297.0 629.9 300.4C629.7 303.9 626.3 307.3 626.3 310.7C626.2 314.2 629.3 317.6 629.9 321.0C630.4 324.5 638.5 327.9 629.6 331.3C620.7 334.8 585.4 339.9 576.6 341.6"/>
 
         <!-- Both mainland labels run to one column at x=112, mirroring the
              island's column on the right. Laem Sok's used to sit where its own
@@ -377,9 +377,9 @@
           <text class="route__name" x="780" y="284.8" text-anchor="start">Ao Salad</text>
         </g>
         <g class="route__stop" data-stop="3">
-          <path class="route__leader" d="M580.1 431.9H770"/>
-          <circle class="route__dot route__dot--end" cx="580.1" cy="431.9" r="6.5"/>
-          <text class="route__name route__name--end" x="780" y="431.9" text-anchor="start">Koh Kood<tspan x="780" dy="17">Beach Resort</tspan></text>
+          <path class="route__leader" d="M576.6 341.6H770"/>
+          <circle class="route__dot route__dot--end" cx="576.6" cy="341.6" r="6.5"/>
+          <text class="route__name route__name--end" x="780" y="341.6" text-anchor="start">Koh Kood<tspan x="780" dy="17">Beach Resort</tspan></text>
         </g>
 
         <!-- ⚠️ MOBILE LABELS. Below 820px the whole 1000-unit viewBox is drawn
@@ -392,8 +392,12 @@
         <g class="route__mlabels" aria-hidden="true">
           <path class="route__leader" d="M635.6 279.8H800"/>
           <text class="route__name route__name--m" x="985" y="288.8" text-anchor="end">Ao Salad</text>
-          <path class="route__leader" d="M580.1 431.9H720"/>
-          <text class="route__name route__name--m route__name--end" x="985" y="429.9" text-anchor="end">Koh Kood<tspan x="985" dy="34">Beach Resort</tspan></text>
+          <!-- Angled down, not straight across. Once the resort marker moved north
+               to its real position the two island stops sit ~50 units apart, and at
+               mobile's 30-unit type that put this label's leader through the middle
+               of the one above it. -->
+          <path class="route__leader" d="M576.6 341.6L760 391.6H800"/>
+          <text class="route__name route__name--m route__name--end" x="985" y="396.6" text-anchor="end">Koh Kood<tspan x="985" dy="34">Beach Resort</tspan></text>
         </g>
 
         <g class="route__glyph" data-glyph="0">

@@ -118,7 +118,10 @@ def smooth(pts, prec=1):
 BANGKOK  = (100.5018, 13.7563)
 LAEM_SOK = (102.5861, 12.0404)   # Laem Sok Pier, Trat
 AO_SALAD = (102.5711, 11.7051)   # Ao Salad, Ko Kut
-BANG_BAO = (102.5370, 11.6118)   # Hat Bang Bao — the resort's own beach
+RESORT   = (102.5344968, 11.6672478)  # the resort itself: OSM `hotel`, house
+                                     # number 121, matching the site's own
+                                     # JSON-LD address. Near Hin Dam Pier at
+                                     # Hat Taphao, roughly 47% down the island.
 
 tha_r  = ring('tha_nom.json')
 kood_r = ring('kood_nom.json')
@@ -144,15 +147,15 @@ print('# kood inset drawn size %.0f x %.0f' % KD.size)
 
 # markers, snapped to the coast where they are coastal places
 salad_ll = snap(*AO_SALAD, kood_r)
-bao_ll   = snap(*BANG_BAO, kood_r)
+res_ll   = snap(*RESORT, kood_r)
 print('# Ao Salad snapped %.4f,%.4f -> %.4f,%.4f' % (AO_SALAD[1], AO_SALAD[0], salad_ll[1], salad_ll[0]))
-print('# Bang Bao snapped %.4f,%.4f -> %.4f,%.4f' % (BANG_BAO[1], BANG_BAO[0], bao_ll[1], bao_ll[0]))
+print('# resort snapped %.4f,%.4f -> %.4f,%.4f' % (RESORT[1], RESORT[0], res_ll[1], res_ll[0]))
 
 bkk_t   = TH(*BANGKOK)
 sok_t   = TH(*LAEM_SOK)
 kood_t  = TH(*AO_SALAD)                    # island's place on the national map
 salad_i = KD(*salad_ll)
-bao_i   = KD(*bao_ll)
+res_i   = KD(*res_ll)
 
 out = {
   'THA':        d_path([TH(*p) for p in tha]),
@@ -160,10 +163,10 @@ out = {
   'KOOD_BIG':   d_path([KD(*p) for p in kood_big], prec=2),
   'LEG_BUS':    curve(bkk_t, sok_t, 0.13),
   'LEG_SEA':    curve(sok_t, salad_i, -0.14),
-  'LEG_ROAD':   smooth([KD(*ll) for ll in spine(salad_ll, bao_ll, kood_r)]),
+  'LEG_ROAD':   smooth([KD(*ll) for ll in spine(salad_ll, res_ll, kood_r)]),
   'PANEL':      'x="%d" y="%d" width="%d" height="%d"' % PANEL,
 }
-pts = {'bkk': bkk_t, 'sok': sok_t, 'koodT': kood_t, 'salad': salad_i, 'bao': bao_i}
+pts = {'bkk': bkk_t, 'sok': sok_t, 'koodT': kood_t, 'salad': salad_i, 'bao': res_i}
 for k, v in pts.items(): print(f'# {k}: {v[0]:.1f}, {v[1]:.1f}')
 json.dump({'paths': out, 'pts': {k: [round(v[0],1), round(v[1],1)] for k,v in pts.items()},
            'panel': PANEL}, open('route_geo.json','w'), indent=1)
@@ -237,9 +240,9 @@ svg = f'''      <svg class="route__map" viewBox="0 0 1000 640" fill="none" prese
           <text class="route__name" x="{LABEL_X+10}" y="{salad_i[1]+5:.1f}" text-anchor="start">Ao Salad</text>
         </g>
         <g class="route__stop" data-stop="3">
-          <path class="route__leader" d="M{f(bao_i)}H{LABEL_X}"/>
-          <circle class="route__dot route__dot--end" cx="{bao_i[0]:.1f}" cy="{bao_i[1]:.1f}" r="6.5"/>
-          <text class="route__name route__name--end" x="{LABEL_X+10}" y="{bao_i[1]:.1f}" text-anchor="start">Koh Kood<tspan x="{LABEL_X+10}" dy="17">Beach Resort</tspan></text>
+          <path class="route__leader" d="M{f(res_i)}H{LABEL_X}"/>
+          <circle class="route__dot route__dot--end" cx="{res_i[0]:.1f}" cy="{res_i[1]:.1f}" r="6.5"/>
+          <text class="route__name route__name--end" x="{LABEL_X+10}" y="{res_i[1]:.1f}" text-anchor="start">Koh Kood<tspan x="{LABEL_X+10}" dy="17">Beach Resort</tspan></text>
         </g>
 
         <!-- ⚠️ MOBILE LABELS. Below 820px the whole 1000-unit viewBox is drawn
@@ -252,8 +255,12 @@ svg = f'''      <svg class="route__map" viewBox="0 0 1000 640" fill="none" prese
         <g class="route__mlabels" aria-hidden="true">
           <path class="route__leader" d="M{salad_i[0]:.1f} {salad_i[1]:.1f}H800"/>
           <text class="route__name route__name--m" x="985" y="{salad_i[1]+9:.1f}" text-anchor="end">Ao Salad</text>
-          <path class="route__leader" d="M{bao_i[0]:.1f} {bao_i[1]:.1f}H720"/>
-          <text class="route__name route__name--m route__name--end" x="985" y="{bao_i[1]-2:.1f}" text-anchor="end">Koh Kood<tspan x="985" dy="34">Beach Resort</tspan></text>
+          <!-- Angled down, not straight across. Once the resort marker moved north
+               to its real position the two island stops sit ~50 units apart, and at
+               mobile's 30-unit type that put this label's leader through the middle
+               of the one above it. -->
+          <path class="route__leader" d="M{res_i[0]:.1f} {res_i[1]:.1f}L760 {res_i[1]+50:.1f}H800"/>
+          <text class="route__name route__name--m route__name--end" x="985" y="{res_i[1]+55:.1f}" text-anchor="end">Koh Kood<tspan x="985" dy="34">Beach Resort</tspan></text>
         </g>
 
         <g class="route__glyph" data-glyph="0">

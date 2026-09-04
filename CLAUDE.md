@@ -135,8 +135,11 @@ Rules that go with it:
   for this property — don't invent one.
 - **No fabricated cancellation/deposit policy.** There is no online payment; the
   FAQ says so plainly.
-- **Prices in THB** with one indicative EUR/DKK/SEK/GBP note per page rather than
-  ~30 conversions that would go stale.
+- **Prices in THB, and no currency conversion at all.** This used to read "one
+  indicative EUR/DKK/SEK/GBP note per page"; Frederik's instruction on 4 Sep 2026
+  was blunter — *no static currency conversions* anywhere. A hard-coded rate is
+  wrong the day after it is written, and one stale number sitting next to a real
+  price costs more trust than the convenience is worth. Don't reintroduce one.
 - **Boonsiri is the recommended route**, with real details (departure times,
   1,100 THB standard / +100 VIP, ~7–8 h total) taken from
   `boonsiriferry.com/en/news/koh-kood`.
@@ -275,10 +278,19 @@ where the warm-white sky began, putting a hard horizon a few pixels above the
 soft dune curve — two horizons competing. The last band on `index.html` (the
 TripAdvisor quote, was `band--ink`) and on `facilities.html` (was `band--sage`)
 are now plain warm-white bands, so the illustration emerges from the page with
-the dune as the only horizon. Ten of twelve pages now meet the illustration with
-warm-white; `accommodation.html` and `getting-here.html` still end on `band--sand`,
-which is 1.14:1 against the sky — no visible line. **Don't put a coloured band
-last on a page** without checking how it meets the dune.
+the dune as the only horizon.
+
+⚠️ **The last band on every page MUST be warm-white — a hard rule, not a
+judgement call.** This paragraph used to say `band--sand` was an acceptable
+closer because it measures 1.14:1 against the sky. **That was wrong**, and the
+error survived because contrast ratio is the wrong instrument for the question:
+1.14:1 says two tones are nearly equal in *luminance*, not that the boundary
+between them is invisible. Sand is warmer and pinker than the sky, and a flat
+full-width edge between two close tones is exactly what the eye is best at
+picking out. Frederik sent a screenshot of the seam on `getting-here.html` — a
+hard line straight across the page a few hundred pixels above the dune,
+competing with it as a second horizon. That page is now plain `.band`, and **all
+twelve pages end warm-white.** Don't measure this one; match the sky.
 
 **Masks are bled 1px** (`calc(100% + 2px)`). The traced contour stops ~0.2px short
 of the viewBox edge and that sliver let the sky through as a hairline exactly where
@@ -883,12 +895,30 @@ right for a country-sized illustration and two orders of magnitude simpler than
 pulling in a projection library on a site with no build step.
 
 **Every marked place is a real geocode**, not a guess: Bangkok, Laem Sok Pier
-(12.0404, 102.5861), Ao Salad (11.7051, 102.5711) and Hat Bang Bao (11.6118,
-102.5370). **Bang Bao is the resort's own beach** — that is the site's own claim,
-from `index.html`'s "Bang Bao Bay" caption over the private-beach photo, not
-something inferred here. The two island markers are **snapped to the nearest
-coastline vertex** (both moved under 70 m), which is what makes the resort dot sit
-*on* the beach rather than near it, as asked.
+(12.0404, 102.5861), Ao Salad (11.7051, 102.5711) and the resort itself
+(**11.6672, 102.5345**). Both island markers are **snapped to the nearest
+coastline vertex**, which is what puts the resort dot *on* the shore rather than
+near it; it moved 33 m, so the OSM node is already essentially on the coast.
+
+⚠️ **The resort marker was first placed at Hat Bang Bao (11.6118) and that was
+wrong — about 28% of the island's length too far south.** Frederik caught it
+against Google Maps. Worth recording how the mistake was reasoned into, because
+the reasoning looked sound: `index.html` captions its private-beach photo
+"Bang Bao Bay", so the site's own copy was taken as the authority for which beach
+the resort sits on, and Bang Bao was geocoded and used. **Site copy is not a
+geocode.** The resort is its own OSM `hotel` node at Hat Taphao near Hin Dam
+Pier, and it self-verifies: its house number is 121, matching the JSON-LD
+`"streetAddress": "121 Moo 1"` on every page. Search for the property, not for
+the place-name a caption mentions.
+
+**The "Bang Bao Bay" caption is gone from `index.html`.** Asked whether the beach
+really is called that, Frederik's answer was that he genuinely does not know — so
+the honest move was to stop asserting it rather than to pick whichever name looked
+most likely. The eyebrow over the private-beach photo now reads **"Koh Kood, west
+coast"**, which the geocoding work above actually establishes. **Don't restore a
+beach name here on the strength of a map label or a listing site** — only the
+resort can settle what its own bay is called, and until someone there does, the
+page says the part that is known.
 
 **Two scales, because one cannot work.** At national scale Koh Kood is about six
 pixels across — you can show where in Thailand it is, or you can show a coastline
@@ -923,6 +953,11 @@ opposite of the recognisable silhouette the country is there to provide.
    north-east coast, so from the mainland the boat goes *round* the north. The
    arc does that now.
 
+⚠️ **Mobile's resort leader is angled, not horizontal.** Once the marker moved
+north to its real position the two island stops sit ~50 units apart, and at
+mobile's 30-unit type a straight leader ran through the middle of the label above
+it. It drops 50 units before running out to the label column.
+
 ⚠️ **Mobile gets its own label set, and this is not cosmetic.** Below 820px the
 1000-unit viewBox is drawn into ~350 CSS px, so the desktop labels render at
 about **5px**. Simply enlarging them cannot work — they sit in two columns
@@ -932,3 +967,57 @@ mainland pair is spelled out in step 01 anyway) at 30 units — about 10.5px on 
 390px phone — right-aligned to the frame, and the desktop set plus its leaders
 are hidden. The positions have to live in markup: `x` on `<text>` is an SVG
 attribute, not a stylable CSS property, so a media query alone could not move them.
+
+### Getting Here rebuilt around the route map (4 Sep 2026)
+
+Frederik's second page-by-page pass. The route band built for the homepage is now
+this page's centrepiece, and the page reads: hero · the three steps · the map ·
+book-direct · transport options · ferry timetable.
+
+**The page hero was `img4p29.webp` — 900x600 — run full-bleed.** The same defect
+the rooms page had, and the same fix: a real photograph at a real size. It is now
+a still from the drone clip in `assets/hero-carousel/New/`, at **12.0s**, which
+frames more of the resort than 10–11s and puts darker foliage bottom-left where
+the headline sits. 3840x2160 native, saved at 1800x1012 / q74 / 386 KB as
+`assets/getting-here/hero.webp`.
+
+⚠️ **There is no ffmpeg on this machine, and `sips` cannot write WebP.** The frame
+came out through AVFoundation (`scratchpad/grab.swift` — `swift grab.swift <video>
+<outdir> <seconds…>`), which works on any Mac with the command line tools, and the
+WebP encode through Pillow, which the system Python has. The generator sets
+`AVAssetImageGenerator`'s tolerance to zero on both sides so it returns the exact
+frame asked for rather than drifting to the nearest keyframe. Reach for those two
+rather than assuming ffmpeg exists.
+
+**The photo band between the steps and the transport list is gone**, replaced by
+`.route--soft` — the homepage's map, with two differences:
+
+- **Its three steps carry no body copy.** The band directly above already spells
+  them out in full, and printing the same three sentences twice on one page is a
+  problem the homepage never had. The numerals are the point: they are the same
+  01/02/03 the reader has just read, lighting up in order as the legs draw. That
+  continuity *is* the "glidende overgang" that was asked for, more than any
+  visual effect could be.
+- **The band's leading edge fades out of the page's own warm-white.** It reads
+  two ways, both wanted: while the section scrolls in it is a soft horizon at the
+  boundary instead of a slab edge; once pinned it is the photo easing up into the
+  nav. The gradient sits above the photo and below the content — same z-index as
+  the content, earlier in the DOM, which is what puts it underneath.
+
+The headline is **"Roughly seven hours from Bangkok"**, kept from the band it
+replaced — the one line Frederik asked to preserve.
+
+⚠️ **The `<svg>` is duplicated in `index.html` and `getting-here.html`, byte for
+byte.** With no build step and no component system there is nowhere shared to put
+it; an external file would cost a second request and put the paths out of reach of
+`getTotalLength()`. It is ~20 KB raw, ~5 KB gzipped, twice. **If you regenerate it
+with `scratchpad/build_route.py`, splice the result into BOTH pages** — one page
+quietly keeping the old geometry is the failure mode here.
+
+**New "Book direct" band** between the map and the transport options, in sand so
+the page gets a quiet beat between the dark map and the warm-white list. Its claim
+— that the resort will book either the Boonsiri bus-and-ferry or a private minivan
+plus the ferry — is not new: both routes already appear further down the same page,
+as do the 30-day lead time and the pier pickup. The band gathers them into an offer
+instead of leaving them as reference material.
+
