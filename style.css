@@ -806,6 +806,9 @@ p { color: var(--ink-muted); }
 @media (hover: hover) and (pointer: fine) { .footer__cookie-link:hover { color: var(--gold); } }
 
 /* ---------- Floating WhatsApp ---------- */
+/* 4 Sep 2026: the markup was removed site-wide until the WhatsApp Business
+   account is set up properly. The rule stays so restoring it is one anchor
+   per page — see the enquiry-handling comment in script.js. */
 .wa {
   position: fixed;
   right: clamp(16px, 2vw, 28px);

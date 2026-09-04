@@ -314,11 +314,15 @@ function initLightbox() {
    visitor's mail client or does nothing at all, and the page has no way to
    tell which happened. So we never claim the message was sent — we say the
    draft is ready, show the full text so nothing is lost if the client never
-   opened, and offer WhatsApp as the path that always works.
+   opened, and give the phone number as the path that always works.
+   4 Sep 2026: WhatsApp was removed from the whole site until the business
+   account is set up properly — restoring it means putting the wa.me links
+   back here and in every page's menu, footer and floating button. The .wa
+   rule is still in style.css.
    ========================================================================== */
 
 const RESORT_EMAIL = 'reservation@kohkoodbeachresorts.com';
-const RESORT_WA = '66819088966';
+const RESORT_PHONE = '+66 (0) 8 1908 8966';
 
 /* Staging pixel for kohkoodbeach.com testing, kept separate from the pixel
    already live on kohkoodbeachresorts.com so clicks made while building this
@@ -389,8 +393,6 @@ function showEnquirySent(form, subject, body, kind, delivered) {
   panel.setAttribute('role', 'status');
   panel.setAttribute('tabindex', '-1');
 
-  const wa = `https://wa.me/${RESORT_WA}?text=${encodeURIComponent(body)}`;
-
   // Two different truths, and the panel must not confuse them. `delivered` is
   // true only when the form POSTed to the backend and the backend said yes —
   // then, and only then, may this say the enquiry has been sent. Without an
@@ -405,8 +407,8 @@ function showEnquirySent(form, subject, body, kind, delivered) {
     </p>
     <div class="sent__panel">
       <p class="sent__panel-title">Something to add?</p>
-      <p>Reply to the confirmation landing in your inbox, or reach the front desk directly on
-         <a class="link" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>.</p>
+      <p>Reply to the confirmation landing in your inbox, or call the front desk on
+         <a class="link" href="tel:+66819088966">${RESORT_PHONE}</a>.</p>
     </div>
     <p class="sent__foot"><a href="index.html" class="link">Back to the resort</a></p>
   ` : `
@@ -420,11 +422,10 @@ function showEnquirySent(form, subject, body, kind, delivered) {
     <div class="sent__panel">
       <p class="sent__panel-title">Nothing opened, or you use webmail?</p>
       <p>Copy the message below and send it to <a href="mailto:${RESORT_EMAIL}" class="link">${RESORT_EMAIL}</a>,
-         or send the same details on WhatsApp — that always works, on any phone.</p>
+         or call us on <a href="tel:+66819088966" class="link">${RESORT_PHONE}</a> — either always works.</p>
       <pre class="sent__copy" data-copy-body></pre>
       <div class="sent__actions">
         <button type="button" class="btn btn--ghost" data-copy>Copy the message</button>
-        <a class="btn" href="${wa}" target="_blank" rel="noopener" data-wa>Send on WhatsApp</a>
       </div>
     </div>
     <p class="sent__foot"><a href="index.html" class="link">Back to the resort</a></p>
@@ -445,9 +446,6 @@ function showEnquirySent(form, subject, body, kind, delivered) {
       setTimeout(() => { copyBtn.textContent = 'Copy the message'; }, 3000);
     });
   }
-
-  const waBtn = panel.querySelector('[data-wa]');
-  if (waBtn) waBtn.addEventListener('click', () => trackEnquiry(kind + '-whatsapp'));
 
   form.replaceWith(panel);
   /* focus() alone scrolls the panel to the very top of the viewport, which is
@@ -1075,8 +1073,10 @@ function initContactForm() {
   });
 }
 
-/* Cookie consent scaffold. No analytics is wired up yet — when a GA4 property
-   exists, uncomment the gtag consent call and load the tag after "accept". */
+/* Cookie consent. Two tools load on "accept" and nothing loads before it:
+   the Meta Pixel and GA4. ⚠️ Both are named individually in contact.html's
+   privacy section, which is a factual claim about what this site does — add
+   or remove a tool here and that section has to change in the same pass. */
 const CONSENT_KEY = 'kkbr_consent';
 const CONSENT_MAX_AGE_DAYS = 365;
 

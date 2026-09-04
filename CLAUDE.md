@@ -1698,3 +1698,62 @@ its own layout rather than relying on where it happens to land.
 Verified on both pages, both panel variants (backend-confirmed and the mailto
 fallback with its copy box and two buttons), at 1440 and 390.
 
+
+### Expired promotion deleted, WhatsApp withdrawn site-wide (4 Sep 2026)
+
+Two removals in one pass, both because the site was about to receive real
+traffic and both were promises the resort could not keep.
+
+**`promotion.html` is gone.** It advertised "Green Season Special — 15% off,
+stay between 1 July and 31 August" and was linked from the footer of every page
+under **Stay → Special Promotion**. The offer had expired a month earlier, so a
+visitor browsing the site would find a live-looking discount that no longer
+existed — worse than having no offer at all. The page file, the footer link on
+all 11 remaining pages, and its `<url>` entry in `sitemap.xml` were all removed
+together. The page count in `check_last_band.py`'s output is now **11, not 12** —
+that is expected, not a regression.
+
+⚠️ **When a new promotion is written, it needs an end date in the markup and a
+person who owns taking it down.** This one had neither, which is why it outlived
+its offer. A dated page with no owner becomes a false claim the moment it
+expires, and nothing in this build will catch that.
+
+**WhatsApp is removed from the whole site** until the Business account is set up
+properly — Frederik's call. It appeared in five places per page and once more in
+`script.js`:
+
+- the `.menu__contact` block in the slide-out menu (now phone + email)
+- the footer's **Find Us** column (all four columns now hold three items)
+- the floating green `.wa` button, bottom right
+- inline links in `contact.html` (its own `<dt>` row), `faq.html` (the closing
+  line) and `book.html` (the note under the send button)
+- both variants of `showEnquirySent()` in `script.js`, where WhatsApp had been
+  *the* fallback — "that always works, on any phone" — for a `mailto:` that may
+  never have opened
+
+⚠️ **That last one is the load-bearing removal.** The mailto fallback panel's
+whole design rests on giving the visitor a second route out, because the page
+cannot tell whether the mail client opened. The phone number now carries that
+job; the copy box is unchanged. Do not delete the phone number from that panel
+without putting something else in its place.
+
+`RESORT_WA` is gone; `RESORT_PHONE` replaces it. **The `.wa` rule stays in
+`style.css`** with a comment saying why, so restoring the button is one anchor
+per page rather than a rebuild.
+
+### The privacy note denied an analytics tool the site actually loads (4 Sep 2026)
+
+Found while checking whether the site was ready for traffic, not reported.
+`contact.html#privacy` ended with "We do not use any other tracking, analytics
+or advertising tool on this site" — written when the Meta Pixel was the only
+tool. GA4 (`G-EJN1DGKE8N`) was added afterwards and loads from the same
+`accept` branch as the pixel, so that sentence had been false ever since.
+
+The section now names Google Analytics alongside the Meta Pixel — the cookies
+it sets, what it is for, and that Google Ireland Limited processes it.
+
+⚠️ **That section is a factual claim about what the code does, and the code and
+the claim drift apart silently.** The consent comment in `script.js` now says so
+at the point where a tool would be added. Nothing enforces it: adding a third
+tool without editing `contact.html` produces a live privacy statement that is
+untrue, and no detector or guard will notice.
