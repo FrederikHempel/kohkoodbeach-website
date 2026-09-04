@@ -1776,3 +1776,117 @@ html { caret-color: var(--gold-dark); }
 .no-motion .route__art { height: auto; }
 .no-motion .route__map { height: auto; aspect-ratio: 1000 / 640; }
 .no-motion .route__stop, .no-motion .route__glyph, .no-motion [data-fade] { transition: none; }
+
+/* ==========================================================================
+   book.html — room chooser, guests, and the "more information" overlay
+   ==========================================================================
+   The old page opened on a bare <select> listing eight room-and-view strings.
+   It was the only place on the site where the rooms appeared as a dropdown
+   rather than as photographs, and it read as a database field on a page whose
+   whole job is to make someone want the room. This replaces it with the same
+   three houses the accommodation page shows, each with its views as priced
+   choices. ⚠️ The markup is GENERATED from accommodation.html by
+   scratchpad/build_book.py — edit the rooms there, not here. */
+
+.rc { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(20px, 2.6vw, 40px); }
+.rc__card { display: flex; flex-direction: column; }
+.rc__shot { overflow: hidden; margin-bottom: clamp(14px, 1.8vw, 22px); }
+/* ⚠️ `height: auto` is load-bearing, not tidiness. The global reset is
+   `img, svg, video { display:block; max-width:100% }` — it never sets a height,
+   so an <img> carrying width/height ATTRIBUTES (every image on this site does,
+   for layout stability) has a specified height, and `aspect-ratio` is ignored
+   whenever height is not auto. Without this line the 2000x1500 room photos
+   rendered 1500px tall inside a 407px card. Same family as the footer-logo
+   stretch already recorded above: set both axes on an <img>, or set the other
+   one to auto. */
+.rc__shot img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.rc__name { font-size: clamp(1.2rem, 1.8vw, 1.6rem); }
+.rc__hook { font-size: 0.94rem; margin-top: 8px; margin-bottom: clamp(14px, 1.8vw, 22px); }
+
+/* The views are the choice. A separate "choose this room" button on the card
+   would have to pick a view on the visitor's behalf, and the view is the whole
+   decision — it is what changes the price. So the chips ARE the button, and the
+   overlay repeats them as full-width rows. */
+.rc__views { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
+.rc__view {
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 12px;
+  align-items: baseline; text-align: left; width: 100%;
+  padding: 12px 14px; background: none; cursor: pointer;
+  border: 1px solid rgba(43, 41, 38, 0.18);
+  font-family: var(--font-body); color: var(--charcoal);
+  transition: border-color var(--t-control) var(--ease-quick),
+              background-color var(--t-control) var(--ease-quick);
+}
+.rc__view-name { font-weight: 500; font-size: 0.95rem; }
+.rc__view-where { grid-column: 1; font-size: 0.84rem; color: var(--warm-gray-strong); }
+.rc__view-price { grid-row: 1; grid-column: 2; font-family: var(--font-display); font-size: 1rem; white-space: nowrap; }
+.rc__unit { font-size: 0.72em; letter-spacing: 0.06em; }
+@media (hover: hover) and (pointer: fine) {
+  .rc__view:hover { border-color: var(--charcoal); }
+}
+.rc__view:active { transform: scale(0.99); }
+.rc__view.is-on { border-color: var(--charcoal); background: var(--charcoal); color: var(--warm-white); }
+.rc__view.is-on .rc__view-where { color: rgba(248, 246, 241, 0.72); }
+
+.rc__more {
+  margin-top: 14px; align-self: start; background: none; border: 0; cursor: pointer;
+  padding: 4px 0; font-family: var(--font-body); font-size: 0.86rem; letter-spacing: 0.04em;
+  color: var(--charcoal); text-decoration: underline;
+  text-decoration-color: rgba(43, 41, 38, 0.35); text-underline-offset: 4px;
+  transition: text-decoration-color var(--t-control) var(--ease-quick);
+}
+@media (hover: hover) and (pointer: fine) { .rc__more:hover { text-decoration-color: var(--charcoal); } }
+
+.rc__any { margin-top: clamp(22px, 3vw, 36px); }
+.rc__view--any { display: inline-block; width: auto; text-align: center; font-size: 0.9rem; }
+
+/* What the form is about to send, stated in words. The chooser sits in its own
+   band above, so without this the form gives no sign which room it carries. */
+.form__chosen {
+  display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline;
+  padding-bottom: clamp(16px, 2vw, 24px); border-bottom: var(--rule);
+  font-size: 0.95rem;
+}
+
+.guests { border: 0; padding: 0; margin: 0; }
+.guests__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(12px, 1.6vw, 22px); margin-top: 10px; }
+.guests__cap { display: block; font-size: 0.8rem; letter-spacing: 0.04em; color: var(--warm-gray-strong); margin-bottom: 6px; }
+
+/* Native <dialog>: Escape, the backdrop and the focus trap are the browser's
+   job, not ours. It keeps the visitor on the page, which was the point. */
+.rdlg {
+  width: min(1020px, calc(100vw - 2 * var(--gutter)));
+  max-height: min(88vh, 900px);
+  padding: 0; border: 0; background: var(--warm-white); color: var(--charcoal);
+  box-shadow: var(--shadow-soft);
+}
+.rdlg::backdrop { background: rgba(20, 18, 16, 0.62); }
+.rdlg__bar {
+  position: sticky; top: 0; z-index: 2; background: var(--warm-white);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: clamp(18px, 2.4vw, 26px) clamp(18px, 3vw, 38px);
+  border-bottom: var(--rule);
+}
+.rdlg__h { font-size: clamp(1.3rem, 2.2vw, 1.9rem); }
+.rdlg__close {
+  background: none; border: 0; cursor: pointer; font-size: 1.1rem; line-height: 1;
+  padding: 8px; color: var(--charcoal);
+  transition: opacity var(--t-control) var(--ease-quick);
+}
+.rdlg__close:active { transform: scale(0.94); }
+@media (hover: hover) and (pointer: fine) { .rdlg__close:hover { opacity: 0.6; } }
+.rdlg__body { padding: clamp(18px, 3vw, 38px); }
+/* The panel arrives from accommodation.html already laid out; it only needs its
+   page-level spacing removed. */
+.rdlg .panel { display: block; }
+.rdlg .pick__book { cursor: pointer; font-family: var(--font-body); }
+
+@media (max-width: 980px) {
+  .rc { grid-template-columns: 1fr; gap: clamp(28px, 5vw, 44px); }
+  .rc__shot img { aspect-ratio: 16 / 9; }
+  .guests__grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .guests__grid { grid-template-columns: 1fr 1fr; }
+  .rdlg { width: 100vw; max-width: 100vw; max-height: 100vh; height: 100vh; }
+}

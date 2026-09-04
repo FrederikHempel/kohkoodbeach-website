@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initRoomSlider2();
   initRoomDetail();
   initRoomGalleries();
+  initRoomChooser();
+  initRoomDialogs();
   initBookPage();
   initContactForm();
   initConsent();
@@ -339,6 +341,7 @@ function loadMetaPixel() {
   window.fbq('track', 'PageView');
 }
 
+
 /* Fires the conversion event once a pixel exists. No-op until then, wrapped
    so a tracking failure can never take the form down with it. */
 function trackEnquiry(kind) {
@@ -352,7 +355,7 @@ function trackEnquiry(kind) {
 
 /* Swaps the form for a confirmation panel. `subject`/`body` are the composed
    email so the visitor can copy it manually if their mail client never opened. */
-function showEnquirySent(form, subject, body, kind) {
+function showEnquirySent(form, subject, body, kind, delivered) {
   const panel = document.createElement('div');
   panel.className = 'sent';
   panel.setAttribute('role', 'status');
@@ -360,12 +363,31 @@ function showEnquirySent(form, subject, body, kind) {
 
   const wa = `https://wa.me/${RESORT_WA}?text=${encodeURIComponent(body)}`;
 
-  panel.innerHTML = `
+  // Two different truths, and the panel must not confuse them. `delivered` is
+  // true only when the form POSTed to the backend and the backend said yes —
+  // then, and only then, may this say the enquiry has been sent. Without an
+  // access key the page still falls back to opening the visitor's own mail
+  // client, where the message is a draft nobody has sent yet.
+  panel.innerHTML = delivered ? `
+    <span class="label">Enquiry sent</span>
+    <h2 class="sent__head">Thank you</h2>
+    <p class="sent__lead">
+      We look forward to welcoming you to Koh Kood and our resort. You will hear from us
+      as soon as possible, and no later than 24 hours (Thailand, GMT+7).
+    </p>
+    <div class="sent__panel">
+      <p class="sent__panel-title">Something to add?</p>
+      <p>Reply to the confirmation landing in your inbox, or reach the front desk directly on
+         <a class="link" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>.</p>
+    </div>
+    <p class="sent__foot"><a href="index.html" class="link">Back to the resort</a></p>
+  ` : `
     <span class="label">Almost there</span>
     <h2 class="sent__head">Your email is ready to send</h2>
     <p class="sent__lead">
       We have opened your email app with the enquiry filled in. <strong>Press send there</strong>
-      and it reaches us — we reply within 24 hours, usually the same day (Thailand, GMT+7).
+      and it reaches us — you will hear from us as soon as possible, and no later than 24 hours
+      (Thailand, GMT+7).
     </p>
     <div class="sent__panel">
       <p class="sent__panel-title">Nothing opened, or you use webmail?</p>
@@ -380,34 +402,126 @@ function showEnquirySent(form, subject, body, kind) {
     <p class="sent__foot"><a href="index.html" class="link">Back to the resort</a></p>
   `;
 
-  // textContent, not innerHTML — the body contains whatever the visitor typed.
-  panel.querySelector('[data-copy-body]').textContent = body;
+  const copyTarget = panel.querySelector('[data-copy-body]');
+  if (copyTarget) copyTarget.textContent = body;   // textContent — the body is whatever was typed
 
   const copyBtn = panel.querySelector('[data-copy]');
-  copyBtn.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(`${subject}\n\n${body}`);
-      copyBtn.textContent = 'Copied';
-    } catch (err) {
-      copyBtn.textContent = 'Select the text above to copy';
-    }
-    setTimeout(() => { copyBtn.textContent = 'Copy the message'; }, 3000);
-  });
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(`${subject}\n\n${body}`);
+        copyBtn.textContent = 'Copied';
+      } catch (err) {
+        copyBtn.textContent = 'Select the text above to copy';
+      }
+      setTimeout(() => { copyBtn.textContent = 'Copy the message'; }, 3000);
+    });
+  }
 
-  panel.querySelector('[data-wa]').addEventListener('click', () => trackEnquiry(kind + '-whatsapp'));
+  const waBtn = panel.querySelector('[data-wa]');
+  if (waBtn) waBtn.addEventListener('click', () => trackEnquiry(kind + '-whatsapp'));
 
   form.replaceWith(panel);
   panel.focus();
   trackEnquiry(kind);
 }
 
-/* book.html — prefill from query params, then build the mailto on submit. */
+/* book.html — the room chooser, the "more information" overlays, and the
+   enquiry itself.
+   ------------------------------------------------------------------------
+   ⚠️ HOW AN ENQUIRY ACTUALLY LEAVES THIS PAGE. There are two paths and the
+   difference matters, because only one of them sends anything:
+
+     access key present -> the form POSTs to Web3Forms, which sends the mail
+                           server-side. This genuinely sends, on any device,
+                           including the phones and webmail users where the
+                           other path silently does nothing.
+     access key blank   -> falls back to opening the visitor's own mail client
+                           with a pre-filled draft, which they must send
+                           themselves. This is what the page did for its whole
+                           life before this pass, and it is why the fallback
+                           panel says "ready to send" rather than "sent".
+
+   The key is deliberately empty in book.html until someone pastes a real one.
+   Do not invent one to make the page look finished — a fake key turns every
+   enquiry into a silent 4xx, which is strictly worse than the mailto. */
+function chosenRoom(form) {
+  return {
+    id: form.querySelector('[name="room"]')?.value || '',
+    label: form.querySelector('[name="room_label"]')?.value || 'Not sure yet',
+  };
+}
+
+function initRoomChooser() {
+  const form = document.querySelector('[data-book-form]');
+  const views = Array.from(document.querySelectorAll('.rc__view'));
+  if (!form || !views.length) return;
+
+  const roomField = form.querySelector('[name="room"]');
+  const labelField = form.querySelector('[name="room_label"]');
+  const chosenText = document.querySelector('[data-chosen-text]');
+
+  const select = (btn, focusForm) => {
+    views.forEach((v) => {
+      const on = v === btn;
+      v.classList.toggle('is-on', on);
+      v.setAttribute('aria-checked', String(on));
+    });
+    const id = btn.dataset.room || '';
+    const label = btn.dataset.label || 'Not sure yet';
+    if (roomField) roomField.value = id;
+    if (labelField) labelField.value = label;
+    if (chosenText) chosenText.innerHTML = id ? label : 'Not sure yet &mdash; we will recommend a room';
+    if (focusForm) {
+      const target = document.getElementById('enquiry');
+      if (target) target.scrollIntoView({ behavior: document.documentElement.classList.contains('no-motion') ? 'auto' : 'smooth', block: 'start' });
+    }
+  };
+
+  views.forEach((btn) => btn.addEventListener('click', () => select(btn, Boolean(btn.dataset.room))));
+
+  // A "Choose this room" inside an overlay picks the matching chip, so the two
+  // surfaces can never disagree about what is selected.
+  document.querySelectorAll('[data-choose]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const match = views.find((v) => v.dataset.room === btn.dataset.choose);
+      if (!match) return;
+      btn.closest('dialog')?.close();
+      select(match, true);
+    });
+  });
+
+  // accommodation.html links here as book.html?room=<id>; honour it.
+  const wanted = new URLSearchParams(window.location.search).get('room');
+  if (wanted) {
+    const match = views.find((v) => v.dataset.room === wanted);
+    if (match) select(match, false);
+  }
+}
+
+/* Native <dialog>: Escape and the backdrop come free, and focus is trapped for
+   us. No library, consistent with the rest of this file. */
+function initRoomDialogs() {
+  document.querySelectorAll('[data-dlg-open]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const dlg = document.getElementById(btn.dataset.dlgOpen);
+      if (dlg && typeof dlg.showModal === 'function') dlg.showModal();
+    });
+  });
+  document.querySelectorAll('dialog.rdlg').forEach((dlg) => {
+    dlg.querySelectorAll('[data-dlg-close]').forEach((b) => b.addEventListener('click', () => dlg.close()));
+    // Clicking the backdrop closes it. The check is on the dialog itself being
+    // the click target, which only happens outside the inner panel.
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  });
+}
+
 function initBookPage() {
   const form = document.querySelector('[data-book-form]');
   if (!form) return;
 
   const params = new URLSearchParams(window.location.search);
-  ['room', 'checkin', 'checkout', 'adults', 'extrabed', 'nationality'].forEach((key) => {
+  ['checkin', 'checkout', 'adults', 'children', 'infants', 'extrabed', 'nationality'].forEach((key) => {
     const field = form.querySelector(`[name="${key}"]`);
     if (field && params.get(key)) field.value = params.get(key);
   });
@@ -431,22 +545,24 @@ function initBookPage() {
   }
   if (checkout) checkout.min = checkin?.value || today;
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
+  const compose = () => {
     const get = (n) => form.querySelector(`[name="${n}"]`)?.value.trim() || '';
     const or = (v, fallback) => (v === '' ? fallback : v);
-    const roomSelect = form.querySelector('[name="room"]');
-    const roomLabel = roomSelect?.selectedOptions[0]?.text || 'Not specified yet';
     const natSelect = form.querySelector('[name="nationality"]');
     const nationality = natSelect?.selectedOptions[0]?.text || '';
     const flexible = form.querySelector('input[name="dates"]:checked')?.value === 'flexible';
+    const guests = [
+      `${or(get('adults'), '0')} adult(s)`,
+      Number(get('children')) ? `${get('children')} child(ren) 2–12` : null,
+      Number(get('infants')) ? `${get('infants')} infant(s) under 2` : null,
+    ].filter(Boolean).join(', ');
 
     const body = [
-      `Room: ${roomLabel}`,
+      `Room: ${chosenRoom(form).label}`,
       `Arrival: ${or(get('checkin'), 'not given')}`,
       `Departure: ${or(get('checkout'), 'not given')}`,
       flexible ? 'Flexible: yes, by 2–3 days either way' : null,
-      `Adults: ${or(get('adults'), 'not given')}`,
+      `Guests: ${guests}`,
       `Extra bed: ${or(get('extrabed'), 'no')}`,
       '',
       `Name: ${or(get('name'), 'not given')}`,
@@ -456,12 +572,41 @@ function initBookPage() {
       get('message') ? `\n${get('message')}` : null,
     ].filter((l) => l !== null).join('\n');
 
-    const subject = `Booking enquiry — ${roomLabel}`;
+    return { body, subject: `Booking enquiry — ${chosenRoom(form).label}` };
+  };
+
+  const fallbackToMail = ({ subject, body }) => {
     window.location.href = `mailto:${RESORT_EMAIL}`
       + `?subject=${encodeURIComponent(subject)}`
       + `&body=${encodeURIComponent(body)}`;
+    showEnquirySent(form, subject, body, 'booking-enquiry', false);
+  };
 
-    showEnquirySent(form, subject, body, 'booking-enquiry');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const { subject, body } = compose();
+    const key = form.querySelector('[name="access_key"]')?.value.trim();
+
+    if (!key) { fallbackToMail({ subject, body }); return; }
+
+    const btn = form.querySelector('button[type="submit"]');
+    const restore = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+    try {
+      const data = new FormData(form);
+      data.set('subject', subject);
+      data.set('message', body);          // one readable block, not 14 loose fields
+      const res = await fetch(form.action, { method: 'POST', body: data });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.success === false) throw new Error(json.message || 'send failed');
+      showEnquirySent(form, subject, body, 'booking-enquiry', true);
+    } catch (err) {
+      // The backend is the better path, not the only one. If it is down or the
+      // key is wrong, the visitor still gets their enquiry out.
+      if (btn) { btn.disabled = false; btn.innerHTML = restore; }
+      fallbackToMail({ subject, body });
+    }
   });
 }
 
