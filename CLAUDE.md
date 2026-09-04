@@ -1032,3 +1032,23 @@ plus the ferry — is not new: both routes already appear further down the same 
 as do the 30-day lead time and the pier pickup. The band gathers them into an offer
 instead of leaving them as reference material.
 
+
+### Google Analytics, consent-gated (4 Sep 2026)
+
+Frederik supplied the standard gtag.js snippet (`G-EJN1DGKE8N`) meant for
+`<head>`. Wired it in via `loadGoogleAnalytics()` instead, called from the
+same two places as `loadMetaPixel()` — a stored "accept" at page load, and a
+fresh Accept click — for the identical reason: pasting it into every
+`<head>` would fire before consent and contradict the banner's own
+"Marketing cookies stay off until you agree." `trackEnquiry()` already
+guarded its `gtag()` call behind `if (window.gtag)`, so GA4's `generate_lead`
+event started working the moment this landed — no other change needed.
+
+The commented-out `gtag('consent','update', ...)` block in `showConsentBar()`
+is Google's Consent Mode v2 shape (`analytics_storage`, `ad_storage`, etc.) —
+left commented deliberately. That pattern is for sites that want *modeled*
+conversions while consent is denied (load gtag eagerly with default-denied,
+then grant later); this site doesn't need that, and loading nothing at all
+until Accept is simpler and matches the Meta Pixel's approach exactly. Don't
+uncomment it without also switching to the default-denied loading pattern —
+half of that snippet with the eager load skipped does nothing.

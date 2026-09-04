@@ -341,6 +341,23 @@ function loadMetaPixel() {
   window.fbq('track', 'PageView');
 }
 
+const GA_MEASUREMENT_ID = 'G-EJN1DGKE8N';
+
+/* Same rule as loadMetaPixel(): only called post-consent, never eagerly in
+   <head>. trackEnquiry() already guards its gtag() call behind
+   `if (window.gtag)`, so it starts working the moment this runs — no
+   changes needed there. */
+function loadGoogleAnalytics() {
+  if (window.gtag) return;
+  const s = document.createElement('script');
+  s.async = true;
+  s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { window.dataLayer.push(arguments); };
+  window.gtag('js', new Date());
+  window.gtag('config', GA_MEASUREMENT_ID);
+}
 
 /* Fires the conversion event once a pixel exists. No-op until then, wrapped
    so a tracking failure can never take the form down with it. */
@@ -677,7 +694,7 @@ function showConsentBar() {
   bar.querySelectorAll('[data-consent]').forEach((btn) => {
     btn.addEventListener('click', () => {
       writeConsent(btn.dataset.consent);
-      if (btn.dataset.consent === 'accept') loadMetaPixel();
+      if (btn.dataset.consent === 'accept') { loadMetaPixel(); loadGoogleAnalytics(); }
       // window.gtag?.('consent', 'update', {
       //   analytics_storage:   btn.dataset.consent === 'accept' ? 'granted' : 'denied',
       //   ad_storage:          btn.dataset.consent === 'accept' ? 'granted' : 'denied',
@@ -691,7 +708,7 @@ function showConsentBar() {
 
 function initConsent() {
   const stored = readConsent();
-  if (stored === 'accept') loadMetaPixel();
+  if (stored === 'accept') { loadMetaPixel(); loadGoogleAnalytics(); }
   if (!stored) showConsentBar();
 
   /* The footer's "Cookie settings" link exists on all 12 pages, so this is
