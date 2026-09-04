@@ -73,6 +73,11 @@
   --t-press: 130ms;   /* press feedback */
   --t-control: 200ms; /* hover/active on controls */
   --t-panel: 260ms;   /* accordions, small panels */
+  /* A whole page section folding is not a control being operated, and 260ms on
+     a 1000px collapse reads as a snap. This is the one duration that belongs
+     with --ease rather than --ease-quick: it is the page rearranging itself,
+     which is the editorial speed's job. */
+  --t-section: 520ms;
 }
 
 /* ---------- Reset ---------- */
@@ -1905,7 +1910,7 @@ html { caret-color: var(--gold-dark); }
 @media (hover: hover) and (pointer: fine) { .step__toggle:hover .step__chev { border-color: var(--gold-dark); } }
 
 /* Measured-height unfold, the technique from initRoomDetail(). */
-.step__body { overflow: hidden; height: 0; transition: height var(--t-panel) var(--ease-quick); }
+.step__body { overflow: hidden; height: 0; transition: height var(--t-section) var(--ease); }
 .step__body[hidden] { display: block; }
 .no-motion .step__body { transition: none; }
 /* ⚠️ One inner wrapper per step body, and unfold() measures it. The region's

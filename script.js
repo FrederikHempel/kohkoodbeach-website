@@ -498,6 +498,60 @@ function initBookHero() {
   video.play().catch(() => {});   // autoplay can be refused; the poster stays
 }
 
+/* The page's own scroll, because the browser's `behavior: 'smooth'` gives no
+   say over duration or easing — on a long jump it reads as a lurch, which is
+   exactly what a booking flow must not do at the moment someone commits. This
+   eases in and out over a distance-aware duration and yields the moment the
+   visitor touches the page themselves. */
+function glideTo(y, still) {
+  if (still) { window.scrollTo({ top: y, behavior: 'instant' }); return; }
+  const start = window.scrollY;
+  const dist = y - start;
+  if (Math.abs(dist) < 2) return;
+
+  // ⚠️ The glide must outlast the fold that makes room for it. The target sits
+  // below the page's current bottom until the opening step has grown into it,
+  // so scrollTo is clamped and NOTHING moves — then the ceiling lifts and the
+  // remaining distance is covered at once. That stall-then-rush is what read as
+  // a lurch. Running longer than --t-section means the height is already there
+  // for most of the travel, and each frame re-clamps against the live ceiling
+  // instead of assuming it.
+  const sect = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--t-section')) || 520;
+  const ms = Math.min(1200, Math.max(sect + 220, Math.abs(dist) * 0.85));
+
+  let t0 = null, cancelled = false;
+  const clean = () => {
+    window.removeEventListener('wheel', stop);
+    window.removeEventListener('touchstart', stop);
+    window.removeEventListener('keydown', stop);
+  };
+  const stop = () => { cancelled = true; clean(); };
+  window.addEventListener('wheel', stop, { passive: true });
+  window.addEventListener('touchstart', stop, { passive: true });
+  window.addEventListener('keydown', stop);
+
+  const step = (now) => {
+    if (cancelled) return;
+    if (t0 === null) t0 = now;          // start the clock on the first frame, not before it
+    const p = Math.min(1, (now - t0) / ms);
+    // Cosine ease: peaks at 1.57x the average speed. Cubic ease-in-out peaks at
+    // 2x, and on a 600px move that middle is exactly the part that startles.
+    const e = 0.5 - Math.cos(Math.PI * p) / 2;
+    const ceiling = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    // ⚠️ `behavior: 'instant'`, and it is not optional. The stylesheet sets
+    // `html { scroll-behavior: smooth }`, so a bare scrollTo is ANIMATED by the
+    // browser — this loop would hand it a fresh target every frame, it would
+    // chase each one and fall behind, then converge on the last in one jump
+    // once the loop stopped. Measured: a 126px crawl over 730ms followed by
+    // 283px in a single frame. Two easing curves fighting is not an easing bug,
+    // it is two animations.
+    window.scrollTo({ top: Math.min(start + dist * e, ceiling), behavior: 'instant' });
+    if (p < 1) requestAnimationFrame(step); else clean();
+  };
+  requestAnimationFrame(step);
+}
+
 /* Measured-height unfold. Shared by the steps and by each house's views:
    fr units do not interpolate in this engine, so a pixel height is what
    animates. The flush is a synchronous offsetHeight read — a rAF never runs in
@@ -602,11 +656,27 @@ function initFlow() {
     });
   };
 
-  const scrollToStep = (name) => {
-    const s = byName(name); if (!s) return;
+  /* ⚠️ The destination is computed BEFORE the folds run, not read after them.
+     Waiting for the heights to settle and only then scrolling is correct but
+     reads as a pause followed by a lurch. Every region that is about to change
+     height and sits above the target shifts it by exactly (final - current), so
+     the arrival point is knowable up front — and the glide can run alongside
+     the fold as one movement instead of after it. */
+  const targetFor = (name) => {
+    const s = byName(name);
+    if (!s) return null;
     const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
-    window.scrollTo({ top: Math.max(0, s.getBoundingClientRect().top + window.scrollY - navH - 18),
-                      behavior: still ? 'auto' : 'smooth' });
+    const top = s.getBoundingClientRect().top + window.scrollY;
+    let shift = 0;
+    steps.forEach((o) => {
+      const body = o.querySelector('[data-step-body]');
+      if (body.getBoundingClientRect().top + window.scrollY >= top) return;   // below the target: no effect
+      const willOpen = o.dataset.step === name;
+      const current = body.hidden ? 0 : body.offsetHeight;
+      const final = willOpen ? body.firstElementChild.offsetHeight : 0;
+      shift += final - current;
+    });
+    return Math.max(0, top + shift - navH - 18);
   };
   const markDone = (name, text) => {
     const s = byName(name); if (!s) return;
@@ -614,7 +684,11 @@ function initFlow() {
     s.classList.add('is-done');
     if (sum) { sum.textContent = text; sum.hidden = false; }
   };
-  const goto = (name) => open(name, () => scrollToStep(name));
+  const goto = (name) => {
+    const y = targetFor(name);
+    open(name);
+    if (y !== null) glideTo(y, still);
+  };
 
   steps.forEach((s) => {
     const body = s.querySelector('[data-step-body]');

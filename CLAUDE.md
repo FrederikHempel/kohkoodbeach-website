@@ -1453,3 +1453,46 @@ them; the stylesheet parsed as one unterminated rule. Caught by counting braces
 after every CSS edit, which is worth keeping in the loop — the brace count is
 cheap and the failure is silent.
 
+### Book Now, seventh pass — the glide, and two animations fighting (4 Sep 2026)
+
+Frederik: the move to the next step "flyver" — it startles. Profiled with a rAF
+sampler inside the page rather than guessed at, and the cause was not easing.
+
+⚠️ **`window.scrollTo(x, y)` is ANIMATED here, because `html` carries
+`scroll-behavior: smooth`.** A hand-written scroll loop hands the browser a new
+target every frame; the browser then eases toward each one, falls behind, and
+converges on the last in a single jump when the loop stops. Measured: a 126px
+crawl over 730ms followed by **283px in one frame**. Two easing curves fighting
+is not an easing problem, it is two animations. Every frame of `glideTo()` now
+passes `behavior: 'instant'`, which overrides the CSS. **Any future scripted
+scroll on this site has to do the same.**
+
+⚠️ **A scroll target below the current page bottom does not exist yet.** Opening
+a step grows the document, so the destination is unreachable while the fold
+runs — `scrollTo` clamps, nothing moves, then the ceiling lifts and the rest is
+covered at once. `glideTo()` re-clamps against the live ceiling every frame and
+runs for `--t-section + 220ms`, so the height is already there for most of the
+travel.
+
+**The motion, as it now measures** (rAF samples, ~67ms apart, at 1440×900):
+
+| | 0 → rooms | rooms → details |
+|---|---|---|
+| distance | 636px | 104px |
+| peak step | 89px | 15px |
+| shape | 7·31·54·71·84·**89**·88·79·65·45·21·2 | 1·5·9·12·13·**15**·14·13·11·7·3·1 |
+
+Both are bell curves that leave and arrive at rest. The ease is a **cosine**
+(`0.5 - cos(πp)/2`), whose peak is 1.57× the average speed; the cubic ease-in-out
+it replaced peaks at 2×, and on a 600px move that middle is exactly the part
+that startles.
+
+**`--t-section: 520ms` is new, and it is the one duration that belongs with
+`--ease` rather than `--ease-quick`.** A whole page section folding is not a
+control being operated — it is the page rearranging itself, which is the
+editorial speed's job. The house views inside a card keep `--t-panel`.
+
+`glideTo()` yields the moment the visitor touches the page: wheel, touch or key
+cancels it. Verified — interrupted at 225px, still at 225px 700ms later. Under
+`prefers-reduced-motion` it jumps outright (measured in place at 50ms).
+
