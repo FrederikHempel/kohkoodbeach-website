@@ -1306,3 +1306,74 @@ carries room, dates, the flexible flag and the guest breakdown; no horizontal
 overflow at 390; no console errors; Impeccable detector 0 findings; guard green
 on all 12 pages.
 
+### Book Now, fourth pass — three steps, and four real bugs (4 Sep 2026)
+
+Frederik: *"Det skal være et flow — først vælger du datoer → choose your room →
+Tell us about you."* Plus four defects, three of them mine.
+
+**The page is now one `<form>` and three steps.** A finished step collapses to a
+gold line saying what it holds, with *Change* to reopen; the next opens in its
+place. Choosing a room folds the rooms away and puts "Tell us about you" in
+their place — the fold-away that was asked for. **This is why there is no sticky
+summary rail any more:** a floating bar under a 114px fixed nav stacked two
+horizontal bands over the page, and when the nav was transparent the content
+slid visibly under it. The steps say what they carry, where they are.
+
+⚠️ **Four bugs, worth keeping so they are not rebuilt:**
+
+1. **The hero video shipped the wrong nine seconds.** The clip pulls back: the
+   pool fills the frame from 0–5s and is a small shape behind palms by 8s. The
+   first cut took **5–14s** — the wrong half — so the hero was nothing but
+   palms. It is 0–5.2s now. *Always contact-sheet a clip before choosing a
+   segment; the filename said "pool" and it was true of only the first third.*
+2. **The transcode silently produced the wrong material.**
+   `AVAssetReaderVideoCompositionOutput` with a composition built from
+   `propertiesOf: asset` remapped time — asking for 5–14s yielded a 4.01s file
+   whose content was not that range. `scratchpad/enc.swift` uses a plain
+   `AVAssetReaderTrackOutput` now, which keeps asset timestamps. 992 KB,
+   5.21s, 156 frames at 29.97fps, `moov` at byte 32.
+3. **`initBookHero()` matched nothing.** It queried
+   `[data-bhero] video[data-src]`; the rebuilt hero has no `data-bhero`
+   attribute, so it returned early and *every guard still reported healthy* —
+   wide screen, motion allowed, `canPlayType` "maybe" — while the poster simply
+   stayed. It queries `.bhero video[data-src]` now. **Don't couple a query to a
+   wrapper attribute the markup does not have to keep.**
+4. ⚠️ **A stale unfold timeout undid the next one.** `unfold()`'s 700ms
+   `transitionend` fallback fired after a *later* call had already collapsed the
+   same region, setting `height: auto` again — so opening step 2 and choosing a
+   room within 700ms left the rooms expanded. `unfold()` now stamps a
+   generation token on the element and the settle only acts if it is still the
+   newest, and `transitionend` is filtered on `e.target === region` and
+   `propertyName === 'height'` so a nested region's transition cannot settle its
+   parent. The step bodies and the house views share this function.
+
+⚠️ **Every `.step__body` has exactly one `.step__inner` child, and that is
+structural.** `unfold()` measures `region.firstElementChild`, so a body with
+several children animates to the height of the first one only — step 1 would
+have opened to the height of its radio row. If you add content to a step, put it
+inside the inner.
+
+⚠️ **`initNav()`'s sentinel is `min(70vh, 70%)`, not a flat 70vh.** It marks
+where the nav stops being transparent, so it must never be taller than the hero
+that contains it. This hero is 52vh; a 70vh sentinel reached past its bottom and
+left the nav transparent over the light page, washing out the mid-tone logo.
+Verified solid at 700px on book, index, accommodation and getting-here.
+
+⚠️ **`.rev--light` has now been deleted twice**, both times by a wholesale
+rewrite of the book.html CSS block it was filed under. It lives **beside `.rev`
+itself** now. `check_last_band.py` asserts the rule exists as well as the class.
+
+**Other numbers:** the hero is `clamp(360px, 52vh, 560px)` — 82vh put step 1 a
+full screen down; `object-position: 50% 42%` keeps the water in a band wider
+than the clip's 16:9. House photos are **150px** (104px on a phone), down from
+722px — the row is 203px tall against 539px. Step 1 (dates, guests, flexible),
+step 2 (three houses + "not sure yet"), step 3 (name, country, email, phone,
+message, send).
+
+Verified in one batched round, one fix batch, one confirmation: video attaches
+and plays at 1440 and is not fetched at 390; dates → room → you advances and
+each Change reopens correctly; `?room=` still marks its house; the mailto body
+carries room, dates, flexible flag and guest breakdown; no horizontal overflow
+at 390; no console errors; Impeccable detector 0 findings; guard green on 12
+pages.
+

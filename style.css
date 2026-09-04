@@ -1308,6 +1308,16 @@ html { caret-color: var(--gold-dark); }
 }
 .rev__by span { opacity: 0.5; margin-inline: 4px; }
 .rev__by a { color: var(--warm-white); border-bottom: 1px solid rgba(248,246,241,0.4); }
+
+/* ⚠️ The light closer lives HERE, beside .rev itself — not in the book.html
+   block. It has now been deleted twice by rewrites of that block, because a
+   variant filed under the page that uses it disappears with the page's CSS.
+   check_last_band.py asserts this rule exists; keep them together. */
+.rev--light { background: var(--warm-white); color: var(--charcoal); }
+.rev--light .rev__text { color: var(--charcoal); }
+.rev--light .rev__by { color: var(--warm-gray-strong); }
+.rev--light .rev__by a { color: var(--charcoal); border-bottom-color: rgba(43, 41, 38, 0.35); }
+.rev--light a:focus-visible { outline-color: var(--gold-dark); }
 .rev a:focus-visible { outline-color: var(--warm-white); }
 
 /* ---------- three cards ---------- */
@@ -1826,144 +1836,129 @@ html { caret-color: var(--gold-dark); }
 }
 
 /* ==========================================================================
-   book.html — the enquiry as the first day of the stay
+   book.html — one enquiry, three steps
    --------------------------------------------------------------------------
-   The whole page is one <form>. The hero carries the four fields that start
-   it, a sticky rail reads the enquiry back as it fills in, the houses are
-   photograph-led rows whose views fold out in place, and the details come
-   last and short. One authored motion — the fold and the rail — and nothing
-   else moves. ⚠️ The houses and overlays are GENERATED from accommodation.html
-   by scratchpad/build_book.py. Edit the rooms there.
+   when → which room → who you are. Each finished step collapses to a line
+   stating what it holds, with Change to reopen, and the next opens in its
+   place. That is why there is no sticky summary bar: a floating rail under a
+   114px fixed nav stacked two horizontal bands on top of the page and showed
+   the content sliding under a transparent nav. The steps say what they carry,
+   where they are. ⚠️ Houses and overlays are GENERATED from accommodation.html
+   by scratchpad/build_book.py.
    ========================================================================== */
 .enq { display: block; }
 
-/* ---- hero ---- */
+/* ---- hero ----
+   Short: the video sets the scene, step 1 has to be findable without hunting.
+   82vh put the first field a full screen down. */
 .bhero {
-  position: relative; min-height: clamp(560px, 82vh, 860px);
-  display: grid; grid-template-rows: 1fr auto; align-items: end;
-  color: var(--warm-white); overflow: hidden; background: var(--charcoal);
+  position: relative; min-height: clamp(360px, 52vh, 560px);
+  display: grid; align-items: end; color: var(--warm-white);
+  overflow: hidden; background: var(--charcoal);
 }
-.bhero__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* object-position keeps the pool: the clip is 16:9, the band is wider, so cover
+   trims top and bottom and the water sits just above centre. */
+.bhero__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
 .bhero::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
-  background: linear-gradient(180deg, rgba(28,26,24,0.48), rgba(28,26,24,0.22) 42%, rgba(28,26,24,0.58) 100%);
+  background: linear-gradient(180deg, rgba(28,26,24,0.46), rgba(28,26,24,0.20) 40%, rgba(28,26,24,0.62) 100%);
 }
-.bhero__copy { position: relative; z-index: 1; padding: calc(var(--nav-h, 70px) + clamp(40px, 8vh, 96px)) var(--gutter) clamp(28px, 4vh, 48px); max-width: 1560px; width: 100%; margin-inline: auto; }
-.bhero h1 { color: var(--warm-white); font-size: clamp(2.6rem, 7vw, 6.2rem); }
-.bhero__sub { margin-top: clamp(14px, 1.8vw, 22px); max-width: 44ch; color: rgba(248,246,241,0.88); font-size: clamp(1rem, 1.25vw, 1.15rem); }
-/* The site's own booking strip from the homepage, laid over the bottom of the
-   photograph: sand ground, dotted underlines. Four fields and one button. */
-.bhero__strip {
-  position: relative; z-index: 1; background: var(--sand); color: var(--charcoal);
-  padding: clamp(22px, 3vw, 36px) var(--gutter);
-  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
-  gap: clamp(18px, 3vw, 48px); align-items: end;
-}
-.bhero__strip > * { max-width: 1560px; }
-.bhero__strip .field input[type="number"] { width: 100%; }
+.bhero__copy { position: relative; z-index: 1; width: 100%; max-width: 1560px; margin-inline: auto;
+  padding: calc(var(--nav-h, 70px) + clamp(30px, 6vh, 70px)) var(--gutter) clamp(26px, 4vh, 46px); }
+.bhero h1 { color: var(--warm-white); font-size: clamp(2.4rem, 6vw, 5rem); }
+.bhero__sub { margin-top: clamp(12px, 1.6vw, 18px); max-width: 46ch; color: rgba(248,246,241,0.9); font-size: clamp(0.98rem, 1.2vw, 1.1rem); }
 
-/* ---- rail ---- */
-.rail {
-  position: sticky; top: var(--nav-h, 70px); z-index: 20;
-  background: var(--warm-white); border-bottom: var(--rule);
-  font-size: 0.86rem; letter-spacing: 0.02em;
+/* ---- the flow ---- */
+.flow { list-style: none; margin: 0; padding-block: clamp(40px, 6vw, 84px); display: grid; }
+.step { border-top: var(--rule); }
+.step:first-child { border-top: 0; }
+.step:last-child { border-bottom: var(--rule); }
+.step__head {
+  display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 20px;
+  padding-block: clamp(22px, 2.8vw, 34px);
 }
-.rail__inner { display: flex; align-items: center; gap: 12px; min-height: 46px; }
-.rail__item { color: var(--charcoal); transition: opacity var(--t-control) var(--ease-quick); }
-.rail__item.is-empty { color: var(--warm-gray-strong); }
-.rail__sep { color: var(--warm-gray); }
-.rail__send {
-  margin-left: auto; font-size: 0.66rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
-  border-bottom: 1px solid rgba(43,41,38,0.35); padding-bottom: 2px;
+.step__h { display: flex; align-items: baseline; gap: 16px; font-size: clamp(1.4rem, 2.4vw, 2rem); }
+/* The number earns its place here: the sequence is the information. */
+.step__n {
+  font-family: var(--font-body); font-size: 0.72rem; font-weight: 500; letter-spacing: 0.14em;
+  color: var(--warm-gray-strong); border: 1px solid rgba(43,41,38,0.25);
+  width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; flex: none; transform: translateY(-2px);
+  transition: background var(--t-control) var(--ease-quick), color var(--t-control) var(--ease-quick),
+              border-color var(--t-control) var(--ease-quick);
 }
-
-/* ---- houses ---- */
-.houses { padding-block: clamp(56px, 8vw, 120px); display: grid; gap: clamp(28px, 4vw, 56px); }
-.house {
-  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(22px, 4vw, 64px);
-  align-items: center; padding-top: clamp(28px, 4vw, 56px); border-top: var(--rule);
-}
-.house:first-of-type { border-top: 0; padding-top: 0; }
-/* height:auto is load-bearing — every <img> here carries width/height
-   attributes, and without it the attribute height wins and aspect-ratio is
-   ignored (see the footer-logo note). */
-.house__shot { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; display: block; }
-.house__name { font-size: clamp(1.7rem, 3vw, 2.6rem); }
-.house__hook { margin-top: 10px; max-width: 40ch; }
-.house__from { margin-top: clamp(14px, 1.6vw, 22px); font-family: var(--font-display); font-size: clamp(1.15rem, 1.6vw, 1.4rem); font-variant-numeric: tabular-nums; }
-.house__unit { font-family: var(--font-body); font-size: 0.62em; letter-spacing: 0.12em; }
-.house__night { font-family: var(--font-body); font-size: 0.7em; color: var(--ink-muted); margin-left: 6px; }
-.house__actions { margin-top: clamp(18px, 2.2vw, 28px); display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
-.house__more, .house__change {
-  font-size: 0.86rem; letter-spacing: 0.02em; color: var(--charcoal);
+.step.is-open .step__n { background: var(--charcoal); color: var(--warm-white); border-color: var(--charcoal); }
+.step.is-done .step__n { background: var(--gold); color: var(--charcoal); border-color: var(--gold); }
+.step__sum { color: var(--gold-text); font-family: var(--font-display); font-size: 1.05rem; }
+.step__change {
+  margin-left: auto; font-size: 0.8rem; letter-spacing: 0.02em; color: var(--charcoal);
   text-decoration: underline; text-decoration-color: rgba(43,41,38,0.35); text-underline-offset: 4px;
   transition: text-decoration-color var(--t-control) var(--ease-quick);
 }
-@media (hover: hover) and (pointer: fine) { .house__more:hover, .house__change:hover { text-decoration-color: var(--charcoal); } }
-/* Chosen: the header says which view, in gold, and the button steps back. */
-.house__chosen { display: none; margin-top: clamp(12px, 1.4vw, 18px); font-family: var(--font-display); font-size: 1.05rem; color: var(--gold-text); }
-.house.is-chosen .house__chosen { display: block; }
-.house.is-chosen .house__chosen::before { content: ''; display: inline-block; width: 22px; height: 1px; background: var(--gold); vertical-align: middle; margin-right: 10px; }
-.house.is-chosen [data-house-open] { display: none; }
-.house.is-chosen .house__change { display: inline; }
-/* The fold: a measured-height region under the row. */
-/* Under the text column, not the full row: name and price a short glance apart. */
+@media (hover: hover) and (pointer: fine) { .step__change:hover { text-decoration-color: var(--charcoal); } }
+/* Measured-height unfold, the technique from initRoomDetail(). */
+.step__body { overflow: hidden; height: 0; transition: height var(--t-panel) var(--ease-quick); }
+.step__body[hidden] { display: block; }
+.no-motion .step__body { transition: none; }
+/* ⚠️ One inner wrapper per step body, and unfold() measures it. The region's
+   firstElementChild IS the measured height, so a body with several children
+   would animate to the height of the first one only. */
+.step__inner { display: grid; gap: 26px; max-width: 760px; padding-bottom: clamp(26px, 3.4vw, 42px); }
+.step[data-step="room"] .step__inner { max-width: none; }
+.step__err { color: var(--gold-text); font-size: 0.9rem; }
+.step__send { display: grid; gap: 16px; justify-items: start; }
+.step__note { font-size: 0.9rem; color: var(--ink-muted); max-width: 52ch; }
+.guests__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(14px, 1.8vw, 24px); }
+
+/* ---- houses: small photo, name and line, price, two actions ---- */
+.houses { display: grid; gap: 0; }
+.house {
+  display: grid; grid-template-columns: 150px minmax(0, 1fr);
+  gap: 8px 22px; align-items: start;
+  padding-block: clamp(18px, 2.2vw, 26px); border-top: var(--rule);
+}
+.houses > .house:first-child { border-top: 0; padding-top: 4px; }
+/* height:auto is load-bearing — every <img> here carries width/height
+   attributes, and without it the attribute height wins and aspect-ratio is
+   ignored (see the footer-logo note). */
+.house__shot { width: 150px; height: auto; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.house__name { font-size: 1.28rem; }
+.house__hook { font-size: 0.9rem; margin-top: 4px; max-width: 46ch; }
+.house__from { margin-top: 10px; font-family: var(--font-display); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.house__unit { font-family: var(--font-body); font-size: 0.62em; letter-spacing: 0.12em; }
+.house__night { font-family: var(--font-body); font-size: 0.72em; color: var(--ink-muted); margin-left: 4px; }
+.house__actions { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.btn--sm { padding: 11px 20px; font-size: 0.62rem; }
+.house__more {
+  font-size: 0.84rem; color: var(--charcoal); text-decoration: underline;
+  text-decoration-color: rgba(43,41,38,0.35); text-underline-offset: 4px;
+  transition: text-decoration-color var(--t-control) var(--ease-quick);
+}
+@media (hover: hover) and (pointer: fine) { .house__more:hover { text-decoration-color: var(--charcoal); } }
+.house.is-chosen { opacity: 1; }
 .house__views { grid-column: 2; overflow: hidden; height: 0; transition: height var(--t-panel) var(--ease-quick); }
 .house__views[hidden] { display: block; }
 .no-motion .house__views { transition: none; }
-.house__views-inner { padding-top: clamp(10px, 1.4vw, 18px); display: grid; gap: 0; border-top: var(--rule); }
+.house__views-inner { padding-top: 12px; display: grid; }
 .view {
-  display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center;
-  padding: clamp(14px, 1.6vw, 18px) 4px; border-bottom: var(--rule); cursor: pointer;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+  padding: 13px 4px; border-bottom: var(--rule); cursor: pointer;
   transition: background var(--t-control) var(--ease-quick);
 }
 @media (hover: hover) and (pointer: fine) { .view:hover { background: rgba(43,41,38,0.03); } }
-.view input { width: 18px; height: 18px; margin: 0; accent-color: var(--gold); }
-.view__name { font-size: 1rem; }
-.view__price { font-family: var(--font-display); font-size: 1.1rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.view input { width: 17px; height: 17px; margin: 0; accent-color: var(--gold); }
+.view__name { font-size: 0.97rem; }
+.view__price { font-family: var(--font-display); font-size: 1.05rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .view__unit { font-family: var(--font-body); font-size: 0.6em; letter-spacing: 0.12em; margin-left: 4px; }
-.view--any { border: 0; padding: 4px 0 0; gap: 12px; grid-template-columns: auto auto; justify-content: start; color: var(--warm-gray-strong); font-size: 0.92rem; }
+.view--any { border-bottom: 0; grid-template-columns: auto auto; justify-content: start; gap: 12px;
+  color: var(--warm-gray-strong); font-size: 0.92rem; padding-left: 0; }
 .view--any:hover { background: none; }
 
-/* ---- details ---- */
-/* `.form` supplies the site's field styling (dotted-underline inputs, stacked
-   labels); this only lays the group out. The old page's <form> carried .form
-   itself — with one <form> wrapping the whole page that would style the strip
-   and the view radios too, so the class moved to this section. */
-.details { padding-block: clamp(48px, 7vw, 100px); display: grid; gap: 26px; border-top: var(--rule); }
-.details__h { font-size: clamp(1.7rem, 3vw, 2.6rem); margin-bottom: 6px; }
-.details__send { padding-top: 10px; display: grid; gap: 16px; justify-items: start; }
-.details__note { font-size: 0.9rem; color: var(--ink-muted); max-width: 52ch; }
-
-@media (max-width: 980px) {
-  .bhero__strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .bhero__strip .btn { grid-column: 1 / -1; }
-  .house { grid-template-columns: 1fr; }
-}
 @media (max-width: 820px) {
-  /* The rail becomes the phone's bottom bar, with Send in it. */
-  .rail { position: fixed; top: auto; bottom: 0; left: 0; right: 0; border-bottom: 0; border-top: var(--rule); box-shadow: 0 -10px 30px rgba(43,41,38,0.08); }
-  .rail__inner { min-height: 54px; gap: 8px; font-size: 0.8rem; }
-  /* The room item is dropped on a phone, and with it the separator BEFORE it —
-     addressed by adjacency, because :last-of-type counts spans, not separators,
-     and pointed at the room item instead. */
-  .rail__item[data-rail-room], [data-rail-guests] + .rail__sep { display: none; }
-  /* The page has its own bottom bar with Send in it; a second floating button
-     on top of the view prices was covering them. WhatsApp stays linked under
-     the Send button. */
-  body:has(.rail) .wa { display: none; }
-  .rail__send { font-size: 0.62rem; }
-  .details { padding-bottom: calc(clamp(48px, 7vw, 100px) + 60px); }
+  .guests__grid { grid-template-columns: repeat(2, 1fr); }
+  .house { grid-template-columns: 104px minmax(0, 1fr); gap: 6px 16px; }
+  .house__shot { width: 104px; }
+  .house__views { grid-column: 1 / -1; }
+  .step__change { margin-left: 0; }
 }
-
-/* ---- the review as a closer, on the sky's own colour ----
-   ⚠️ These rules were lost once already: the book.html CSS block was rewritten
-   wholesale and the variant lived inside it, so the page shipped a charcoal
-   closer while the markup guard — which reads class names, not CSS — stayed
-   green. check_last_band.py now also asserts this rule exists. */
-.rev--light { background: var(--warm-white); color: var(--charcoal); }
-.rev--light .rev__text { color: var(--charcoal); }
-.rev--light .rev__by { color: var(--warm-gray-strong); }
-.rev--light .rev__by a { color: var(--charcoal); border-bottom-color: rgba(43, 41, 38, 0.35); }
-.rev--light a:focus-visible { outline-color: var(--gold-dark); }
 

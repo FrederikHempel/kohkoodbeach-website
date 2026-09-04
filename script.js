@@ -55,7 +55,13 @@ function initNav() {
   if (!hero) { nav.classList.add('nav--solid'); return; }
 
   const sentinel = document.createElement('div');
-  sentinel.style.cssText = 'position:absolute;top:0;height:70vh;width:1px;pointer-events:none;';
+  // ⚠️ min(70vh, 70%) — not a flat 70vh. The sentinel marks where the nav
+  // stops being transparent, so it must never be taller than the hero it
+  // sits in. book.html's hero is 52vh; a 70vh sentinel reached past its
+  // bottom and left the nav transparent over the light page below, washing
+  // out the mid-tone logo. Percentages keep every hero honest about its own
+  // height.
+  sentinel.style.cssText = 'position:absolute;top:0;height:min(70vh,70%);width:1px;pointer-events:none;';
   hero.style.position = hero.style.position || 'relative';
   hero.appendChild(sentinel);
 
