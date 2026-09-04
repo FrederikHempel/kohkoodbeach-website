@@ -152,11 +152,23 @@
      the steps say what they carry, where they are.
      ⚠️ The houses and their overlays are GENERATED from accommodation.html by
      scratchpad/build_book.py — edit the rooms there. -->
+<!-- ============ THE ENQUIRY ============
+     One <form>, three steps, in the order the visitor decides: when → which
+     room → who you are. Each finished step collapses to a line stating what it
+     holds, with Change to reopen; the next opens in its place. No sticky bar —
+     the steps say what they carry, where they are.
+     ⚠️ The houses and their overlays are GENERATED from accommodation.html by
+     scratchpad/build_book.py — edit the rooms there. -->
 <form class="enq" data-book-form data-endpoint="https://api.web3forms.com/submit">
-  <!-- ⚠️ Empty on purpose. Paste the Web3Forms access key here and the form
-       starts POSTing for real; while blank it falls back to the mailto draft.
-       See CLAUDE.md — do not invent a key. -->
-  <input type="hidden" name="access_key" value="">
+  <!-- ⚠️ The Web3Forms access key. With it present the form POSTs for real;
+       blank it out and the submit handler falls back to the mailto draft.
+       This key is NOT the one in contact.html — two forms, two keys, and each
+       key is bound to whatever address its form was created with. This one was
+       set up pointing at frja91@outlook.com as a test; repoint the form to
+       reservation@kohkoodbeachresorts.com in the Web3Forms dashboard before the
+       site takes real bookings. The key is public by design — it only permits
+       sending TO that mailbox. -->
+  <input type="hidden" name="access_key" value="8a3f2c91-4b7d-4e2a-9f16-c05d8e7b3a44">
   <input type="hidden" name="subject" value="Booking enquiry — Koh Kood Beach Resort">
   <input type="hidden" name="from_name" value="Koh Kood Beach Resort website">
   <input type="checkbox" name="botcheck" class="visually-hidden" style="display:none" tabindex="-1" autocomplete="off">

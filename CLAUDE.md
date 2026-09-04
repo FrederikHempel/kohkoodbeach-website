@@ -1554,3 +1554,36 @@ rows**, so the times and fares have one home. The footer of the overlay links to
 the full page for the ferry timetable and the other routes, which is a departure
 the visitor chooses rather than one the form makes for them.
 
+### Both forms POST for real now (4 Sep 2026)
+
+⚠️ **There are TWO Web3Forms keys, one per form, and they are not
+interchangeable.** A key is bound to the address its form was created with.
+
+| form | key | created for |
+|---|---|---|
+| `contact.html` | `c5260114-…` | set up in an earlier pass |
+| `book.html` | `8a3f2c91-…` | pointed at `frja91@outlook.com` **as a test** |
+
+**Before the site takes real bookings, repoint the booking form to
+`reservation@kohkoodbeachresorts.com` in the Web3Forms dashboard** — the key in
+the markup stays the same, only its destination changes. And confirm where
+`contact.html`'s key delivers; nobody has checked it this session. The keys are
+public by design: they only permit sending *to* their own mailbox.
+
+⚠️ **The key could not be verified from here, and it is worth knowing why.**
+Web3Forms refuses server-side calls outright ("Use our API in client side …
+Pro plan is required"), so `curl` returns the same rejection for a good key and
+a bad one. A client-side POST from headless Chrome fails with `TypeError:
+Failed to fetch` — also identically for both keys. **Neither test can
+distinguish a live key from a dead one**, so the only real check is a submission
+from an ordinary browser. What *was* verified: both forms take the POST branch,
+carry their own key, and reach the "Thank you" panel, which only appears when
+the backend reports success.
+
+**A `transferLine()` copy had leaked into `initContactForm()`.** The edit that
+added it to `initBookPage()` used a plain string replace, and
+`const compose = () => {` appears in both functions — so it was defined twice.
+Dead in the contact form (it queries a `[data-transfer]` box that page does not
+have) but wrong; removed. **When patching one of these two near-identical
+handlers, anchor on something unique to it.**
+

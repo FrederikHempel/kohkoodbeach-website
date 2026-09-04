@@ -952,18 +952,6 @@ function initContactForm() {
   const form = document.querySelector('[data-contact-form]');
   if (!form) return;
 
-  /* The transport request, in words rather than a field name. It is the one
-     answer here the resort has to act on separately from the room. */
-  const transferLine = () => {
-    const on = form.querySelector('[data-transfer]')?.checked;
-    if (!on) return null;
-    const route = form.querySelector('input[name="transfer_route"]:checked')?.value;
-    const named = { 'bus-ferry': 'Boonsiri bus + ferry',
-                    'minivan-ferry': 'private minivan + ferry',
-                    'either': 'no preference — please recommend' }[route];
-    return `Transport from Bangkok: YES, please quote${named ? ` (${named})` : ''}`;
-  };
-
   const compose = () => {
     const get = (n) => form.querySelector(`[name="${n}"]`)?.value.trim() || '';
     const body = [
