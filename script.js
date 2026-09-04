@@ -895,35 +895,69 @@ function initBookPage() {
     return `Transport from Bangkok: YES, please quote${named ? ` (${named})` : ''}`;
   };
 
+  /* ⚠️ ONE list of [label, value] pairs, and it feeds BOTH paths — the fields
+     Web3Forms renders in the notification email, and the plain-text body of the
+     mailto fallback. It used to be `new FormData(form)` plus a composed
+     `message`, which mailed the raw control values AND the readable summary:
+     reception read "bali-house-sea-view", "dk", "bus-ferry", "flexible". A
+     booking enquiry is read by a person, so it says what the website says.
+     Web3Forms turns underscores into spaces and capitalises, so `Extra_bed`
+     arrives as "Extra bed"; `name` and `email` stay lowercase because the
+     service reads those two itself — `email` becomes the reply-to address. */
   const compose = () => {
     const get = (n) => form.querySelector(`[name="${n}"]`)?.value.trim() || '';
-    const or = (v, fallback) => (v === '' ? fallback : v);
-    const natSelect = form.querySelector('[name="nationality"]');
-    const nationality = natSelect?.selectedOptions[0]?.text || '';
+    const optionText = (n) => {
+      const el = form.querySelector(`[name="${n}"]`);
+      return el && el.selectedOptions && el.selectedOptions[0] ? el.selectedOptions[0].text : '';
+    };
+    const day = (iso) => {
+      const d = new Date(iso + 'T00:00:00Z');
+      return isNaN(d) ? iso : d.toLocaleDateString('en-GB',
+        { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+    };
+    const nights = (() => {
+      const a = get('checkin'), b = get('checkout');
+      if (!a || !b) return 0;
+      return Math.round((new Date(b + 'T00:00:00Z') - new Date(a + 'T00:00:00Z')) / 86400000);
+    })();
+
+    const room = chosenRoom(form);
     const flexible = form.querySelector('input[name="dates"]:checked')?.value === 'flexible';
-    const guests = [
-      `${or(get('adults'), '0')} adult(s)`,
-      Number(get('children')) ? `${get('children')} child(ren) 2–12` : null,
-      Number(get('infants')) ? `${get('infants')} infant(s) under 2` : null,
-    ].filter(Boolean).join(', ');
+    const ad = Number(get('adults') || 0), ch = Number(get('children') || 0), inf = Number(get('infants') || 0);
+    const who = [`${ad} adult${ad === 1 ? '' : 's'}`];
+    if (ch) who.push(`${ch} child${ch === 1 ? '' : 'ren'} (2–12)`);
+    if (inf) who.push(`${inf} infant${inf === 1 ? '' : 's'} (under 2)`);
 
-    const body = [
-      `Room: ${chosenRoom(form).label}`,
-      `Arrival: ${or(get('checkin'), 'not given')}`,
-      `Departure: ${or(get('checkout'), 'not given')}`,
-      flexible ? 'Flexible: yes, by 2–3 days either way' : null,
-      `Guests: ${guests}`,
-      `Extra bed: ${or(get('extrabed'), 'no')}`,
-      transferLine(),
-      '',
-      `Name: ${or(get('name'), 'not given')}`,
-      `Email: ${or(get('email'), 'not given')}`,
-      nationality && nationality !== 'Select a country' ? `Country: ${nationality}` : null,
-      get('phone') ? `Phone: ${get('phone')}` : null,
-      get('message') ? `\n${get('message')}` : null,
-    ].filter((l) => l !== null).join('\n');
+    const wantsTransfer = form.querySelector('[data-transfer]')?.checked;
+    const routeName = {
+      'bus-ferry': 'Boonsiri bus + ferry',
+      'minivan-ferry': 'Private minivan + ferry',
+      'either': 'No preference — please recommend one',
+    }[form.querySelector('input[name="transfer_route"]:checked')?.value];
+    const country = optionText('nationality');
 
-    return { body, subject: `Booking enquiry — ${chosenRoom(form).label}` };
+    const fields = [
+      ['Room', room.id ? `${room.label}${room.price ? ` — from ${room.price} THB per night` : ''}`
+                       : 'Not chosen yet — please recommend one'],
+      ['Arrival', get('checkin') ? day(get('checkin')) : 'not given'],
+      ['Departure', get('checkout') ? day(get('checkout')) : 'not given'],
+      ['Nights', nights > 0 ? String(nights) : null],
+      ['Dates', flexible ? 'Flexible by 2–3 days either way' : 'Fixed'],
+      ['Guests', who.join(', ')],
+      ['Extra_bed', get('extrabed') === 'yes' ? 'Yes, please' : 'No'],
+      ['Transport_from_Bangkok', wantsTransfer
+        ? `Yes, please quote${routeName ? ` — ${routeName}` : ''}`
+        : 'Not requested'],
+      ['Country', country && country !== 'Select a country' ? country : 'not given'],
+      ['Phone', get('phone') || 'not given'],
+      ['Message', get('message') || '—'],
+    ].filter(([, v]) => v !== null);
+
+    const body = [`Name: ${get('name') || 'not given'}`, `Email: ${get('email') || 'not given'}`, '']
+      .concat(fields.map(([k, v]) => `${k.replace(/_/g, ' ')}: ${v}`))
+      .join('\n');
+
+    return { fields, body, subject: `Booking enquiry — ${room.label}` };
   };
 
   const fallbackToMail = ({ subject, body }) => {
@@ -943,7 +977,7 @@ function initBookPage() {
        Every required field lives in a section that is open at this point, so
        there is nothing it cannot focus. */
     if (!form.reportValidity()) return;
-    const { subject, body } = compose();
+    const { subject, body, fields } = compose();
     const key = form.querySelector('[name="access_key"]')?.value.trim();
 
     if (!key) { fallbackToMail({ subject, body }); return; }
@@ -953,9 +987,14 @@ function initBookPage() {
     if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
 
     try {
-      const data = new FormData(form);
+      // Built by hand, not from the form: only what a person should read.
+      const data = new FormData();
+      data.set('access_key', key);
       data.set('subject', subject);
-      data.set('message', body);          // one readable block, not 14 loose fields
+      data.set('from_name', form.querySelector('[name="from_name"]')?.value || 'Koh Kood Beach Resort website');
+      data.set('name', form.querySelector('[name="name"]')?.value.trim() || '');
+      data.set('email', form.querySelector('[name="email"]')?.value.trim() || '');
+      fields.forEach(([k, v]) => data.set(k, v));
       const res = await fetch(form.dataset.endpoint, { method: 'POST', body: data });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || json.success === false) throw new Error(json.message || 'send failed');

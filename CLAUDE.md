@@ -1645,3 +1645,34 @@ successfully!"}`**. A full submission through the live form then reaches the
 (the key does not change), and decide the `noindex` / production-domain
 question.
 
+### The enquiry email now reads like the website (4 Sep 2026)
+
+The first real submissions arrived as raw control values — `bali-house-sea-view`,
+`dk`, `bus-ferry`, `flexible`, `yes` — because the POST was
+`new FormData(form)`, which sweeps up every field exactly as the markup stores
+it, *plus* a composed `message`. Reception got the machine's version and the
+human's version of the same enquiry, one under the other.
+
+⚠️ **`compose()` now returns ONE ordered list of `[label, value]` pairs, and it
+feeds both paths** — the fields Web3Forms renders in the notification, and the
+plain-text body of the mailto fallback. The POST builds its payload by hand from
+that list; it never reads the form directly. Add a field to the booking form and
+it will *not* appear in the email until it is added to that list, which is the
+right way round.
+
+| in the email | from |
+|---|---|
+| `Bali House – Sea View — from 3,500 THB per night` | the chosen radio's label and price |
+| `Wed, 10 February 2027` · `Nights 7` | the ISO dates, formatted in UTC |
+| `2 adults, 1 child (2–12)` | the three guest fields, pluralised |
+| `Yes, please quote — Boonsiri bus + ferry` | the transport box |
+| `Sweden` | the country select's *option text*, not its value |
+
+**Web3Forms turns underscores into spaces and capitalises the key**, so
+`Extra_bed` arrives as "Extra bed". `name` and `email` stay lowercase on
+purpose: the service reads those two itself, and `email` becomes the reply-to
+address, so a reply goes to the guest.
+
+`initContactForm()` still posts `new FormData(form)` and is fine as it is — its
+four fields are already words.
+
