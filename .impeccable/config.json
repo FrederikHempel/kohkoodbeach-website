@@ -17,6 +17,15 @@
         ],
         "createdAt": "2026-09-03T08:35:26.503Z",
         "reason": "user confirmed: Frederik asked for the See more panel to unfold in a smooth motion; grid-template-rows 0fr->1fr does not interpolate in this engine (verified — it jumped to full height), so height is the only option that animates. One element, one deliberate click, 520ms."
+      },
+      {
+        "rule": "broken-image",
+        "value": "*",
+        "files": [
+          "style.css"
+        ],
+        "createdAt": "2026-09-04T09:27:21.099Z",
+        "reason": "False positive: detector matches the literal string \"img\" wherever it appears, including inside .rc__shot img { } CSS rules and a comment discussing <img> width/height attributes near L1796/1800 -- there is no actual <img> tag with an empty or missing src anywhere in style.css, which contains no HTML at all."
       }
     ]
   }
