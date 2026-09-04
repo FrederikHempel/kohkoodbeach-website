@@ -36,6 +36,14 @@ for page in sorted(ROOT.glob('*.html')):
         why = ', '.join(sorted(coloured)) or 'inline background'
         bad.append(f'  {page.name:22s} <{tag} class="{" ".join(sorted(cls))}">  ← {why}')
 
+# A class name is a promise the stylesheet has to keep. `rev--light` is only a
+# light closer if its rule is actually present — it went missing once when the
+# booking page's CSS block was rewritten, and this check reads markup only.
+css = (ROOT / 'style.css').read_text(encoding='utf-8')
+if any('rev--light' in l for l in open(ROOT / 'book.html', encoding='utf-8')) and \
+   not re.search(r'\.rev--light\s*\{[^}]*--warm-white', css):
+    bad.append('  style.css              .rev--light rule missing or not warm-white  ← CSS')
+
 if bad:
     print('LAST BAND MUST BE WARM-WHITE — it meets the footer illustration\'s sky.')
     print('\n'.join(bad))

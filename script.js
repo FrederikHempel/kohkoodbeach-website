@@ -25,9 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initRoomSlider2();
   initRoomDetail();
   initRoomGalleries();
+  initBookHero();
   initRoomChooser();
   initRoomDialogs();
   initBookPage();
+  initRail();
   initContactForm();
   initConsent();
   initMarquee();
@@ -49,7 +51,7 @@ function initNav() {
   const nav = document.querySelector('.nav');
   if (!nav) return;
 
-  const hero = document.querySelector('.hero, .page-hero, .rs');
+  const hero = document.querySelector('.hero, .page-hero, .rs, .bhero');
   if (!hero) { nav.classList.add('nav--solid'); return; }
 
   const sentinel = document.createElement('div');
@@ -466,59 +468,144 @@ function showEnquirySent(form, subject, body, kind, delivered) {
    Do not invent one to make the page look finished — a fake key turns every
    enquiry into a silent 4xx, which is strictly worse than the mailto. */
 function chosenRoom(form) {
-  return {
-    id: form.querySelector('[name="room"]')?.value || '',
-    label: form.querySelector('[name="room_label"]')?.value || 'Not sure yet',
-  };
+  const on = form.querySelector('input[name="room"]:checked');
+  return { id: on?.value || '', label: on?.dataset.label || 'Not sure yet', price: on?.dataset.price || '' };
 }
 
+/* The hero video is attached, not shipped. Everyone gets the poster (the
+   video's own first frame); the 2.4 MB clip is fetched only on a wide screen,
+   without prefers-reduced-motion, and not on a save-data connection. */
+function initBookHero() {
+  const video = document.querySelector('[data-bhero] video[data-src]');
+  if (!video) return;
+  const wide = window.matchMedia('(min-width: 821px)').matches;
+  const still = document.documentElement.classList.contains('no-motion');
+  const saveData = navigator.connection && navigator.connection.saveData;
+  if (!wide || still || saveData) return;
+  if (!video.canPlayType('video/mp4')) return;
+  video.src = video.dataset.src;
+  video.load();
+  video.play().catch(() => {});   // autoplay can be refused; the poster stays
+}
+
+/* The rail reads the enquiry back in words as it is filled in. */
+function initRail() {
+  const form = document.querySelector('[data-book-form]');
+  const rail = document.querySelector('[data-rail]');
+  if (!form || !rail) return;
+  const dates = rail.querySelector('[data-rail-dates]');
+  const guests = rail.querySelector('[data-rail-guests]');
+  const room = rail.querySelector('[data-rail-room]');
+  const fmt = (iso) => {
+    const d = new Date(iso + 'T00:00:00');
+    return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  };
+  const update = () => {
+    const a = form.checkin?.value, b = form.checkout?.value;
+    if (a && b) {
+      const nights = Math.round((new Date(b) - new Date(a)) / 86400000);
+      dates.textContent = `${fmt(a)} – ${fmt(b)}` + (nights > 0 ? ` · ${nights} night${nights === 1 ? '' : 's'}` : '');
+      dates.classList.remove('is-empty');
+    } else { dates.textContent = 'Your dates'; dates.classList.add('is-empty'); }
+    const ad = Number(form.adults?.value || 0), ch = Number(form.children?.value || 0), inf = Number(form.infants?.value || 0);
+    const parts = [`${ad} adult${ad === 1 ? '' : 's'}`];
+    if (ch) parts.push(`${ch} child${ch === 1 ? '' : 'ren'}`);
+    if (inf) parts.push(`${inf} infant${inf === 1 ? '' : 's'}`);
+    guests.textContent = parts.join(', ');
+    const r = chosenRoom(form);
+    room.textContent = r.id ? r.label.replace(' – ', ', ') : 'Any bungalow';
+    room.classList.toggle('is-empty', !r.id);
+  };
+  form.addEventListener('input', update);
+  form.addEventListener('change', update);
+  update();
+  document.querySelector('[data-continue]')?.addEventListener('click', () => {
+    document.getElementById('rooms')?.scrollIntoView({ behavior: document.documentElement.classList.contains('no-motion') ? 'auto' : 'smooth', block: 'start' });
+  });
+}
+
+/* The houses. "Choose this room" unfolds that house's views in place; picking
+   a view marks the house chosen and folds the rest. Views are real radios, so
+   the choice submits without JS too. */
 function initRoomChooser() {
   const form = document.querySelector('[data-book-form]');
-  const chips = Array.from(document.querySelectorAll('.chip'));
-  if (!form || !chips.length) return;
+  const houses = Array.from(document.querySelectorAll('.house'));
+  if (!form || !houses.length) return;
+  const still = document.documentElement.classList.contains('no-motion');
 
-  const roomField = form.querySelector('[name="room"]');
-  const labelField = form.querySelector('[name="room_label"]');
-  const fold = document.querySelector('[data-fold]');
-  const current = document.querySelector('[data-fold-current]');
-
-  // The <details> summary is the one place the choice is stated in words, so
-  // it must never disagree with the chips. Everything routes through here.
-  const select = (btn) => {
-    chips.forEach((c) => {
-      const on = c === btn;
-      c.classList.toggle('is-on', on);
-      c.setAttribute('aria-checked', String(on));
-    });
-    const id = btn.dataset.room || '';
-    const label = btn.dataset.label || 'Not sure yet';
-    if (roomField) roomField.value = id;
-    if (labelField) labelField.value = label;
-    if (current) current.innerHTML = id ? label : 'Not sure yet &mdash; we&rsquo;ll recommend one';
+  const setHeight = (region, open) => {
+    const inner = region.firstElementChild;
+    if (still) { region.hidden = !open; region.style.height = open ? 'auto' : '0'; return; }
+    if (open) {
+      region.hidden = false;
+      region.style.height = '0px';
+      void region.offsetHeight;                       // synchronous flush; rAF never runs in a throttled tab
+      region.style.height = `${inner.offsetHeight}px`;
+      const done = () => { region.style.height = 'auto'; region.removeEventListener('transitionend', done); };
+      region.addEventListener('transitionend', done);
+      setTimeout(done, 700);                           // transitionend does not fire when nothing changed
+    } else {
+      region.style.height = `${inner.offsetHeight}px`;
+      void region.offsetHeight;
+      region.style.height = '0px';
+      const done = () => { region.hidden = true; region.removeEventListener('transitionend', done); };
+      region.addEventListener('transitionend', done);
+      setTimeout(done, 700);
+    }
   };
 
-  chips.forEach((btn) => btn.addEventListener('click', () => select(btn)));
+  const open = (house) => {
+    houses.forEach((h) => {
+      const region = h.querySelector('[data-house-views]');
+      const btn = h.querySelector('[data-house-open]');
+      const isThis = h === house;
+      if (!isThis && !region.hidden) setHeight(region, false);
+      if (isThis && region.hidden) setHeight(region, true);
+      btn.setAttribute('aria-expanded', String(isThis));
+    });
+  };
 
-  // "Choose this room" inside an overlay picks the matching chip, so the two
-  // surfaces can never disagree about what is selected. Closing the dialog
-  // returns focus to the fold, which is where the choice now reads.
+  const mark = () => {
+    const on = form.querySelector('input[name="room"]:checked');
+    houses.forEach((h) => {
+      const mine = on && on.value && h.contains(on);
+      h.classList.toggle('is-chosen', Boolean(mine));
+      const line = h.querySelector('[data-house-chosen]');
+      if (line) line.textContent = mine ? `${on.closest('.view').querySelector('.view__name').textContent} · from ${on.dataset.price} THB` : '';
+      if (mine) setHeight(h.querySelector('[data-house-views]'), false);
+    });
+  };
+
+  houses.forEach((h) => {
+    h.querySelector('[data-house-open]').addEventListener('click', () => open(h));
+    h.querySelector('[data-house-change]').addEventListener('click', () => {
+      const any = form.querySelector('input[name="room"][value=""]');
+      if (any) any.checked = true;
+      mark(); open(h);
+      form.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+  form.querySelectorAll('input[name="room"]').forEach((r) => r.addEventListener('change', mark));
+
+  // The overlay's "Choose this room" checks the matching radio and marks it.
   document.querySelectorAll('[data-choose]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const match = chips.find((c) => c.dataset.room === btn.dataset.choose);
-      if (!match) return;
+      const radio = form.querySelector(`input[name="room"][value="${btn.dataset.choose}"]`);
+      if (!radio) return;
       btn.closest('dialog')?.close();
-      select(match);
-      if (fold) { fold.open = true; fold.querySelector('summary')?.focus(); }
+      radio.checked = true; mark();
+      form.dispatchEvent(new Event('change', { bubbles: true }));
+      radio.closest('.house')?.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' });
     });
   });
 
-  // accommodation.html links here as book.html?room=<id>. Honour it, and open
-  // the fold so the visitor can see what arrived preselected.
+  // accommodation.html links here as book.html?room=<id>.
   const wanted = new URLSearchParams(window.location.search).get('room');
   if (wanted) {
-    const match = chips.find((c) => c.dataset.room === wanted);
-    if (match) { select(match); if (fold) fold.open = true; }
+    const radio = form.querySelector(`input[name="room"][value="${wanted}"]`);
+    if (radio) { radio.checked = true; mark(); form.dispatchEvent(new Event('change', { bubbles: true })); }
   }
+  mark();
 }
 
 /* Native <dialog>: Escape and the backdrop come free, and focus is trapped for
@@ -543,7 +630,7 @@ function initBookPage() {
   if (!form) return;
 
   const params = new URLSearchParams(window.location.search);
-  ['checkin', 'checkout', 'adults', 'children', 'infants', 'extrabed', 'nationality'].forEach((key) => {
+  ['checkin', 'checkout', 'adults', 'children', 'infants', 'extrabed', 'nationality'].forEach((key) => {  // room is handled by initRoomChooser
     const field = form.querySelector(`[name="${key}"]`);
     if (field && params.get(key)) field.value = params.get(key);
   });

@@ -10,6 +10,8 @@ assets/**/*.mp4
 assets/**/*.mov
 !assets/og-image.jpg
 !assets/logo/apple-touch-icon.png
+# The booking page's hero loop is the one video the pages load.
+!assets/book-hero.mp4
 
 # OS/editor noise
 .DS_Store

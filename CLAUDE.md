@@ -1227,3 +1227,82 @@ and script.js, guard green on all 12 pages. Known residual, not a defect: a chip
 whose "where" line is long wraps its price to a second line inside the 575px
 chip column; a 12rem text column instead of 14rem would give the chips the room.
 
+### Book Now, third pass — the enquiry as the first day of the stay (4 Sep 2026)
+
+Frederik's verdict on the second pass: "stadig virkelig kedelig", and a direct
+question — *would you build it like this if I asked for the perfect booking
+page?* No. The second pass was a correct form: fieldsets, right order, measured.
+It treated the page as a tool to operate. For a 19-bungalow resort with no
+engine and no payment, "book now" is not a transaction; it is the moment someone
+who already wants to come starts a conversation with a place. So the page was
+built again, from a clean slate, on that premise. `PRODUCT.md` now exists and
+records the confirmed audience and purpose; read it before the next design pass.
+
+**The whole page is one `<form>`.** Hero, rail, houses and details are all
+fields of the same enquiry. Nothing sits between the photograph and the first
+field.
+
+**The hero carries the four fields that start it.** Video, headline, one line,
+and the site's own sand booking strip from the homepage laid over the bottom of
+the frame: Arrival · Departure · Adults · Children · Continue. Measured at
+1440×900: strip 599–738px, Arrival at 664px — inside the first viewport.
+
+⚠️ **The video is attached, not shipped.** `assets/book-hero.mp4` is 2.4 MB —
+the daylight pool pull-back, seconds 5–14, 1280×720 H.264 at ~2.2 Mbps, no
+audio, `moov` at byte 32 (fast-start; it plays before it has fully downloaded).
+The `<video>` has **no `src` in the markup**; `initBookHero()` attaches it only
+on a wide screen, without `prefers-reduced-motion`, and not on a save-data
+connection. Everyone else gets the poster, which is the video's **own first
+frame** (`book-hero-poster.webp`, 1600×900), so nothing jumps when playback
+starts. Verified: `src` attached and playing at 1440, not attached at 390.
+The sunset clip was considered and rejected on the standing no-dark-heroes
+rule; the "palm trees over pool and vast ocean" clip is portrait. Made with
+`scratchpad/transcode.swift` (AVAssetWriter — there is no ffmpeg here) and
+`.gitignore` carries a `!assets/book-hero.mp4` exception, the one video the
+pages load.
+
+**The rail reads the enquiry back.** A sticky line under the nav — "12 Dec – 19
+Dec · 7 nights · 2 adults, 1 child · Bali House, Sea View" — filling in as the
+visitor chooses, with a Send link. On a phone it is the bottom bar, with Send
+in it, and the WhatsApp float is hidden on this page because the page now has
+its own bottom bar; WhatsApp stays linked under the Send button. The rail sits
+at `top: var(--nav-h)`; measured, nav bottom = rail top = 114px, no gap.
+
+**The houses are photograph-led rows, one per house**, in `.wrap`: a 3:2 photo
+leads (7fr), then name, one line, "from X THB per night", **Choose this room**
+and *More about it* (the existing `<dialog>`). No chips, no "where" lines.
+Pressing Choose unfolds that house's views **in place, under the text column**
+(`grid-column: 2` — the first cut spanned the full 1560px row and put name and
+price 1400px apart) as clean rows: name and from-price only. The views are
+**real `<input type="radio" name="room">`**, so the choice submits without JS
+and `?room=` prefills natively. Picking one marks the house — gold rule, "Sea
+View · from 3,500 THB" — folds the views, updates the rail, and shows *Change*.
+"Not sure yet" is a radio too, checked by default. The unfold is the measured-
+height technique from `initRoomDetail()` (synchronous `offsetHeight` flush,
+`transitionend` with a 700ms timeout; instant under `.no-motion`).
+
+⚠️ **`.form` moved from the `<form>` to the `.details` section.** With one form
+wrapping the whole page, `.form`'s field rules would have styled the hero strip
+and the view radios too. The first cut forgot this and the details rendered as
+raw browser inputs. `.details` carries `form` now; the strip is styled by
+`.field`, the views by `.view`.
+
+⚠️ **`.rev--light` went missing once and the guard did not notice.** The
+booking-page CSS block was rewritten wholesale and the light variant lived
+inside it, so the page shipped a charcoal closer while
+`check_last_band.py` — which reads class names — stayed green. The rules are
+back, and **the guard now also asserts the `.rev--light` rule exists in
+`style.css` with `--warm-white`**. A class name is a promise the stylesheet has
+to keep; the check reads both now.
+
+**Also:** `initNav()`'s hero selector gained `.bhero` so the nav goes transparent
+over the video like every other opener; Fixed/Flexible dates live in the details
+group; infants and extra bed moved there too, so the strip stays four fields.
+
+Verified in one batched round, one fix batch, one confirmation: overlay
+"Choose this room" checks the radio and marks the house; `Change` reopens and
+resets; `?room=bali-deluxe-partial-sea-view` marks on load; the mailto body
+carries room, dates, the flexible flag and the guest breakdown; no horizontal
+overflow at 390; no console errors; Impeccable detector 0 findings; guard green
+on all 12 pages.
+

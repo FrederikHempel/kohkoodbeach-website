@@ -89,161 +89,183 @@
   </div>
 </div>
 
-<section class="page-hero page-hero--short" style="background-image:url('assets/book-hero.webp')">
-  <div class="page-hero__inner">
-    <span class="label">Enquire</span>
-    <h1>When will you arrive?</h1>
-  </div>
-</section>
-
 <!-- ============ THE ENQUIRY ============
-     One form, four groups, in the order a visitor actually decides: when, who,
-     which bungalow (optional, folded), then who they are. Nothing sits between
-     the hero and the first field, so the form is reachable without scrolling.
-     ⚠️ The bungalow rows and the three overlays are GENERATED from
-     accommodation.html by scratchpad/build_book.py — edit the rooms there. -->
-<section class="band band--tight" id="enquiry">
-  <form class="form enq wrap-narrow" data-book-form data-endpoint="https://api.web3forms.com/submit">
-    <!-- ⚠️ Empty on purpose. Paste the Web3Forms access key here and the form
-         starts POSTing for real; while it is blank the submit handler falls
-         back to the mailto draft. See CLAUDE.md — do not invent a key. -->
-    <input type="hidden" name="access_key" value="">
-    <input type="hidden" name="subject" value="Booking enquiry — Koh Kood Beach Resort">
-    <input type="hidden" name="from_name" value="Koh Kood Beach Resort website">
-    <input type="hidden" name="room" value="">
-    <input type="hidden" name="room_label" value="Not sure yet">
-    <!-- Web3Forms' honeypot: real people never see it, bots fill it in. -->
-    <input type="checkbox" name="botcheck" class="visually-hidden" style="display:none" tabindex="-1" autocomplete="off">
+     One <form> wraps the whole page: the hero strip, the rail, the houses and
+     the details are all fields of the same enquiry. The visitor clicked "Book
+     now" — the page's job is to take the question with as little friction as
+     possible and to feel like the first day of the stay while it does.
+     ⚠️ The houses and their overlays are GENERATED from accommodation.html by
+     scratchpad/build_book.py — edit the rooms there. -->
+<!-- ============ THE ENQUIRY ============
+     One <form> wraps the whole page: the hero strip, the rail, the houses and
+     the details are all fields of the same enquiry. The visitor clicked "Book
+     now" — the page's job is to take the question with as little friction as
+     possible and to feel like the first day of the stay while it does.
+     ⚠️ The houses and their overlays are GENERATED from accommodation.html by
+     scratchpad/build_book.py — edit the rooms there. -->
+<!-- ============ THE ENQUIRY ============
+     One <form> wraps the whole page: the hero strip, the rail, the houses and
+     the details are all fields of the same enquiry. The visitor clicked "Book
+     now" — the page's job is to take the question with as little friction as
+     possible and to feel like the first day of the stay while it does.
+     ⚠️ The houses and their overlays are GENERATED from accommodation.html by
+     scratchpad/build_book.py — edit the rooms there. -->
+<form class="enq" data-book-form data-endpoint="https://api.web3forms.com/submit">
+  <!-- ⚠️ Empty on purpose. Paste the Web3Forms access key here and the form
+       starts POSTing for real; while blank it falls back to the mailto draft.
+       See CLAUDE.md — do not invent a key. -->
+  <input type="hidden" name="access_key" value="">
+  <input type="hidden" name="subject" value="Booking enquiry — Koh Kood Beach Resort">
+  <input type="hidden" name="from_name" value="Koh Kood Beach Resort website">
+  <input type="checkbox" name="botcheck" class="visually-hidden" style="display:none" tabindex="-1" autocomplete="off">
 
-    <fieldset class="enq__group">
-      <legend class="enq__legend">When</legend>
-      <div class="radios">
-        <label><input type="radio" name="dates" value="fixed" checked> <span>Fixed dates</span></label>
-        <label><input type="radio" name="dates" value="flexible"> <span>Flexible by 2&ndash;3 days</span></label>
-      </div>
-      <div class="form__row">
-        <label><span class="label">Arrival</span><input type="date" name="checkin" required></label>
-        <label><span class="label">Departure</span><input type="date" name="checkout" required></label>
-      </div>
-    </fieldset>
+  <!-- ============ HERO: the photograph, and the four fields that start it ============
+       The <video> has no src in the markup. initBookHero() attaches it only on a
+       wide screen, without prefers-reduced-motion, and not on a save-data
+       connection — everyone else gets the poster, which is the video's own
+       first frame, so nothing jumps when it does start. -->
+  <section class="bhero" data-bhero>
+    <video class="bhero__video" muted playsinline loop preload="none"
+           poster="assets/book-hero-poster.webp" data-src="assets/book-hero.mp4" aria-hidden="true"></video>
+    <div class="bhero__copy">
+      <h1>When will you arrive?</h1>
+      <p class="bhero__sub">Tell us your dates and who is coming. We reply within 24 hours, usually the same day &mdash; no payment now.</p>
+    </div>
+    <div class="bhero__strip">
+      <label class="field"><span class="label">Arrival</span><input type="date" name="checkin" required></label>
+      <label class="field"><span class="label">Departure</span><input type="date" name="checkout" required></label>
+      <label class="field"><span class="label">Adults <span class="label__hint">13+</span></span><input type="number" name="adults" min="1" max="12" value="2" required inputmode="numeric"></label>
+      <label class="field"><span class="label">Children <span class="label__hint">2&ndash;12</span></span><input type="number" name="children" min="0" max="10" value="0" inputmode="numeric"></label>
+      <button type="button" class="btn" data-continue>Continue <span class="arrow" aria-hidden="true">&#8594;</span></button>
+    </div>
+  </section>
 
-    <fieldset class="enq__group">
-      <legend class="enq__legend">Who&rsquo;s coming</legend>
-      <div class="guests__grid">
-        <label><span class="guests__cap">Adults <span class="label__hint">13+</span></span>
-          <input type="number" name="adults" min="1" max="12" value="2" required inputmode="numeric"></label>
-        <label><span class="guests__cap">Children <span class="label__hint">2&ndash;12</span></span>
-          <input type="number" name="children" min="0" max="10" value="0" inputmode="numeric"></label>
-        <label><span class="guests__cap">Infants <span class="label__hint">under 2</span></span>
-          <input type="number" name="infants" min="0" max="6" value="0" inputmode="numeric"></label>
-        <label><span class="guests__cap">Extra bed</span>
-          <select name="extrabed"><option value="no">No</option><option value="yes">Yes</option></select></label>
-      </div>
-    </fieldset>
+  <!-- The page answering back: fills in as the visitor chooses. Sticky under
+       the nav on desktop, a bottom bar on a phone. -->
+  <div class="rail" data-rail aria-live="polite">
+    <div class="wrap rail__inner">
+      <span class="rail__item" data-rail-dates>Your dates</span>
+      <span class="rail__sep" aria-hidden="true">&middot;</span>
+      <span class="rail__item" data-rail-guests>2 adults</span>
+      <span class="rail__sep" aria-hidden="true">&middot;</span>
+      <span class="rail__item" data-rail-room>Any bungalow</span>
+      <a href="#send" class="rail__send">Send enquiry <span class="arrow" aria-hidden="true">&#8594;</span></a>
+    </div>
+  </div>
 
-    <fieldset class="enq__group">
-      <legend class="enq__legend">Your bungalow <span class="label__hint">optional</span></legend>
-      <!-- Native <details>: opens without JS, is keyboard-operable, and the
-           summary is a real control. JS only keeps its text in step with the
-           chosen chip. -->
-      <details class="fold" data-fold>
-        <summary class="fold__sum">
-          <span class="fold__current" data-fold-current>Not sure yet &mdash; we&rsquo;ll recommend one</span>
-          <span class="fold__cta">Choose a bungalow</span>
-        </summary>
-        <div class="fold__body">
-          <button type="button" class="chip chip--any" role="radio" aria-checked="true"
-                  data-room="" data-label="Not sure yet &mdash; happy to be recommended a room">
-            Not sure yet &mdash; recommend one for us
-          </button>
-      <div class="rr">
-        <img class="rr__shot" src="assets/room-photos/bali-house-sea-view/img_2p9928.webp" alt="" width="2000" height="1500" loading="lazy">
-        <div class="rr__text">
-          <h3 class="rr__name">Bali House</h3>
-          <p class="rr__hook">Bali cottage style on stilts among the palms, with an open-air bathroom.</p>
+  <!-- ============ THE HOUSES ============ -->
+  <section class="houses wrap" id="rooms">
+    <article class="house" data-house="bali-house">
+      <img class="house__shot" src="assets/room-photos/bali-house-sea-view/img_2p9928.webp" alt="" width="2000" height="1500" loading="lazy">
+      <div class="house__body">
+        <h2 class="house__name">Bali House</h2>
+        <p class="house__hook">Bali cottage style on stilts among the palms, with an open-air bathroom.</p>
+        <p class="house__from">from 2,900 <span class="house__unit">THB</span> <span class="house__night">per night</span></p>
+        <p class="house__chosen" data-house-chosen aria-live="polite"></p>
+        <div class="house__actions">
+          <button type="button" class="btn" data-house-open="bali-house" aria-expanded="false" aria-controls="views-bali-house">Choose this room</button>
+          <button type="button" class="house__more" data-dlg-open="rdlg-bali-house">More about it</button>
+          <button type="button" class="house__change" data-house-change="bali-house" hidden>Change</button>
         </div>
-        <div class="rr__views" role="radiogroup" aria-label="Bali House &mdash; choose your view">
-          <button type="button" class="chip" role="radio" aria-checked="false"
-                  data-room="bali-house-garden-view" data-label="Bali House &ndash; Garden View">
-            <span class="chip__name">Garden View</span>
-            <span class="chip__where">Set back among the palms</span>
-            <span class="chip__price">from 2,900<span class="chip__unit">THB</span></span>
-          </button>
-          <button type="button" class="chip" role="radio" aria-checked="false"
-                  data-room="bali-house-partial-sea-view" data-label="Bali House &ndash; Partial Sea View">
-            <span class="chip__name">Partial Sea View</span>
-            <span class="chip__where">Angled towards the water</span>
-            <span class="chip__price">from 3,300<span class="chip__unit">THB</span></span>
-          </button>
-          <button type="button" class="chip" role="radio" aria-checked="false"
-                  data-room="bali-house-partial-sea-view-twin" data-label="Bali House &ndash; Partial Sea View twin">
-            <span class="chip__name">Partial Sea View twin</span>
-            <span class="chip__where">The same outlook, twin beds</span>
-            <span class="chip__price">from 3,300<span class="chip__unit">THB</span></span>
-          </button>
-          <button type="button" class="chip" role="radio" aria-checked="false"
-                  data-room="bali-house-sea-view" data-label="Bali House &ndash; Sea View">
-            <span class="chip__name">Sea View</span>
-            <span class="chip__where">The front row, facing the sea</span>
-            <span class="chip__price">from 3,500<span class="chip__unit">THB</span></span>
-          </button>
-        </div>
-        <button type="button" class="rr__more" data-dlg-open="rdlg-bali-house">More info</button>
       </div>
-      <div class="rr">
-        <img class="rr__shot" src="assets/room-photos/bali-deluxe-partial-sea-view/img_9p8358.webp" alt="" width="2000" height="1500" loading="lazy">
-        <div class="rr__text">
-          <h3 class="rr__name">Bali Deluxe</h3>
-          <p class="rr__hook">The same style, half as big again — two bedrooms and a living space.</p>
+      <div class="house__views" id="views-bali-house" data-house-views hidden>
+        <div class="house__views-inner" role="radiogroup" aria-label="Bali House &mdash; which view?">
+          <label class="view">
+            <input type="radio" name="room" value="bali-house-garden-view" data-label="Bali House &ndash; Garden View" data-price="2,900">
+            <span class="view__name">Garden View</span>
+            <span class="view__price">from 2,900<span class="view__unit">THB</span></span>
+          </label>
+          <label class="view">
+            <input type="radio" name="room" value="bali-house-partial-sea-view" data-label="Bali House &ndash; Partial Sea View" data-price="3,300">
+            <span class="view__name">Partial Sea View</span>
+            <span class="view__price">from 3,300<span class="view__unit">THB</span></span>
+          </label>
+          <label class="view">
+            <input type="radio" name="room" value="bali-house-partial-sea-view-twin" data-label="Bali House &ndash; Partial Sea View twin" data-price="3,300">
+            <span class="view__name">Partial Sea View twin</span>
+            <span class="view__price">from 3,300<span class="view__unit">THB</span></span>
+          </label>
+          <label class="view">
+            <input type="radio" name="room" value="bali-house-sea-view" data-label="Bali House &ndash; Sea View" data-price="3,500">
+            <span class="view__name">Sea View</span>
+            <span class="view__price">from 3,500<span class="view__unit">THB</span></span>
+          </label>
         </div>
-        <div class="rr__views" role="radiogroup" aria-label="Bali Deluxe &mdash; choose your view">
-          <button type="button" class="chip" role="radio" aria-checked="false"
-                  data-room="bali-deluxe-partial-sea-view" data-label="Bali Deluxe &ndash; Partial Sea View">
-            <span class="chip__name">Partial Sea View</span>
-            <span class="chip__where">Angled towards the water</span>
-            <span class="chip__price">from 5,500<span class="chip__unit">THB</span></span>
-          </button>
-        </div>
-        <button type="button" class="rr__more" data-dlg-open="rdlg-bali-deluxe">More info</button>
       </div>
-      <div class="rr">
-        <img class="rr__shot" src="assets/room-photos/thai-twin-house-partial-sea-view/img_6p2997.webp" alt="" width="750" height="500" loading="lazy">
-        <div class="rr__text">
-          <h3 class="rr__name">Thai Twin House</h3>
-          <p class="rr__hook">Simpler and lighter, with two proper beds and a terrace at the front.</p>
+    </article>
+    <article class="house" data-house="bali-deluxe">
+      <img class="house__shot" src="assets/room-photos/bali-deluxe-partial-sea-view/img_9p8358.webp" alt="" width="2000" height="1500" loading="lazy">
+      <div class="house__body">
+        <h2 class="house__name">Bali Deluxe</h2>
+        <p class="house__hook">The same style, half as big again — two bedrooms and a living space.</p>
+        <p class="house__from">from 5,500 <span class="house__unit">THB</span> <span class="house__night">per night</span></p>
+        <p class="house__chosen" data-house-chosen aria-live="polite"></p>
+        <div class="house__actions">
+          <button type="button" class="btn" data-house-open="bali-deluxe" aria-expanded="false" aria-controls="views-bali-deluxe">Choose this room</button>
+          <button type="button" class="house__more" data-dlg-open="rdlg-bali-deluxe">More about it</button>
+          <button type="button" class="house__change" data-house-change="bali-deluxe" hidden>Change</button>
         </div>
-        <div class="rr__views" role="radiogroup" aria-label="Thai Twin House &mdash; choose your view">
-          <button type="button" class="chip" role="radio" aria-checked="false"
-                  data-room="thai-twin-house-garden-view" data-label="Thai Twin House &ndash; Garden View">
-            <span class="chip__name">Garden View</span>
-            <span class="chip__where">Set back, facing the lawn</span>
-            <span class="chip__price">from 7,000<span class="chip__unit">THB</span></span>
-          </button>
-          <button type="button" class="chip" role="radio" aria-checked="false"
-                  data-room="thai-twin-house-partial-sea-view" data-label="Thai Twin House &ndash; Partial Sea View">
-            <span class="chip__name">Partial Sea View</span>
-            <span class="chip__where">Angled towards the water</span>
-            <span class="chip__price">from 7,800<span class="chip__unit">THB</span></span>
-          </button>
-          <button type="button" class="chip" role="radio" aria-checked="false"
-                  data-room="thai-twin-house-sea-view" data-label="Thai Twin House &ndash; Sea View">
-            <span class="chip__name">Sea View</span>
-            <span class="chip__where">The front row, facing the sea</span>
-            <span class="chip__price">from 8,200<span class="chip__unit">THB</span></span>
-          </button>
-        </div>
-        <button type="button" class="rr__more" data-dlg-open="rdlg-thai-twin-house">More info</button>
       </div>
+      <div class="house__views" id="views-bali-deluxe" data-house-views hidden>
+        <div class="house__views-inner" role="radiogroup" aria-label="Bali Deluxe &mdash; which view?">
+          <label class="view">
+            <input type="radio" name="room" value="bali-deluxe-partial-sea-view" data-label="Bali Deluxe &ndash; Partial Sea View" data-price="5,500">
+            <span class="view__name">Partial Sea View</span>
+            <span class="view__price">from 5,500<span class="view__unit">THB</span></span>
+          </label>
         </div>
-      </details>
-    </fieldset>
+      </div>
+    </article>
+    <article class="house" data-house="thai-twin-house">
+      <img class="house__shot" src="assets/room-photos/thai-twin-house-partial-sea-view/img_6p2997.webp" alt="" width="750" height="500" loading="lazy">
+      <div class="house__body">
+        <h2 class="house__name">Thai Twin House</h2>
+        <p class="house__hook">Simpler and lighter, with two proper beds and a terrace at the front.</p>
+        <p class="house__from">from 7,000 <span class="house__unit">THB</span> <span class="house__night">per night</span></p>
+        <p class="house__chosen" data-house-chosen aria-live="polite"></p>
+        <div class="house__actions">
+          <button type="button" class="btn" data-house-open="thai-twin-house" aria-expanded="false" aria-controls="views-thai-twin-house">Choose this room</button>
+          <button type="button" class="house__more" data-dlg-open="rdlg-thai-twin-house">More about it</button>
+          <button type="button" class="house__change" data-house-change="thai-twin-house" hidden>Change</button>
+        </div>
+      </div>
+      <div class="house__views" id="views-thai-twin-house" data-house-views hidden>
+        <div class="house__views-inner" role="radiogroup" aria-label="Thai Twin House &mdash; which view?">
+          <label class="view">
+            <input type="radio" name="room" value="thai-twin-house-garden-view" data-label="Thai Twin House &ndash; Garden View" data-price="7,000">
+            <span class="view__name">Garden View</span>
+            <span class="view__price">from 7,000<span class="view__unit">THB</span></span>
+          </label>
+          <label class="view">
+            <input type="radio" name="room" value="thai-twin-house-partial-sea-view" data-label="Thai Twin House &ndash; Partial Sea View" data-price="7,800">
+            <span class="view__name">Partial Sea View</span>
+            <span class="view__price">from 7,800<span class="view__unit">THB</span></span>
+          </label>
+          <label class="view">
+            <input type="radio" name="room" value="thai-twin-house-sea-view" data-label="Thai Twin House &ndash; Sea View" data-price="8,200">
+            <span class="view__name">Sea View</span>
+            <span class="view__price">from 8,200<span class="view__unit">THB</span></span>
+          </label>
+        </div>
+      </div>
+    </article>
+    <label class="view view--any">
+      <input type="radio" name="room" value="" data-label="Not sure yet &mdash; happy to be recommended a room" checked>
+      <span class="view__name">Not sure yet &mdash; recommend one for us</span>
+    </label>
+  </section>
 
-    <fieldset class="enq__group">
-      <legend class="enq__legend">Your details</legend>
-      <div class="form__row">
-        <label><span class="label">Name</span><input type="text" name="name" required autocomplete="name"></label>
-        <label><span class="label">Country</span>
-          <select name="nationality" required>
+  <!-- ============ YOUR DETAILS ============ -->
+  <section class="details form wrap-narrow" id="details">
+    <h2 class="details__h">Your details</h2>
+    <div class="radios" role="radiogroup" aria-label="Are your dates fixed?">
+      <label><input type="radio" name="dates" value="fixed" checked> <span>Fixed dates</span></label>
+      <label><input type="radio" name="dates" value="flexible"> <span>Flexible by 2&ndash;3 days</span></label>
+    </div>
+    <div class="form__row">
+      <label><span class="label">Name</span><input type="text" name="name" required autocomplete="name"></label>
+      <label><span class="label">Country</span>
+        <select name="nationality" required>
           <option value="">Select a country</option>
           <option value="dk">Denmark</option>
           <option value="se">Sweden</option>
@@ -270,26 +292,29 @@
           <option value="ca">Canada</option>
           <option value="other">Somewhere else</option>
         </select>
-        </label>
-      </div>
-      <div class="form__row">
-        <label><span class="label">Email</span><input type="email" name="email" required autocomplete="email"></label>
-        <label><span class="label">Telephone <span class="label__hint">optional</span></span><input type="tel" name="phone" autocomplete="tel"></label>
-      </div>
-      <label><span class="label">Anything else we should know?</span><textarea name="message" rows="4"></textarea></label>
-    </fieldset>
-
-    <div class="enq__send">
+      </label>
+    </div>
+    <div class="form__row">
+      <label><span class="label">Email</span><input type="email" name="email" required autocomplete="email"></label>
+      <label><span class="label">Telephone <span class="label__hint">optional</span></span><input type="tel" name="phone" autocomplete="tel"></label>
+    </div>
+    <div class="form__row">
+      <label><span class="label">Infants <span class="label__hint">under 2</span></span><input type="number" name="infants" min="0" max="6" value="0" inputmode="numeric"></label>
+      <label><span class="label">Extra bed</span>
+        <select name="extrabed"><option value="no">No</option><option value="yes">Yes</option></select></label>
+    </div>
+    <label><span class="label">Anything else we should know?</span><textarea name="message" rows="4"></textarea></label>
+    <div class="details__send" id="send">
       <button type="submit" class="btn">Send enquiry <span class="arrow" aria-hidden="true">&#8594;</span></button>
-      <p class="enq__note">No payment now. We reply by email within 24 hours, usually the same day
+      <p class="details__note">No payment now. We reply by email within 24 hours, usually the same day
         &mdash; or <a href="https://wa.me/66819088966?text=Hi%21%20I%27d%20like%20to%20ask%20about%20staying%20at%20Koh%20Kood%20Beach%20Resort." target="_blank" rel="noopener" class="link">message us on WhatsApp</a>.</p>
     </div>
-  </form>
-</section>
+  </section>
+</form>
 
-<!-- Warm-white on purpose: this is the last band before the footer, and the
-     footer illustration's sky is warm-white. scratchpad/check_last_band.py
-     refuses the commit otherwise. -->
+<!-- Warm-white on purpose: the last band before the footer must match the
+     footer illustration's sky. scratchpad/check_last_band.py refuses the
+     commit otherwise. -->
 <aside class="rev rev--light">
   <div class="wrap-narrow rev__inner">
     <span class="rev__stars" role="img" aria-label="5 out of 5"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></span>

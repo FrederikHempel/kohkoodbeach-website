@@ -67,29 +67,37 @@ def dialog(key):
   </div>
 </dialog>'''
 
-def row(key):
-    """One house as a row: photo | name + one line | the views as chips | more."""
+def house(key):
+    """One house: photograph-led row, with its views folded underneath."""
     r = rooms[key]; src, w, h = r['img']
+    lowest = min(r['picks'], key=lambda p: int(p['price'].replace(',', '')))['price']
     views = '\n'.join(
-        f'''          <button type="button" class="chip" role="radio" aria-checked="false"
-                  data-room="{p['id']}" data-label="{NAMES[key]} &ndash; {p['name']}">
-            <span class="chip__name">{p['name']}</span>
-            <span class="chip__where">{p['where']}</span>
-            <span class="chip__price">from {p['price']}<span class="chip__unit">THB</span></span>
-          </button>''' for p in r['picks'])
-    return f'''      <div class="rr">
-        <img class="rr__shot" src="{src}" alt="" width="{w}" height="{h}" loading="lazy">
-        <div class="rr__text">
-          <h3 class="rr__name">{NAMES[key]}</h3>
-          <p class="rr__hook">{HOOKS[key]}</p>
+        f'''          <label class="view">
+            <input type="radio" name="room" value="{p['id']}" data-label="{NAMES[key]} &ndash; {p['name']}" data-price="{p['price']}">
+            <span class="view__name">{p['name']}</span>
+            <span class="view__price">from {p['price']}<span class="view__unit">THB</span></span>
+          </label>''' for p in r['picks'])
+    return f'''    <article class="house" data-house="{key}">
+      <img class="house__shot" src="{src}" alt="" width="{w}" height="{h}" loading="lazy">
+      <div class="house__body">
+        <h2 class="house__name">{NAMES[key]}</h2>
+        <p class="house__hook">{HOOKS[key]}</p>
+        <p class="house__from">from {lowest} <span class="house__unit">THB</span> <span class="house__night">per night</span></p>
+        <p class="house__chosen" data-house-chosen aria-live="polite"></p>
+        <div class="house__actions">
+          <button type="button" class="btn" data-house-open="{key}" aria-expanded="false" aria-controls="views-{key}">Choose this room</button>
+          <button type="button" class="house__more" data-dlg-open="rdlg-{key}">More about it</button>
+          <button type="button" class="house__change" data-house-change="{key}" hidden>Change</button>
         </div>
-        <div class="rr__views" role="radiogroup" aria-label="{NAMES[key]} &mdash; choose your view">
+      </div>
+      <div class="house__views" id="views-{key}" data-house-views hidden>
+        <div class="house__views-inner" role="radiogroup" aria-label="{NAMES[key]} &mdash; which view?">
 {views}
         </div>
-        <button type="button" class="rr__more" data-dlg-open="rdlg-{key}">More info</button>
-      </div>'''
+      </div>
+    </article>'''
 
-rows = '\n'.join(row(k) for k in STYLE_ORDER)
+houses = '\n'.join(house(k) for k in STYLE_ORDER)
 dialogs = '\n\n'.join(dialog(k) for k in STYLE_ORDER)
 
 # The country list is carried forward from whatever book.html currently holds,
@@ -98,104 +106,99 @@ dialogs = '\n\n'.join(dialog(k) for k in STYLE_ORDER)
 COUNTRIES = re.search(r'<select name="nationality"[^>]*>(.*?)</select>',
                       (ROOT / 'book.html').read_text(encoding='utf-8'), re.S).group(1)
 
-BODY = f'''<section class="page-hero page-hero--short" style="background-image:url('assets/book-hero.webp')">
-  <div class="page-hero__inner">
-    <span class="label">Enquire</span>
-    <h1>When will you arrive?</h1>
+BODY = f'''<!-- ============ THE ENQUIRY ============
+     One <form> wraps the whole page: the hero strip, the rail, the houses and
+     the details are all fields of the same enquiry. The visitor clicked "Book
+     now" — the page's job is to take the question with as little friction as
+     possible and to feel like the first day of the stay while it does.
+     ⚠️ The houses and their overlays are GENERATED from accommodation.html by
+     scratchpad/build_book.py — edit the rooms there. -->
+<form class="enq" data-book-form data-endpoint="https://api.web3forms.com/submit">
+  <!-- ⚠️ Empty on purpose. Paste the Web3Forms access key here and the form
+       starts POSTing for real; while blank it falls back to the mailto draft.
+       See CLAUDE.md — do not invent a key. -->
+  <input type="hidden" name="access_key" value="">
+  <input type="hidden" name="subject" value="Booking enquiry — Koh Kood Beach Resort">
+  <input type="hidden" name="from_name" value="Koh Kood Beach Resort website">
+  <input type="checkbox" name="botcheck" class="visually-hidden" style="display:none" tabindex="-1" autocomplete="off">
+
+  <!-- ============ HERO: the photograph, and the four fields that start it ============
+       The <video> has no src in the markup. initBookHero() attaches it only on a
+       wide screen, without prefers-reduced-motion, and not on a save-data
+       connection — everyone else gets the poster, which is the video's own
+       first frame, so nothing jumps when it does start. -->
+  <section class="bhero" data-bhero>
+    <video class="bhero__video" muted playsinline loop preload="none"
+           poster="assets/book-hero-poster.webp" data-src="assets/book-hero.mp4" aria-hidden="true"></video>
+    <div class="bhero__copy">
+      <h1>When will you arrive?</h1>
+      <p class="bhero__sub">Tell us your dates and who is coming. We reply within 24 hours, usually the same day &mdash; no payment now.</p>
+    </div>
+    <div class="bhero__strip">
+      <label class="field"><span class="label">Arrival</span><input type="date" name="checkin" required></label>
+      <label class="field"><span class="label">Departure</span><input type="date" name="checkout" required></label>
+      <label class="field"><span class="label">Adults <span class="label__hint">13+</span></span><input type="number" name="adults" min="1" max="12" value="2" required inputmode="numeric"></label>
+      <label class="field"><span class="label">Children <span class="label__hint">2&ndash;12</span></span><input type="number" name="children" min="0" max="10" value="0" inputmode="numeric"></label>
+      <button type="button" class="btn" data-continue>Continue <span class="arrow" aria-hidden="true">&#8594;</span></button>
+    </div>
+  </section>
+
+  <!-- The page answering back: fills in as the visitor chooses. Sticky under
+       the nav on desktop, a bottom bar on a phone. -->
+  <div class="rail" data-rail aria-live="polite">
+    <div class="wrap rail__inner">
+      <span class="rail__item" data-rail-dates>Your dates</span>
+      <span class="rail__sep" aria-hidden="true">&middot;</span>
+      <span class="rail__item" data-rail-guests>2 adults</span>
+      <span class="rail__sep" aria-hidden="true">&middot;</span>
+      <span class="rail__item" data-rail-room>Any bungalow</span>
+      <a href="#send" class="rail__send">Send enquiry <span class="arrow" aria-hidden="true">&#8594;</span></a>
+    </div>
   </div>
-</section>
 
-<!-- ============ THE ENQUIRY ============
-     One form, four groups, in the order a visitor actually decides: when, who,
-     which bungalow (optional, folded), then who they are. Nothing sits between
-     the hero and the first field, so the form is reachable without scrolling.
-     ⚠️ The bungalow rows and the three overlays are GENERATED from
-     accommodation.html by scratchpad/build_book.py — edit the rooms there. -->
-<section class="band band--tight" id="enquiry">
-  <form class="form enq wrap-narrow" data-book-form data-endpoint="https://api.web3forms.com/submit">
-    <!-- ⚠️ Empty on purpose. Paste the Web3Forms access key here and the form
-         starts POSTing for real; while it is blank the submit handler falls
-         back to the mailto draft. See CLAUDE.md — do not invent a key. -->
-    <input type="hidden" name="access_key" value="">
-    <input type="hidden" name="subject" value="Booking enquiry — Koh Kood Beach Resort">
-    <input type="hidden" name="from_name" value="Koh Kood Beach Resort website">
-    <input type="hidden" name="room" value="">
-    <input type="hidden" name="room_label" value="Not sure yet">
-    <!-- Web3Forms' honeypot: real people never see it, bots fill it in. -->
-    <input type="checkbox" name="botcheck" class="visually-hidden" style="display:none" tabindex="-1" autocomplete="off">
+  <!-- ============ THE HOUSES ============ -->
+  <section class="houses wrap" id="rooms">
+{houses}
+    <label class="view view--any">
+      <input type="radio" name="room" value="" data-label="Not sure yet &mdash; happy to be recommended a room" checked>
+      <span class="view__name">Not sure yet &mdash; recommend one for us</span>
+    </label>
+  </section>
 
-    <fieldset class="enq__group">
-      <legend class="enq__legend">When</legend>
-      <div class="radios">
-        <label><input type="radio" name="dates" value="fixed" checked> <span>Fixed dates</span></label>
-        <label><input type="radio" name="dates" value="flexible"> <span>Flexible by 2&ndash;3 days</span></label>
-      </div>
-      <div class="form__row">
-        <label><span class="label">Arrival</span><input type="date" name="checkin" required></label>
-        <label><span class="label">Departure</span><input type="date" name="checkout" required></label>
-      </div>
-    </fieldset>
-
-    <fieldset class="enq__group">
-      <legend class="enq__legend">Who&rsquo;s coming</legend>
-      <div class="guests__grid">
-        <label><span class="guests__cap">Adults <span class="label__hint">13+</span></span>
-          <input type="number" name="adults" min="1" max="12" value="2" required inputmode="numeric"></label>
-        <label><span class="guests__cap">Children <span class="label__hint">2&ndash;12</span></span>
-          <input type="number" name="children" min="0" max="10" value="0" inputmode="numeric"></label>
-        <label><span class="guests__cap">Infants <span class="label__hint">under 2</span></span>
-          <input type="number" name="infants" min="0" max="6" value="0" inputmode="numeric"></label>
-        <label><span class="guests__cap">Extra bed</span>
-          <select name="extrabed"><option value="no">No</option><option value="yes">Yes</option></select></label>
-      </div>
-    </fieldset>
-
-    <fieldset class="enq__group">
-      <legend class="enq__legend">Your bungalow <span class="label__hint">optional</span></legend>
-      <!-- Native <details>: opens without JS, is keyboard-operable, and the
-           summary is a real control. JS only keeps its text in step with the
-           chosen chip. -->
-      <details class="fold" data-fold>
-        <summary class="fold__sum">
-          <span class="fold__current" data-fold-current>Not sure yet &mdash; we&rsquo;ll recommend one</span>
-          <span class="fold__cta">Choose a bungalow</span>
-        </summary>
-        <div class="fold__body">
-          <button type="button" class="chip chip--any" role="radio" aria-checked="true"
-                  data-room="" data-label="Not sure yet &mdash; happy to be recommended a room">
-            Not sure yet &mdash; recommend one for us
-          </button>
-{rows}
-        </div>
-      </details>
-    </fieldset>
-
-    <fieldset class="enq__group">
-      <legend class="enq__legend">Your details</legend>
-      <div class="form__row">
-        <label><span class="label">Name</span><input type="text" name="name" required autocomplete="name"></label>
-        <label><span class="label">Country</span>
-          <select name="nationality" required>{COUNTRIES}</select>
-        </label>
-      </div>
-      <div class="form__row">
-        <label><span class="label">Email</span><input type="email" name="email" required autocomplete="email"></label>
-        <label><span class="label">Telephone <span class="label__hint">optional</span></span><input type="tel" name="phone" autocomplete="tel"></label>
-      </div>
-      <label><span class="label">Anything else we should know?</span><textarea name="message" rows="4"></textarea></label>
-    </fieldset>
-
-    <div class="enq__send">
+  <!-- ============ YOUR DETAILS ============ -->
+  <section class="details form wrap-narrow" id="details">
+    <h2 class="details__h">Your details</h2>
+    <div class="radios" role="radiogroup" aria-label="Are your dates fixed?">
+      <label><input type="radio" name="dates" value="fixed" checked> <span>Fixed dates</span></label>
+      <label><input type="radio" name="dates" value="flexible"> <span>Flexible by 2&ndash;3 days</span></label>
+    </div>
+    <div class="form__row">
+      <label><span class="label">Name</span><input type="text" name="name" required autocomplete="name"></label>
+      <label><span class="label">Country</span>
+        <select name="nationality" required>{COUNTRIES}</select>
+      </label>
+    </div>
+    <div class="form__row">
+      <label><span class="label">Email</span><input type="email" name="email" required autocomplete="email"></label>
+      <label><span class="label">Telephone <span class="label__hint">optional</span></span><input type="tel" name="phone" autocomplete="tel"></label>
+    </div>
+    <div class="form__row">
+      <label><span class="label">Infants <span class="label__hint">under 2</span></span><input type="number" name="infants" min="0" max="6" value="0" inputmode="numeric"></label>
+      <label><span class="label">Extra bed</span>
+        <select name="extrabed"><option value="no">No</option><option value="yes">Yes</option></select></label>
+    </div>
+    <label><span class="label">Anything else we should know?</span><textarea name="message" rows="4"></textarea></label>
+    <div class="details__send" id="send">
       <button type="submit" class="btn">Send enquiry <span class="arrow" aria-hidden="true">&#8594;</span></button>
-      <p class="enq__note">No payment now. We reply by email within 24 hours, usually the same day
+      <p class="details__note">No payment now. We reply by email within 24 hours, usually the same day
         &mdash; or <a href="https://wa.me/66819088966?text=Hi%21%20I%27d%20like%20to%20ask%20about%20staying%20at%20Koh%20Kood%20Beach%20Resort." target="_blank" rel="noopener" class="link">message us on WhatsApp</a>.</p>
     </div>
-  </form>
-</section>
+  </section>
+</form>
 
-<!-- Warm-white on purpose: this is the last band before the footer, and the
-     footer illustration's sky is warm-white. scratchpad/check_last_band.py
-     refuses the commit otherwise. -->
+<!-- Warm-white on purpose: the last band before the footer must match the
+     footer illustration's sky. scratchpad/check_last_band.py refuses the
+     commit otherwise. -->
 <aside class="rev rev--light">
   <div class="wrap-narrow rev__inner">
     <span class="rev__stars" role="img" aria-label="5 out of 5"><span aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span></span>
@@ -211,7 +214,13 @@ BODY = f'''<section class="page-hero page-hero--short" style="background-image:u
 # ---- splice into book.html between the nav and the footer ----
 p = ROOT / 'book.html'
 s = p.read_text(encoding='utf-8')
-a = s.index('<section class="page-hero"')
+# The body starts at whatever opener the previous build left: the old
+# .page-hero section, or this build's own <form>. Match the prefix only —
+# the hero carried modifier classes, so an exact class="…" never matched.
+import re as _re
+_m = _re.search(r'<section class="page-hero[^"]*"|<form class="enq"', s)
+if not _m: raise SystemExit('no body opener found in book.html')
+a = _m.start()
 b = s.index('<footer class="footer">')
 p.write_text(s[:a] + BODY + '\n' + s[b:], encoding='utf-8')
 print(f'book.html rebuilt — {len(BODY)} bytes of body')
