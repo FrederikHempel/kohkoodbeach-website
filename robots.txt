@@ -1,2 +1,15 @@
+# Meta's crawler is let through so Facebook domain verification can fetch the
+# homepage and read its verification meta tag. Meta's crawlers obey robots.txt
+# (their own crawler documentation says so; the only stated exception is
+# security and integrity checks), so the blanket Disallow below would otherwise
+# make verification fail with a correct tag in place — the failure would look
+# like a tag problem and it would not be one.
+# This does NOT make the site indexable: every page still carries
+# <meta name="robots" content="noindex, nofollow">, and Meta does not index.
+User-agent: facebookexternalhit
+Allow: /
+
+# Staging domain, deliberately not indexable. When this becomes production,
+# see CLAUDE.md — the meta tags and this file have to be reverted together.
 User-agent: *
 Disallow: /

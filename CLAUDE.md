@@ -581,6 +581,21 @@ reverting — drop the meta tag from all 12 pages, restore `robots.txt` to
 `Allow: /` with the `Sitemap:` line pointing at `sitemap.xml`, and only then
 submit it in Search Console. Don't flip one without the other.
 
+⚠️ **`robots.txt` also carries a `facebookexternalhit` exception, and it is not
+decoration.** Meta's crawlers obey robots.txt — their own crawler documentation
+is explicit, and the only stated exception is security and integrity checks — so
+the blanket `Disallow: /` would have made Facebook **domain verification** fail
+even with a correct `facebook-domain-verification` tag in `<head>`. That failure
+would have looked like a tag problem and would not have been one. The exception
+does not make the site indexable: every page still carries the `noindex` meta
+tag, and Meta is not a search engine. Keep the exception when you revert the
+rest, or move it into the production `robots.txt`.
+
+The verification tag itself lives in `index.html`'s `<head>` only. Meta requires
+it on the home page and requires it to be **static** — a tag injected by
+JavaScript is not accepted, which is why it is in the markup rather than in
+`script.js` alongside the pixel.
+
 Hosting is GitHub Pages from a public repo (`kohkoodbeach-website`, pushed from
 this folder) — Frederik's GitHub account is Free tier, which requires a public
 repo for Pages. That's fine here: there is no server logic or secret to leak,
