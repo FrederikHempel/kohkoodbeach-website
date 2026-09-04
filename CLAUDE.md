@@ -696,3 +696,58 @@ instead of the 750x500 original, since that's the page's real representative
 photo now. `img_d03y201734.webp` is still used as a small thumbnail on
 `index.html` and `family.html` — leave those, only this page's use of it as
 a full-bleed background was the problem.
+
+### Homepage, first pass (4 Sep 2026)
+
+Going page by page per Frederik's request, starting with `index.html`. Six
+changes, agreed after a critique round — worth recording the two where the
+brief and the site's own standing rules pulled in different directions.
+
+**Hero tagline changed to "Stay closer to nature".** Flagged before making
+this change: "Sense of true happiness" is baked into the logo file itself,
+not just page copy, so the hero and the logo now say two different things.
+Frederik's call, made knowingly — not an oversight. `.hero h1` also got its
+own scoped font-size (`clamp(2.6rem, 7.6vw, 6.6rem)`, down from the shared
+`h1`'s `clamp(2.9rem, 9vw, 8rem)`) rather than touching the sitewide rule,
+which every page's `<h1>` draws from.
+
+**The snorkelling photo is a genuine judgement call, overruled on purpose.**
+Flagged that `img_victoria_snorkel.webp` (an Unsplash download) reads to me
+as wetsuited scuba gear, not snorkelling — Frederik's read, with more context
+than I have, is that it's swimmers/snorkellers and less stock-looking than
+what was there before. Went with his call. It's now row 02 on the homepage
+Experiences list. **Row 05, "Scuba Diving", is new** — reuses
+`assets/activities/5_79_img_d07y201791.webp`, already live on `activities.html`
+for the same activity. Its copy, and `activities.html`'s existing copy, both
+now mention the Open Water certification available in the resort's own pool
+— a real detail Frederik gave me, not previously written anywhere.
+
+**New "Book reminder" band**, between the Journey section and the Gina
+review (which stays untouched, per instruction). Copy was steered away from
+the brief's own example ("Enquire now to ensure your private bungalow") —
+"ensure" implies scarcity, which is the exact framing this project has
+rejected before (see the rooms-page passes above: no "only 19 rooms," this
+audience is inoculated against it). Landed on "Ready to book your stay? /
+Tell us your dates, and we'll take it from there." instead. Reuses
+`assets/rooms/rooms-hero.webp` as the background (already vetted sharp,
+unused elsewhere on this page) rather than sourcing a new photo.
+
+New `.cta-band` in style.css puts a **warm-white-filled `.btn`** on the photo,
+not the standard charcoal fill — charcoal on this band's scrim
+(`rgba(28,26,24,...)`, close to the scrim's own tone) would barely register.
+Every other on-photo CTA in this project solves the same problem the same
+way (`.rs__cta`, `.footer__social a:hover`): invert to light-on-dark, don't
+reach for a new brand colour.
+
+⚠️ **Deferred, deliberately: the "Getting Here" band.** Frederik wants the
+photo-locked, scroll-driven route animation (NIHI Sumba reference — bus from
+Bangkok to Laem Sok pier, then a ferry icon to Koh Kood, drawn over
+`assets/hero-carousel/hero-4.webp`, the resort's own drone shot). Worth
+recording why this didn't happen in the same pass as everything else here:
+it's a real interactive build (an illustrated SVG route, not a live map — the
+NIHI reference itself is a hand-drawn island outline, not real map data;
+scroll-pinning logic; a simpler non-locked fallback for mobile, confirmed
+explicitly rather than assumed), not a copy or asset swap. Frederik agreed
+it should be its own session. The homepage's existing Journey section
+(bus/ferry/pickup, three steps) is untouched for now, and still ends in a CTA
+to `getting-here.html` — that full page redesign is separately deferred too.

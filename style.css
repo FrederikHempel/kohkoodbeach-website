@@ -385,7 +385,10 @@ p { color: var(--ink-muted); }
 }
 .hero__place { display: flex; align-items: center; gap: 14px; color: rgba(248,246,241,0.9); }
 .hero__place::before { content: ''; width: clamp(28px, 5vw, 64px); height: 1px; background: currentColor; }
-.hero h1 { color: var(--warm-white); max-width: 15ch; }
+/* A few points down from the shared h1 (clamp(2.9rem, 9vw, 8rem)) — Frederik's
+   read that the homepage hero type ran heavy. Scoped here rather than on the
+   shared rule, which every page's h1 draws from. */
+.hero h1 { color: var(--warm-white); max-width: 15ch; font-size: clamp(2.6rem, 7.6vw, 6.6rem); }
 .hero__tagline {
   font-family: var(--font-display);
   font-weight: 300;
@@ -475,6 +478,37 @@ p { color: var(--ink-muted); }
 .reveal-img__cap { position: relative; z-index: 1; padding: var(--gutter); }
 .reveal-img__cap .label { color: rgba(248,246,241,0.8); }
 .reveal-img__cap h3 { color: var(--warm-white); max-width: 18ch; margin-top: 12px; }
+
+/* ---------- Book reminder (photo CTA band) ----------
+   Closes the homepage's case for the resort with one more direct ask, after
+   the room collection, experiences and journey have made it. Reuses
+   rooms-hero.webp rather than a new photo — already vetted sharp at this
+   scale (see the accommodation-page rebuild), and unused on this page. */
+.cta-band {
+  position: relative; background-size: cover; background-position: center;
+  padding-block: clamp(90px, 13vw, 170px);
+  text-align: center; color: var(--warm-white);
+}
+.cta-band::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(28,26,24,0.5), rgba(28,26,24,0.42));
+}
+.cta-band__inner { position: relative; z-index: 1; margin-inline: auto; }
+.cta-band h2 { color: var(--warm-white); }
+.cta-band p { color: rgba(248,246,241,0.9); margin-top: 14px; font-size: clamp(1rem, 1.3vw, 1.2rem); }
+.cta-band__actions {
+  margin-top: clamp(28px, 3vw, 40px);
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+/* Inverted fill, not the standard charcoal .btn — charcoal on this scrim
+   (itself rgba(28,26,24,...)) would all but disappear. Every other on-photo
+   CTA in this project solves the same problem the same way (.rs__cta,
+   .footer__social a:hover): light on dark here, not a new brand colour. */
+.cta-band .btn { background: var(--warm-white); color: var(--charcoal); }
+@media (hover: hover) and (pointer: fine) {
+  .cta-band .btn:hover { background: var(--gold); color: var(--charcoal); }
+}
+.cta-band__rating { font-size: 0.82rem; letter-spacing: 0.04em; color: rgba(248,246,241,0.85); }
 
 /* ---------- Room collection (sage band) ---------- */
 .rooms { position: relative; overflow: hidden; }
