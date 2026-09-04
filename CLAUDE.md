@@ -1522,3 +1522,35 @@ reception can act on it separately from the room.
 text. Matching the specificity with `label.` and coming later in the file is
 what wins it back. Worth remembering for any new label inside `.form`.
 
+### Book Now, ninth pass — the departure floor, matched motion, transport overlay (4 Sep 2026)
+
+⚠️ **Departure's floor is arrival + one night, and getting there exposed a
+timezone trap.** `checkout.min` used to be `checkin.value`, which left the
+arrival date itself selectable — a nought-night stay the form would submit. The
+first fix computed the next day with `new Date(iso + 'T00:00:00')` and
+`toISOString()`; that parses as **local** midnight and serialises back to UTC,
+so east of Greenwich it lands on the previous day and the floor never moved.
+`dayAfter()` parses with a trailing `Z` and steps with `setUTCDate` — a plain
+calendar date stays a calendar date. Verified across a month boundary
+(30 Sep → 1 Oct) and a year boundary (31 Dec → 1 Jan). **Any date arithmetic on
+this site should use the UTC accessors; the values are dates, not instants.**
+
+⚠️ **The fold and the glide share one duration, read from one place.** Choosing
+a room still felt fast next to "Choose your room", and the scroll was not the
+difference: that step also *collapses* the room section, and a 1000px collapse
+in 520ms threw the page up the screen. `--t-section` is now **760ms** with
+`--ease-flow` (`cubic-bezier(0.45, 0, 0.55, 1)`, the curve form of the cosine
+`glideTo()` eases with), and **`glideTo()` reads `--t-section` for its own
+duration instead of scaling by distance**. Both interactions now move for the
+same time on the same curve however far apart their targets are — measured 734ms
+for a 636px move and 700ms for a 104px one, both ending at 767ms. Change the
+custom property and both change together; that is the point of it.
+
+**"Times and fares" is an overlay, not a link away.** Sending someone to another
+page in the middle of an enquiry loses the form. It is a `<dialog>` reusing the
+room overlays' `.rdlg` chrome, so Escape, the backdrop and the focus trap come
+free — and its content is **generated from `getting-here.html`'s own numbered
+rows**, so the times and fares have one home. The footer of the overlay links to
+the full page for the ferry timetable and the other routes, which is a departure
+the visitor chooses rather than one the form makes for them.
+

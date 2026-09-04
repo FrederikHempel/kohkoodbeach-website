@@ -516,9 +516,15 @@ function glideTo(y, still) {
   // a lurch. Running longer than --t-section means the height is already there
   // for most of the travel, and each frame re-clamps against the live ceiling
   // instead of assuming it.
-  const sect = parseFloat(getComputedStyle(document.documentElement)
-    .getPropertyValue('--t-section')) || 520;
-  const ms = Math.min(1200, Math.max(sect + 220, Math.abs(dist) * 0.85));
+  /* ⚠️ A fixed duration, read from the same custom property the fold uses, and
+     NOT scaled by distance. Frederik's note was that choosing a room still felt
+     fast next to "Choose your room" — and the scroll was not the difference:
+     that step also collapses the room section, and a 1000px collapse in 520ms
+     is what threw the page up the screen. Fold and glide now share one duration
+     and one curve, so the two interactions move identically however far apart
+     their targets are. */
+  const ms = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--t-section')) || 760;
 
   let t0 = null, cancelled = false;
   const clean = () => {
@@ -839,15 +845,30 @@ function initBookPage() {
   const checkin = form.querySelector('[name="checkin"]');
   const checkout = form.querySelector('[name="checkout"]');
   const today = new Date().toISOString().slice(0, 10);
+  /* ⚠️ Departure's floor is the night AFTER arrival, not arrival itself. It used
+     to be `checkin.value`, which left the arrival date selectable in the
+     departure picker — a nought-night stay the form would happily submit. */
+  /* ⚠️ All UTC, deliberately. `new Date('2026-09-24T00:00:00')` is LOCAL
+     midnight, and `toISOString()` then converts it back to UTC — east of
+     Greenwich that lands on the previous day, so "the day after" returned the
+     same date and the departure floor never moved. Parsing with a trailing Z
+     and stepping with setUTCDate keeps a plain calendar date a calendar date. */
+  const dayAfter = (iso) => {
+    const d = new Date(iso + 'T00:00:00Z');
+    if (isNaN(d)) return today;
+    d.setUTCDate(d.getUTCDate() + 1);
+    return d.toISOString().slice(0, 10);
+  };
+  const floorDeparture = () => {
+    if (!checkout) return;
+    checkout.min = checkin?.value ? dayAfter(checkin.value) : today;
+    if (checkout.value && checkout.value < checkout.min) checkout.value = '';
+  };
   if (checkin) {
     checkin.min = today;
-    checkin.addEventListener('change', () => {
-      if (!checkout) return;
-      checkout.min = checkin.value || today;
-      if (checkout.value && checkout.value <= checkin.value) checkout.value = '';
-    });
+    checkin.addEventListener('change', floorDeparture);
   }
-  if (checkout) checkout.min = checkin?.value || today;
+  floorDeparture();
 
   /* The transport request, in words rather than a field name. It is the one
      answer here the resort has to act on separately from the room. */

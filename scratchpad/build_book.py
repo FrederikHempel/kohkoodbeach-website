@@ -12,6 +12,18 @@ import re, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 acc = (ROOT / 'accommodation.html').read_text(encoding='utf-8')
+gh = (ROOT / 'getting-here.html').read_text(encoding='utf-8')
+
+# The transport overlay's content comes from getting-here.html's own numbered
+# rows — same times, same fares, one place to edit them.
+def _route(n):
+    m = re.search(r'<span class="numbered__no">0%d\.</span>\s*<div class="numbered__body">(.*?)</div>\s*</div>' % n, gh, re.S)
+    b = m.group(1)
+    head = re.sub(r'<span[^>]*>.*?</span>', '', re.search(r'<h3>(.*?)</h3>', b, re.S).group(1), flags=re.S).strip()
+    lead = ' '.join(re.sub('<[^>]+>', '', re.findall(r'<p[^>]*>(.*?)</p>', b, re.S)[0]).split())
+    rows = re.findall(r'<dt>(.*?)</dt><dd>(.*?)</dd>', b)
+    return head, lead, rows
+ROUTES = [_route(1), _route(2)]
 
 STYLE_ORDER = ['bali-house', 'bali-deluxe', 'thai-twin-house']
 NAMES = {'bali-house': 'Bali House', 'bali-deluxe': 'Bali Deluxe',
@@ -77,6 +89,31 @@ for _m in re.finditer(r'<article class="cat" id="([a-z-]+)">(.*?)</article>', ac
         'line': re.search(r'<p class="cat__line">(.*?)</p>', _b, re.S).group(1).strip(),
         'facts': re.findall(r'<dt>(.*?)</dt><dd>(.*?)</dd>', _b),
     }
+
+
+# ---- the transport overlay ----
+def transport_dialog():
+    blocks = []
+    for head, lead, rows in ROUTES:
+        dl = ''.join(f'<div><dt>{d}</dt><dd>{dd}</dd></div>' for d, dd in rows)
+        blocks.append(f'''      <section class="tinfo">
+        <h3 class="tinfo__h">{head}</h3>
+        <p class="tinfo__lead">{lead}</p>
+        <dl class="data-list">{dl}</dl>
+      </section>''')
+    body = '\n'.join(blocks)
+    return f'''<dialog class="rdlg" id="tdlg-transport" aria-labelledby="tdlg-transport-h">
+  <div class="rdlg__bar">
+    <h2 class="rdlg__h" id="tdlg-transport-h">Getting here from Bangkok</h2>
+    <button type="button" class="rdlg__close" data-dlg-close aria-label="Close">&#10005;</button>
+  </div>
+  <div class="rdlg__body">
+{body}
+    <p class="tinfo__foot">Whichever you take, we meet you at Ao Salad pier and drive you the last stretch.
+      Rates move with the season and are confirmed on enquiry; in high season the seats want about 30 days&rsquo; notice.
+      The <a href="getting-here.html" class="link">full page</a> has the ferry timetable and the other routes.</p>
+  </div>
+</dialog>'''
 
 def house(key):
     """The accommodation card, re-pointed: See more opens the overlay, Choose
@@ -223,7 +260,7 @@ BODY = f'''<!-- ============ THE ENQUIRY ============
             </label>
             <div class="offer__opts" data-transfer-opts hidden>
               <div class="offer__opts-inner" role="radiogroup" aria-label="Which route?">
-                <p class="offer__hint">Both end the same way &mdash; we meet you at Ao Salad pier and drive you the last stretch. In high season the seats want about 30 days&rsquo; notice. <a href="getting-here.html" class="link">Times and fares</a>.</p>
+                <p class="offer__hint">Both end the same way &mdash; we meet you at Ao Salad pier and drive you the last stretch. In high season the seats want about 30 days&rsquo; notice. <button type="button" class="link" data-dlg-open="tdlg-transport">Times and fares</button>.</p>
                 <label class="offer__opt">
                   <input type="radio" name="transfer_route" value="bus-ferry">
                   <span class="offer__opt-name">Boonsiri bus + ferry</span>
@@ -267,6 +304,8 @@ BODY = f'''<!-- ============ THE ENQUIRY ============
 </aside>
 
 {dialogs}
+
+{transport_dialog()}
 '''
 
 # ---- splice into book.html between the nav and the footer ----

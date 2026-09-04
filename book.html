@@ -145,6 +145,13 @@
      the steps say what they carry, where they are.
      ⚠️ The houses and their overlays are GENERATED from accommodation.html by
      scratchpad/build_book.py — edit the rooms there. -->
+<!-- ============ THE ENQUIRY ============
+     One <form>, three steps, in the order the visitor decides: when → which
+     room → who you are. Each finished step collapses to a line stating what it
+     holds, with Change to reopen; the next opens in its place. No sticky bar —
+     the steps say what they carry, where they are.
+     ⚠️ The houses and their overlays are GENERATED from accommodation.html by
+     scratchpad/build_book.py — edit the rooms there. -->
 <form class="enq" data-book-form data-endpoint="https://api.web3forms.com/submit">
   <!-- ⚠️ Empty on purpose. Paste the Web3Forms access key here and the form
        starts POSTing for real; while blank it falls back to the mailto draft.
@@ -368,7 +375,7 @@
             </label>
             <div class="offer__opts" data-transfer-opts hidden>
               <div class="offer__opts-inner" role="radiogroup" aria-label="Which route?">
-                <p class="offer__hint">Both end the same way &mdash; we meet you at Ao Salad pier and drive you the last stretch. In high season the seats want about 30 days&rsquo; notice. <a href="getting-here.html" class="link">Times and fares</a>.</p>
+                <p class="offer__hint">Both end the same way &mdash; we meet you at Ao Salad pier and drive you the last stretch. In high season the seats want about 30 days&rsquo; notice. <button type="button" class="link" data-dlg-open="tdlg-transport">Times and fares</button>.</p>
                 <label class="offer__opt">
                   <input type="radio" name="transfer_route" value="bus-ferry">
                   <span class="offer__opt-name">Boonsiri bus + ferry</span>
@@ -628,6 +635,28 @@
           </div>
         </div>
       </div>
+  </div>
+</dialog>
+
+<dialog class="rdlg" id="tdlg-transport" aria-labelledby="tdlg-transport-h">
+  <div class="rdlg__bar">
+    <h2 class="rdlg__h" id="tdlg-transport-h">Getting here from Bangkok</h2>
+    <button type="button" class="rdlg__close" data-dlg-close aria-label="Close">&#10005;</button>
+  </div>
+  <div class="rdlg__body">
+      <section class="tinfo">
+        <h3 class="tinfo__h">Boonsiri Bus + High Speed Ferry</h3>
+        <p class="tinfo__lead">One combined ticket covering the bus from Bangkok and the ferry across. A VIP air-conditioned bus leaves Boonsiri's Khaosan Road office or Rama 9 for Laem Sok pier (about 5–6 hours), where the catamaran continues to Ao Salad pier (about 1 hour). Book at boonsiriferry.com.</p>
+        <dl class="data-list"><div><dt>Bangkok → Koh Kood</dt><dd>05:00 → 11:45 / 08:00 → 16:00</dd></div><div><dt>Koh Kood → Bangkok</dt><dd>09:00, 11:45 or 13:00</dd></div><div><dt>Standard seat</dt><dd>1,100 THB one-way</dd></div><div><dt>VIP seat upgrade</dt><dd>+100 THB</dd></div></dl>
+      </section>
+      <section class="tinfo">
+        <h3 class="tinfo__h">Private Minivan</h3>
+        <p class="tinfo__lead">A private car or minivan can collect you from any Bangkok hotel and drive straight to Laem Sok pier — about 5 hours (320 km) depending on traffic. Please book at least 30 days ahead.</p>
+        <dl class="data-list"><div><dt>Minivan (4–6 persons) — Bangkok–Laemsok</dt><dd>6,000 THB</dd></div><div><dt>Minivan (4–6 persons) — Suvarnabhumi–Laemsok</dt><dd>5,500 THB</dd></div><div><dt>Car (2–3 persons) — Bangkok–Laemsok</dt><dd>5,500 THB</dd></div><div><dt>Car (2–3 persons) — Suvarnabhumi–Laemsok</dt><dd>5,000 THB</dd></div></dl>
+      </section>
+    <p class="tinfo__foot">Whichever you take, we meet you at Ao Salad pier and drive you the last stretch.
+      Rates move with the season and are confirmed on enquiry; in high season the seats want about 30 days&rsquo; notice.
+      The <a href="getting-here.html" class="link">full page</a> has the ferry timetable and the other routes.</p>
   </div>
 </dialog>
 

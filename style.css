@@ -76,8 +76,13 @@
   /* A whole page section folding is not a control being operated, and 260ms on
      a 1000px collapse reads as a snap. This is the one duration that belongs
      with --ease rather than --ease-quick: it is the page rearranging itself,
-     which is the editorial speed's job. */
-  --t-section: 520ms;
+     which is the editorial speed's job.
+     ⚠️ glideTo() in script.js READS THIS VALUE and uses it for the scroll too,
+     so a step's fold and the scroll that follows it are one movement. Change it
+     and both change together — which is the point. --ease-flow is the cosine
+     the script eases with, expressed as a curve; keep them in step. */
+  --t-section: 760ms;
+  --ease-flow: cubic-bezier(0.45, 0, 0.55, 1);
 }
 
 /* ---------- Reset ---------- */
@@ -1910,7 +1915,7 @@ html { caret-color: var(--gold-dark); }
 @media (hover: hover) and (pointer: fine) { .step__toggle:hover .step__chev { border-color: var(--gold-dark); } }
 
 /* Measured-height unfold, the technique from initRoomDetail(). */
-.step__body { overflow: hidden; height: 0; transition: height var(--t-section) var(--ease); }
+.step__body { overflow: hidden; height: 0; transition: height var(--t-section) var(--ease-flow); }
 .step__body[hidden] { display: block; }
 .no-motion .step__body { transition: none; }
 /* ⚠️ One inner wrapper per step body, and unfold() measures it. The region's
@@ -2011,4 +2016,15 @@ label.offer__opt {
 .offer__opt input { grid-row: 1 / span 2; width: 17px; height: 17px; margin: 2px 0 0; accent-color: var(--gold); }
 .offer__opt-name { font-size: 0.97rem; }
 .offer__opt-note { grid-column: 2; font-size: 0.85rem; color: var(--warm-gray-strong); }
+
+/* ---- the transport overlay's own content ----
+   Generated from getting-here.html's numbered rows, so the times and fares have
+   one home. `.link` is a <button> here, not an anchor — leaving the booking
+   page mid-enquiry is exactly what this replaces. */
+.tinfo + .tinfo { margin-top: clamp(26px, 3vw, 40px); padding-top: clamp(26px, 3vw, 40px); border-top: var(--rule); }
+.tinfo__h { font-size: clamp(1.15rem, 1.8vw, 1.45rem); }
+.tinfo__lead { margin-top: 10px; max-width: 62ch; }
+.tinfo .data-list { margin-top: clamp(16px, 2vw, 22px); max-width: 640px; }
+.tinfo__foot { margin-top: clamp(26px, 3vw, 40px); padding-top: clamp(20px, 2.4vw, 28px); border-top: var(--rule); font-size: 0.9rem; color: var(--ink-muted); max-width: 62ch; }
+button.link { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 
