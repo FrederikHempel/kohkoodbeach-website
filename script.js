@@ -324,14 +324,13 @@ function initLightbox() {
 const RESORT_EMAIL = 'reservation@kohkoodbeachresorts.com';
 const RESORT_PHONE = '+66 (0) 8 1908 8966';
 
-/* Staging pixel for kohkoodbeach.com testing, kept separate from the pixel
-   already live on kohkoodbeachresorts.com so clicks made while building this
-   site don't mix into real campaign data. Swap to 876625588428207 (the
-   production pixel) in the same pass as removing noindex at go-live — see
-   CLAUDE.md under "Staging deploy on kohkoodbeach.com".
-   4 Sep 2026: replaced 2040247273287344 — Frederik had created that one
-   under the wrong ad account. This is "KKBR kohkoodbeach.com (correct
-   pixel)", verified live on the Koh Kood Beach Resort business. */
+/* The pixel for this site. "KKBR kohkoodbeach.com (correct pixel)", created
+   on the Koh Kood Beach Resort business and verified live there.
+   4 Sep 2026: replaced 2040247273287344, which Frederik had created under the
+   wrong ad account. Nothing is swapped at go-live — this is the one that
+   collects, staging and production alike. An earlier version of this comment
+   said to swap to the old kohkoodbeachresorts.com pixel at launch; that plan
+   died when this pixel was created, and the line outlived it by a day. */
 const META_PIXEL_ID = '1600958241509815';
 
 /* Injects the Meta Pixel base snippet and fires PageView. Only called from

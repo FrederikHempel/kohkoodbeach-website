@@ -1757,3 +1757,22 @@ the claim drift apart silently.** The consent comment in `script.js` now says so
 at the point where a tool would be added. Nothing enforces it: adding a third
 tool without editing `contact.html` produces a live privacy statement that is
 untrue, and no detector or guard will notice.
+
+### The pixel is not swapped at go-live (4 Sep 2026)
+
+`META_PIXEL_ID` is `1600958241509815` and stays that way. It was created on the
+Koh Kood Beach Resort business for this domain and verified live there.
+
+⚠️ **The comment above it used to say "swap to 876625588428207 (the production
+pixel) in the same pass as removing noindex".** That was the plan from when this
+domain was pure staging and the only real pixel lived on
+kohkoodbeachresorts.com. Creating a proper pixel for *this* site killed that
+plan — but the swap line was left sitting directly above the note recording the
+new pixel, so the comment asserted both at once. It was read back as a live
+instruction a day later and reported to Frederik as an open decision. It was
+not; it was stale.
+
+`876625588428207` now appears nowhere in the project, which is the point: a
+superseded instruction is worse than no instruction, because it reads as
+current. When a plan changes, delete the sentence that described the old one in
+the same edit that records the new one.
