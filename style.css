@@ -1072,10 +1072,20 @@ a:focus-visible, button:focus-visible, summary:focus-visible {
 /* Shown in place of the form once the mailto has been handed off. Deliberately
    does not claim the message was sent — the visitor still has to press send in
    their own mail client, and it may never have opened at all. */
+/* ⚠️ The confirmation panel replaces the <form> in place, so it inherits that
+   form's position in the document and nothing else. On contact.html the form
+   sits inside a wrapped band and the panel looked fine by inheritance; on
+   book.html the form IS the page — no wrap, no gutter — and the panel rendered
+   flush against the viewport edge with its heading behind the fixed nav.
+   It carries its own page layout now, so it lands correctly wherever it is
+   dropped. */
 .sent {
   max-width: 62ch;
+  margin-inline: auto;
+  padding: calc(var(--nav-h, 70px) + clamp(40px, 7vh, 90px)) var(--gutter) clamp(60px, 10vh, 120px);
   outline: none;
 }
+.sent .label { display: block; margin-bottom: 6px; }
 .sent__head {
   font-family: var(--font-display);
   font-size: clamp(1.7rem, 3.6vw, 2.4rem);

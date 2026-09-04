@@ -450,7 +450,12 @@ function showEnquirySent(form, subject, body, kind, delivered) {
   if (waBtn) waBtn.addEventListener('click', () => trackEnquiry(kind + '-whatsapp'));
 
   form.replaceWith(panel);
-  panel.focus();
+  /* focus() alone scrolls the panel to the very top of the viewport, which is
+     behind the fixed nav — that is what put the heading under the logo. Take
+     the focus without the scroll, then place it below the nav ourselves. */
+  panel.focus({ preventScroll: true });
+  const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
+  window.scrollTo({ top: Math.max(0, panel.getBoundingClientRect().top + window.scrollY - navH), behavior: 'instant' });
   trackEnquiry(kind);
 }
 

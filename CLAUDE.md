@@ -1676,3 +1676,25 @@ address, so a reply goes to the guest.
 `initContactForm()` still posts `new FormData(form)` and is fine as it is — its
 four fields are already words.
 
+### The confirmation panel carries its own layout (4 Sep 2026)
+
+⚠️ **`showEnquirySent()` replaces the `<form>` in place, so the panel inherits
+that form's position in the document and nothing else.** On `contact.html` the
+form sits inside a wrapped band, so the panel looked right by inheritance and
+the bug stayed hidden. On `book.html` the form *is* the page — no wrap, no
+gutter — and after a real booking the confirmation rendered flush against the
+left edge of the viewport with its heading tucked behind the fixed nav.
+
+`.sent` now sets its own `max-width`, `margin-inline: auto` and gutter padding,
+plus top padding of `--nav-h` + space, so it lands correctly wherever it is
+dropped. And `panel.focus()` was scrolling it to the very top of the viewport,
+which is *behind* the nav — it is `focus({ preventScroll: true })` followed by a
+scroll that subtracts the nav height.
+
+**Anything else that replaces a form or a section wholesale has the same
+problem**: the replacement keeps the slot, not the styling around it. Give it
+its own layout rather than relying on where it happens to land.
+
+Verified on both pages, both panel variants (backend-confirmed and the mailto
+fallback with its copy box and two buttons), at 1440 and 390.
+
