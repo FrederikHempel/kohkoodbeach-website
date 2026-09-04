@@ -1614,3 +1614,34 @@ earlier-departure snaps to arrival + 1; same-day snaps to the next night; a
 legal stay is left untouched; a bad range no longer submits; a good one still
 does.
 
+### The booking form sends for real — and why the tests kept saying otherwise (4 Sep 2026)
+
+⚠️ **There is ONE Web3Forms form and ONE key: `c5260114-…`** ("Booking form",
+recipient `frja91@outlook.com`, free plan, 250 submissions a month). A key
+identifies a *destination*, not a piece of markup, so `book.html` and
+`contact.html` both post to it; the `subject` field is what separates a booking
+enquiry from a contact message in the inbox. **A key pasted from anywhere other
+than that dashboard is not a key** — an invented-looking one was tried and every
+enquiry was silently rejected and fell back to the mailto draft, which is
+exactly what the fallback is for but is not what should be happening.
+
+⚠️ **`api.web3forms.com` is behind Cloudflare and refuses anything that does not
+look like a real browser** — including headless Chrome's default
+`HeadlessChrome` user-agent. It answers **403 with no `Access-Control-Allow-*`
+headers at all**, on the POST and on the preflight, which the browser then
+reports only as `TypeError: Failed to fetch`. That error says nothing about the
+key, and for two passes it was read as one.
+
+**How to test this endpoint from here**, and the isolation that proves the
+diagnosis: same-origin `fetch` → 200; a control cross-origin `fetch` to an
+unrelated host → 200; `api.web3forms.com` → `Failed to fetch`. Relaunch headless
+Chrome with `--user-agent="Mozilla/5.0 … Chrome/152.0.0.0 Safari/537.36"` and
+the same call returns **`{"success": true, "message": "Form submitted
+successfully!"}`**. A full submission through the live form then reaches the
+**"Thank you"** panel, which only renders when the backend confirms.
+
+**Still to do before real bookings:** repoint the recipient from
+`frja91@outlook.com` to `reservation@kohkoodbeachresorts.com` in the dashboard
+(the key does not change), and decide the `noindex` / production-domain
+question.
+
