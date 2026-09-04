@@ -990,19 +990,22 @@ frame asked for rather than drifting to the nearest keyframe. Reach for those tw
 rather than assuming ffmpeg exists.
 
 **The photo band between the steps and the transport list is gone**, replaced by
-`.route--soft` — the homepage's map, with two differences:
+the homepage's map. It differs in exactly one way: **its three steps carry no
+body copy.** The band directly above already spells them out in full, and
+printing the same three sentences twice on one page is a problem the homepage
+never had. The numerals are the point — the same 01/02/03 the reader has just
+read, lighting up in order as the legs draw. That continuity *is* the "glidende
+overgang" that was asked for.
 
-- **Its three steps carry no body copy.** The band directly above already spells
-  them out in full, and printing the same three sentences twice on one page is a
-  problem the homepage never had. The numerals are the point: they are the same
-  01/02/03 the reader has just read, lighting up in order as the legs draw. That
-  continuity *is* the "glidende overgang" that was asked for, more than any
-  visual effect could be.
-- **The band's leading edge fades out of the page's own warm-white.** It reads
-  two ways, both wanted: while the section scrolls in it is a soft horizon at the
-  boundary instead of a slab edge; once pinned it is the photo easing up into the
-  nav. The gradient sits above the photo and below the content — same z-index as
-  the content, earlier in the DOM, which is what puts it underneath.
+⚠️ **A soft fade on the band's leading edge was built and then removed — don't
+rebuild it.** `.route--soft` put a warm-white gradient over the top of the stage,
+meant to let the map emerge from the step list rather than cut against it. Shown
+in place, Frederik's read was immediate and right: it does not work. A gradient
+can only sell a transition if it *moves*; as a fixed 180px wash sitting
+permanently at the top of a pinned stage it reads as a smudge over the
+photograph. Every other full-bleed band on this site meets the page with a hard
+edge, and so does this one now. The continuity is carried by the numerals, not
+by the paint.
 
 The headline is **"Roughly seven hours from Bangkok"**, kept from the band it
 replaced — the one line Frederik asked to preserve.
@@ -1013,6 +1016,14 @@ it; an external file would cost a second request and put the paths out of reach 
 `getTotalLength()`. It is ~20 KB raw, ~5 KB gzipped, twice. **If you regenerate it
 with `scratchpad/build_route.py`, splice the result into BOTH pages** — one page
 quietly keeping the old geometry is the failure mode here.
+
+**The transport list has a heading now** — "Alternative ways of getting here" —
+which it never had; it used to open straight onto a numbered row. One line under
+it does the work of resolving an otherwise fair objection: row 01 is the
+*recommended* route, which sits oddly inside a list called alternatives. It says
+so plainly instead ("The Boonsiri bus and ferry sits first — it is the route
+above, in full, with times and fares"), which is also the honest description of
+why that row is longer than the rest.
 
 **New "Book direct" band** between the map and the transport options, in sand so
 the page gets a quiet beat between the dark map and the warm-white list. Its claim

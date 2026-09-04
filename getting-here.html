@@ -130,12 +130,11 @@
 </section>
 
 <!-- ============ THE ROUTE — scroll-drawn (see CLAUDE.md) ============ -->
-<!-- `.route--soft` is this page's variant: the three steps carry no body copy,
-     because the band directly above already spells them out in full, and the
-     band's top edge fades out of the page's own warm-white so it emerges from
-     the step list rather than cutting against it. The map itself is byte-for-byte
-     the homepage's — regenerate BOTH with scratchpad/build_route.py. -->
-<section class="route route--soft" data-route aria-labelledby="route-h">
+<!-- This page's variant differs from the homepage's in one way only: the three
+     steps carry no body copy, because the band directly above already spells
+     them out in full. The map itself is byte-for-byte the homepage's —
+     regenerate BOTH with scratchpad/build_route.py. -->
+<section class="route" data-route aria-labelledby="route-h">
   <div class="route__stage">
     <div class="route__photo" role="img" aria-label="Koh Kood Beach Resort and its bay seen from the air"></div>
 
@@ -288,7 +287,12 @@
 </section>
 
 <section class="band wrap">
-    <div class="numbered" data-reveal-group>
+  <div style="max-width:56ch;margin-bottom:clamp(38px,5vw,68px)">
+    <h2 data-reveal>Alternative ways of getting here</h2>
+    <p style="margin-top:clamp(14px,1.6vw,20px)" data-reveal>The Boonsiri bus and ferry sits first &mdash; it is the route above, in full, with times and fares. Everything else is here too.</p>
+  </div>
+
+  <div class="numbered" data-reveal-group>
     <div class="numbered__row" style="grid-template-columns:80px 1fr" data-reveal>
       <span class="numbered__no">01.</span>
       <div class="numbered__body">

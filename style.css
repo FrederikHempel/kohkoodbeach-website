@@ -1729,23 +1729,16 @@ html { caret-color: var(--gold-dark); }
 }
 
 /* ---- getting-here.html's variant ----
-   `.route--soft` softens the band's leading edge into the page's own warm-white,
-   so the map emerges from the step list above it instead of cutting against it.
-   It reads two ways, both wanted: while the section scrolls in it is a soft
-   horizon at the boundary; once pinned it is the photo easing up into the nav.
-   ⚠️ It sits ABOVE the photo and BELOW the content — same z-index as the
-   content, earlier in the DOM, which is what puts it underneath. */
-.route--soft .route__stage::before {
-  content: ''; position: absolute; inset: 0 0 auto 0; z-index: 1;
-  height: clamp(90px, 15vh, 180px);
-  background: linear-gradient(180deg, var(--warm-white) 0%, rgba(248, 246, 241, 0.72) 34%, rgba(248, 246, 241, 0) 100%);
-  pointer-events: none;
-}
-/* The three steps keep their numerals and titles but drop the body copy: the
-   band directly above this one already carries those sentences in full, and
-   printing them twice on one page is the thing the homepage version does not
-   have to worry about. The numerals are the point — they are the same 01/02/03
-   the reader has just read, now lighting up in order as the legs draw. */
+   ⚠️ This used to carry `.route--soft`: a warm-white gradient over the band's
+   leading edge, meant to let the map emerge from the step list rather than cut
+   against it. It was removed after seeing it in place. A gradient can only sell
+   a transition if it MOVES — as a fixed 180px wash sitting permanently at the
+   top of a pinned stage it reads as a smudge over the photograph, not as a
+   horizon. Every other full-bleed band on this site (.reveal-img, .cta-band,
+   .route on the homepage) meets the page with a hard edge, and that is the
+   right answer here too. Don't re-add it; the continuity this band needs is
+   carried by the numerals below, which are the same 01/02/03 from the band
+   above lighting up in order. */
 .route__steps--compact .route__step h3 { margin-bottom: 0; font-size: clamp(1.02rem, 1.35vw, 1.2rem); }
 
 /* ---- unpinned fallback ----
