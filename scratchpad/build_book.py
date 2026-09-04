@@ -144,7 +144,14 @@ BODY = f'''<section class="page-hero" style="background-image:url('assets/book-h
 <section class="band wrap-narrow" id="enquiry">
   <h2 data-reveal>Your details</h2>
 
-  <form class="form" data-book-form action="https://api.web3forms.com/submit" method="POST"
+  <!-- ⚠️ The endpoint is `data-endpoint`, NOT `action`, and that is deliberate.
+       With a real `action` a no-JS submit would POST natively — which is the
+       correct progressive enhancement ONCE a key exists, but with the key blank
+       it posts to the service and lands the visitor on its error page. A form
+       that cannot work should fail by doing nothing, not by throwing someone
+       off the site. Give it back its `action` if you ever want the no-JS path,
+       but only after the key is in. -->
+  <form class="form" data-book-form data-endpoint="https://api.web3forms.com/submit"
         style="max-width:100%;margin-top:clamp(24px,3vw,38px)" data-reveal>
     <!-- ⚠️ Empty on purpose. Paste the Web3Forms access key here and the form
          starts POSTing for real; while it is blank the submit handler falls

@@ -1857,6 +1857,13 @@ html { caret-color: var(--gold-dark); }
 .rdlg {
   width: min(1020px, calc(100vw - 2 * var(--gutter)));
   max-height: min(88vh, 900px);
+  /* Both of these are needed and neither is decoration. Setting `padding: 0`
+     and `border: 0` on a <dialog> drops the UA's own box, and without an
+     explicit `margin: auto` the modal renders hard against the top-left instead
+     of centred. `overflow: auto` makes the dialog its own scroll container,
+     which is also what lets .rdlg__bar stay sticky while a long room panel
+     scrolls under it. */
+  margin: auto; overflow: auto;
   padding: 0; border: 0; background: var(--warm-white); color: var(--charcoal);
   box-shadow: var(--shadow-soft);
 }

@@ -617,7 +617,7 @@ function initBookPage() {
       const data = new FormData(form);
       data.set('subject', subject);
       data.set('message', body);          // one readable block, not 14 loose fields
-      const res = await fetch(form.action, { method: 'POST', body: data });
+      const res = await fetch(form.dataset.endpoint, { method: 'POST', body: data });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || json.success === false) throw new Error(json.message || 'send failed');
       showEnquirySent(form, subject, body, 'booking-enquiry', true);

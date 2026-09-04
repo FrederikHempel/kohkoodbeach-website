@@ -1052,3 +1052,99 @@ then grant later); this site doesn't need that, and loading nothing at all
 until Accept is simpler and matches the Meta Pixel's approach exactly. Don't
 uncomment it without also switching to the default-denied loading pattern —
 half of that snippet with the eager load skipped does nothing.
+
+### Book Now rebuilt; the enquiry can actually send now (4 Sep 2026)
+
+⚠️ **Read this before touching the enquiry flow.** Frederik asked what happened
+when someone pressed "Send enquiry". The answer was: **nothing was sent.** The
+handler set `window.location.href` to a `mailto:` — it opened the visitor's own
+mail client with a draft they still had to send themselves, and on a phone or in
+webmail, where no mail client is configured, it did *visibly nothing*. That is
+why the confirmation panel has always said "ready to send" rather than "sent";
+that wording was load-bearing, not shyness.
+
+**The form now POSTs to Web3Forms, with the mailto kept as the fallback.** Two
+paths, and the difference is the whole point:
+
+| state | what happens |
+|---|---|
+| access key present | POST to the service, which sends the mail server-side. Works on every device. The panel may then say **sent**, because it was. |
+| access key blank, or the POST fails | Falls back to the mailto draft and the old "ready to send" panel. Nothing is ever silently lost. |
+
+⚠️ **The key in `book.html` is deliberately empty and must stay that way until a
+real one exists.** A made-up key does not degrade — it turns every enquiry into a
+silent rejection while the page still says thank you, which is strictly worse
+than the mailto it replaced. Frederik is getting the key from whoever administers
+`reservation@`; the key is public by design (it only permits sending *to* that
+mailbox) so it belongs in the markup, not in a secret.
+
+⚠️ **The endpoint is `data-endpoint`, not `action`.** A real `action` is the
+correct progressive enhancement *once a key exists* — Web3Forms formats a plain
+HTML form fine without JS. With the key blank it instead posts to the service and
+lands the visitor on its error page. A form that cannot work should fail by doing
+nothing, not by throwing someone off the site. Give it back its `action` after
+the key is in, if the no-JS path is wanted.
+
+**A copy to a second address is NOT in the code, on purpose.** Frederik asked for
+a BCC to his personal address. Web3Forms has no BCC; its CC is a paid feature and
+is visible to everyone on the mail anyway. More to the point, **any address in
+the page is public** — this repo is public, so it would be scraped. The copy
+belongs in a forwarding rule on the `reservation@` mailbox or in the service's
+own dashboard. Don't put a personal address in the markup.
+
+**`reservation@kohkoodbeach.com` appeared in 52 places and was wrong.** Commit
+`0f0825d` moved the site to the staging domain with a find-and-replace of
+`kohkoodbeachresorts.com` → `kohkoodbeach.com`, which also rewrote the reservation
+address in every footer and every JSON-LD block. The form's own constant in
+`script.js` survived because it was written separately, so the site *displayed*
+one address while the form *sent* to another. All 52 restored. **If the domain
+moves again, replace `ORIGIN` only — do not blanket-replace the bare domain.**
+
+**No static currency conversions** — see the content-integrity rule above; this
+page had none, but it is the same instruction.
+
+#### The page itself
+
+**The bungalow `<select>` is gone.** It listed eight room-and-view strings and was
+the only place on the site where the rooms appeared as a database field rather
+than as photographs — on the one page whose job is to make someone want the room.
+It is now the same three houses the accommodation page shows, each with its views
+as priced choices, plus a quiet "Not sure yet" that is a valid answer.
+
+**The view chips ARE the "choose this room" button.** A separate button per card
+would have to pick a view on the visitor's behalf, and the view is the entire
+decision — it is what changes the price. "See more information" opens a native
+`<dialog>` carrying that room's own accommodation-page panel: the same gallery,
+copy, amenities and prices, with each view's "Book now" link swapped for a
+`Choose this room` button that sets the selection and closes. Nobody leaves the
+page, which is what was asked for.
+
+⚠️ **The chooser and the three overlays are GENERATED from `accommodation.html`
+by `scratchpad/build_book.py`.** Edit the rooms, prices or photos on that page
+and re-run it; do not hand-edit them here, or the two pages will disagree about
+what a room costs. The script is idempotent — it carries the country list forward
+out of whatever `book.html` already holds.
+
+⚠️ **`.rc__shot img` needs `height: auto` and it is load-bearing.** The global
+reset is `img, svg, video { display:block; max-width:100% }` and never sets a
+height, so an `<img>` carrying width/height ATTRIBUTES — every image on this site
+does, for layout stability — has a *specified* height, and `aspect-ratio` is
+ignored whenever height is not `auto`. Without that one word the 2000x1500 room
+photos rendered 1500px tall inside a 407px card. Same family as the footer-logo
+stretch recorded further up: set both axes on an `<img>`, or set the other to
+auto.
+
+**`.rdlg` needs `margin: auto` and `overflow: auto`.** Zeroing a `<dialog>`'s
+padding and border drops the UA box that was centring it, so it renders hard
+against the top-left; and the dialog has to be its own scroll container both to
+contain a long room panel and to let its title bar stay sticky.
+
+**Other changes:** hero is a still from `Panoramic from the ocean over the resort
+drone shot.MP4` at 10.0s (the shot Frederik sent), cropped 3:2 around the pool;
+the h1 is "When will you arrive?" instead of the more commanding "Send us your
+dates"; Adults became **Guests** split into adults 13+, children 2–12 and infants
+under 2; dates, guests, name, email and country are required and phone is not; a
+paraphrased TripAdvisor review sits under the form; and the thank-you reads as
+Frederik wrote it, at **24 hours** — the figure the rest of the site already
+promises, chosen over 48 so the page does not make two different promises.
+
