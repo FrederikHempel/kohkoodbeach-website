@@ -67,30 +67,47 @@ def dialog(key):
   </div>
 </dialog>'''
 
+# The card face — photo, one line, the Size/Beds/Sleeps facts — is the same
+# component accommodation.html uses. Read from there so the two cannot drift.
+cats = {}
+for _m in re.finditer(r'<article class="cat" id="([a-z-]+)">(.*?)</article>', acc, re.S):
+    _k, _b = _m.group(1), _m.group(2)
+    cats[_k] = {
+        'img': re.search(r'<img src="([^"]+)"[^>]*width="(\d+)" height="(\d+)"', _b).groups(),
+        'line': re.search(r'<p class="cat__line">(.*?)</p>', _b, re.S).group(1).strip(),
+        'facts': re.findall(r'<dt>(.*?)</dt><dd>(.*?)</dd>', _b),
+    }
+
 def house(key):
-    """One house as a compact row: small photo | name, line, price, actions."""
-    r = rooms[key]; src, w, h = r['img']
+    """The accommodation card, re-pointed: See more opens the overlay, Choose
+    this room unfolds that card's views underneath the row."""
+    r, c = rooms[key], cats[key]
+    src, w, h = c['img']
     lowest = min(r['picks'], key=lambda p: int(p['price'].replace(',', '')))['price']
+    facts = '\n'.join(f'            <div><dt>{d}</dt><dd>{dd}</dd></div>' for d, dd in c['facts'])
     views = '\n'.join(
         f'''            <label class="view">
               <input type="radio" name="room" value="{p['id']}" data-label="{NAMES[key]} &ndash; {p['name']}" data-price="{p['price']}">
               <span class="view__name">{p['name']}</span>
               <span class="view__price">from {p['price']}<span class="view__unit">THB</span></span>
             </label>''' for p in r['picks'])
-    return f'''      <article class="house" data-house="{key}">
-        <img class="house__shot" src="{src}" alt="" width="{w}" height="{h}" loading="lazy">
-        <div class="house__body">
-          <h3 class="house__name">{NAMES[key]}</h3>
-          <p class="house__hook">{HOOKS[key]}</p>
-          <p class="house__from">from {lowest} <span class="house__unit">THB</span> <span class="house__night">per night</span></p>
-          <div class="house__actions">
-            <button type="button" class="btn btn--sm" data-house-open="{key}" aria-expanded="false" aria-controls="views-{key}">Choose this room</button>
-            <button type="button" class="house__more" data-dlg-open="rdlg-{key}">More about it</button>
+    return f'''      <article class="cat" data-house="{key}">
+        <div class="cat__shot"><img src="{src}" alt="{NAMES[key]}" width="{w}" height="{h}" loading="lazy"></div>
+        <div class="cat__body">
+          <h3 class="cat__name">{NAMES[key]}</h3>
+          <p class="cat__line">{c['line']}</p>
+          <dl class="cat__facts">
+{facts}
+          </dl>
+          <p class="cat__price">from {lowest} <span class="cat__unit">THB per night</span></p>
+          <div class="cat__actions">
+            <button type="button" class="cat__more" data-dlg-open="rdlg-{key}">See more</button>
+            <button type="button" class="cat__book" data-house-open="{key}" aria-expanded="false" aria-controls="views-{key}">Choose this room</button>
           </div>
-        </div>
-        <div class="house__views" id="views-{key}" data-house-views hidden>
-          <div class="house__views-inner" role="radiogroup" aria-label="{NAMES[key]} &mdash; which view?">
+          <div class="cat__views" id="views-{key}" data-house-views hidden>
+            <div class="cat__views-inner" role="radiogroup" aria-label="{NAMES[key]} &mdash; which view?">
 {views}
+            </div>
           </div>
         </div>
       </article>'''
@@ -124,89 +141,77 @@ BODY = f'''<!-- ============ THE ENQUIRY ============
        without hunting for it. initBookHero() attaches the source only on a wide
        screen, without prefers-reduced-motion and not on save-data; everyone
        else keeps the poster, which is the clip's own first frame. -->
+  <!-- The dates live in the hero, on the site's own sand booking strip. The
+       visitor clicked "Book now"; the first thing they should meet is a date
+       field, not a heading about one. -->
   <section class="bhero">
     <video class="bhero__video" muted playsinline loop preload="none"
            poster="assets/book-hero-poster.webp" data-src="assets/book-hero.mp4" aria-hidden="true"></video>
     <div class="bhero__copy">
       <h1>When will you arrive?</h1>
-      <p class="bhero__sub">Three steps, no payment, and a reply from us within 24 hours &mdash; usually the same day.</p>
+      <p class="bhero__sub">No payment now &mdash; we reply within 24 hours, usually the same day.</p>
     </div>
+    <div class="bhero__strip">
+      <label class="field"><span class="label">Arrival</span><input type="date" name="checkin" required></label>
+      <label class="field"><span class="label">Departure</span><input type="date" name="checkout" required></label>
+      <label class="field"><span class="label">Adults <span class="label__hint">13+</span></span><input type="number" name="adults" min="1" max="12" value="2" required inputmode="numeric"></label>
+      <label class="field"><span class="label">Children <span class="label__hint">2&ndash;12</span></span><input type="number" name="children" min="0" max="10" value="0" inputmode="numeric"></label>
+      <button type="button" class="btn" data-step-next="room">Choose your room <span class="arrow" aria-hidden="true">&#8594;</span></button>
+    </div>
+    <p class="bhero__err" data-step-err hidden role="alert"></p>
   </section>
 
-  <ol class="flow wrap-narrow">
-    <li class="step is-open" data-step="dates">
+  <ol class="flow wrap">
+    <li class="step is-open" data-step="room">
       <div class="step__head">
-        <h2 class="step__h"><span class="step__n" aria-hidden="true">1</span> Your dates</h2>
-        <p class="step__sum" data-step-sum hidden></p>
-        <button type="button" class="step__change" data-step-change="dates" hidden>Change</button>
-      </div>
-      <div class="step__body" data-step-body>
-        <div class="step__inner form">
-        <div class="radios" role="radiogroup" aria-label="Are your dates fixed?">
-          <label><input type="radio" name="dates" value="fixed" checked> <span>Fixed dates</span></label>
-          <label><input type="radio" name="dates" value="flexible"> <span>Flexible by 2&ndash;3 days</span></label>
-        </div>
-        <div class="form__row">
-          <label><span class="label">Arrival</span><input type="date" name="checkin" required></label>
-          <label><span class="label">Departure</span><input type="date" name="checkout" required></label>
-        </div>
-        <div class="guests__grid">
-          <label><span class="label">Adults <span class="label__hint">13+</span></span>
-            <input type="number" name="adults" min="1" max="12" value="2" required inputmode="numeric"></label>
-          <label><span class="label">Children <span class="label__hint">2&ndash;12</span></span>
-            <input type="number" name="children" min="0" max="10" value="0" inputmode="numeric"></label>
-          <label><span class="label">Infants <span class="label__hint">under 2</span></span>
-            <input type="number" name="infants" min="0" max="6" value="0" inputmode="numeric"></label>
-          <label><span class="label">Extra bed</span>
-            <select name="extrabed"><option value="no">No</option><option value="yes">Yes</option></select></label>
-        </div>
-        <p class="step__err" data-step-err hidden role="alert"></p>
-        <button type="button" class="btn" data-step-next="room">Choose your room <span class="arrow" aria-hidden="true">&#8594;</span></button>
-        </div>
-      </div>
-    </li>
-
-    <li class="step" data-step="room">
-      <div class="step__head">
-        <h2 class="step__h"><span class="step__n" aria-hidden="true">2</span> Your room</h2>
+        <h2 class="step__h">Your room</h2>
         <p class="step__sum" data-step-sum hidden></p>
         <button type="button" class="step__change" data-step-change="room" hidden>Change</button>
       </div>
       <div class="step__body" data-step-body>
         <div class="step__inner">
-        <div class="houses">
+          <div class="cats__grid">
 {houses}
-        </div>
-        <label class="view view--any">
-          <input type="radio" name="room" value="" data-label="Not sure yet &mdash; happy to be recommended a room" checked>
-          <span class="view__name">Not sure yet &mdash; recommend one for us</span>
-        </label>
+          </div>
+          <label class="view view--any">
+            <input type="radio" name="room" value="" data-label="Not sure yet &mdash; happy to be recommended a room" checked>
+            <span class="view__name">Not sure yet &mdash; recommend one for us</span>
+          </label>
         </div>
       </div>
     </li>
 
     <li class="step" data-step="you">
       <div class="step__head">
-        <h2 class="step__h"><span class="step__n" aria-hidden="true">3</span> Tell us about you</h2>
+        <h2 class="step__h">Tell us about you</h2>
       </div>
       <div class="step__body" data-step-body>
         <div class="step__inner form">
-        <div class="form__row">
-          <label><span class="label">Name</span><input type="text" name="name" required autocomplete="name"></label>
-          <label><span class="label">Country</span>
-            <select name="nationality" required>{COUNTRIES}</select>
-          </label>
-        </div>
-        <div class="form__row">
-          <label><span class="label">Email</span><input type="email" name="email" required autocomplete="email"></label>
-          <label><span class="label">Telephone <span class="label__hint">optional</span></span><input type="tel" name="phone" autocomplete="tel"></label>
-        </div>
-        <label><span class="label">Anything else we should know?</span><textarea name="message" rows="4"></textarea></label>
-        <div class="step__send">
-          <button type="submit" class="btn">Send enquiry <span class="arrow" aria-hidden="true">&#8594;</span></button>
-          <p class="step__note">No payment now. We reply by email within 24 hours, usually the same day
-            &mdash; or <a href="https://wa.me/66819088966?text=Hi%21%20I%27d%20like%20to%20ask%20about%20staying%20at%20Koh%20Kood%20Beach%20Resort." target="_blank" rel="noopener" class="link">message us on WhatsApp</a>.</p>
-        </div>
+          <div class="form__row">
+            <label><span class="label">Name</span><input type="text" name="name" required autocomplete="name"></label>
+            <label><span class="label">Country</span>
+              <select name="nationality" required>{COUNTRIES}</select>
+            </label>
+          </div>
+          <div class="form__row">
+            <label><span class="label">Email</span><input type="email" name="email" required autocomplete="email"></label>
+            <label><span class="label">Telephone <span class="label__hint">optional</span></span><input type="tel" name="phone" autocomplete="tel"></label>
+          </div>
+          <div class="form__row">
+            <label><span class="label">Infants <span class="label__hint">under 2</span></span><input type="number" name="infants" min="0" max="6" value="0" inputmode="numeric"></label>
+            <label><span class="label">Extra bed</span>
+              <select name="extrabed"><option value="no">No</option><option value="yes">Yes</option></select></label>
+          </div>
+          <div class="radios" role="radiogroup" aria-label="Are your dates fixed?">
+            <label><input type="radio" name="dates" value="fixed" checked> <span>Fixed dates</span></label>
+            <label><input type="radio" name="dates" value="flexible"> <span>Flexible by 2&ndash;3 days</span></label>
+          </div>
+          <label><span class="label">Anything else we should know?</span><textarea name="message" rows="4"></textarea></label>
+          <div class="step__send">
+            <button type="submit" class="btn">Send enquiry <span class="arrow" aria-hidden="true">&#8594;</span></button>
+            <p class="step__note">No payment now. We reply by email within 24 hours, usually the same day
+              &mdash; or <a href="https://wa.me/66819088966?text=Hi%21%20I%27d%20like%20to%20ask%20about%20staying%20at%20Koh%20Kood%20Beach%20Resort." target="_blank" rel="noopener" class="link">message us on WhatsApp</a>.</p>
+          </div>
         </div>
       </div>
     </li>

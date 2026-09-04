@@ -1377,3 +1377,46 @@ carries room, dates, flexible flag and guest breakdown; no horizontal overflow
 at 390; no console errors; Impeccable detector 0 findings; guard green on 12
 pages.
 
+### Book Now, fifth pass — dates in the hero, rooms as the accommodation cards (4 Sep 2026)
+
+Frederik's iteration on the flow: the dates belong back in the hero as they were
+("det stod fint før"), the rooms should use the card format from
+`accommodation.html`, "Choose this room" should unfold the views inside the
+card, and picking an arrival should open the departure picker on its own.
+
+**Shape now:** hero (video + headline + the sand booking strip: arrival,
+departure, adults, children, and *Choose your room*) → **Your room** (the three
+`.cat` cards) → **Tell us about you**. Pressing *Choose your room* validates the
+dates and glides down to the rooms; choosing a view collapses the room section
+to a gold summary line with *Change* and opens the details in its place.
+
+**The numbered step chips are gone.** They were mine, not asked for, and with
+step 1 living in the hero the numbering had nowhere honest to start. The order
+is carried by the interaction — button, glide, fold — which is what the craft
+floor asks for before spending a numeral.
+
+⚠️ **The room cards are GENERATED from `accommodation.html`'s own `.cat`
+markup** — photo, one line, and the Size/Beds/Sleeps facts are read out of that
+page by `scratchpad/build_book.py`, alongside the views and prices it already
+took from the panels. Two pages, one source. Only the actions differ here:
+*See more* opens the overlay dialog rather than the in-page panel, and
+*Book now* becomes *Choose this room*, which unfolds `.cat__views` inside the
+card. `.cats__grid` is `align-items: start`, so an opened card grows without
+dragging its neighbours down.
+
+**Picking an arrival opens the departure picker.** `showPicker()` needs the user
+activation the click carries and is not in every engine, so it is wrapped and
+falls back to `focus()`. It only fires when departure is still empty — reopening
+the picker over a date the visitor already chose would be rude.
+
+**The hero is `clamp(500px, 76vh, 820px)` again**, tall enough to carry the strip
+under the headline: measured at 1440×900 the strip sits 553–684px, fully inside
+the first viewport.
+
+Verified in one batched round: video attaches at 1440 and not at 390; *Choose
+your room* scrolls the room section to the top of the viewport; the card's
+dropdown opens to 254px inside the card and the card goes gold; picking folds
+the rooms and opens the details; `showPicker` is called on the departure field
+after an arrival change; no horizontal overflow at 390; no console errors;
+Impeccable detector 0 findings; guard green on all 12 pages.
+

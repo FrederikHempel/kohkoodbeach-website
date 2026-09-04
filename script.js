@@ -593,14 +593,14 @@ function initFlow() {
 
   steps.forEach((s) => {
     const body = s.querySelector('[data-step-body]');
-    const first = s.dataset.step === 'dates';
+    const first = s.dataset.step === 'room';
     body.hidden = !first;
     body.style.height = first ? 'auto' : '0';
     s.classList.toggle('is-open', first);
   });
 
-  byName('dates').querySelector('[data-step-next]').addEventListener('click', () => {
-    const err = byName('dates').querySelector('[data-step-err]');
+  document.querySelector('[data-step-next]').addEventListener('click', () => {
+    const err = document.querySelector('[data-step-err]');
     for (const f of [form.checkin, form.checkout]) {
       if (!f.value) { err.textContent = 'Please give both an arrival and a departure date.'; err.hidden = false; f.focus(); return; }
     }
@@ -608,8 +608,15 @@ function initFlow() {
       err.textContent = 'Departure has to be after arrival.'; err.hidden = false; form.checkout.focus(); return;
     }
     err.hidden = true;
-    markDone('dates', datesSummary());
     goto('room');
+  });
+
+  /* Picking an arrival should open the departure picker, not make the visitor
+     find it. showPicker() needs the user activation the click carries, and is
+     not in every engine — the focus() is what the rest get. */
+  form.checkin.addEventListener('change', () => {
+    if (!form.checkin.value || form.checkout.value) return;
+    try { form.checkout.showPicker(); } catch (err) { form.checkout.focus(); }
   });
 
   steps.forEach((s) => {
@@ -626,14 +633,11 @@ function initFlow() {
   form.querySelectorAll('input[name="room"]').forEach((r) => {
     r.addEventListener('change', () => {
       if (!r.checked) return;
+      document.querySelectorAll('.cat[data-house]').forEach((c) =>
+        c.classList.toggle('is-chosen', c.contains(r)));
       markDone('room', roomSummary());
       goto('you');
     });
-  });
-
-  form.addEventListener('input', () => {
-    const s = byName('dates');
-    if (s.classList.contains('is-done')) s.querySelector('[data-step-sum]').textContent = datesSummary();
   });
 
   window.__flow = { markDone, goto, roomSummary };
@@ -643,7 +647,7 @@ function initFlow() {
    picking one is a real radio change, which the flow above acts on. */
 function initRoomChooser() {
   const form = document.querySelector('[data-book-form]');
-  const houses = Array.from(document.querySelectorAll('.house'));
+  const houses = Array.from(document.querySelectorAll('.cat[data-house]'));
   if (!form || !houses.length) return;
   const still = document.documentElement.classList.contains('no-motion');
 
@@ -652,6 +656,7 @@ function initRoomChooser() {
       const region = h.querySelector('[data-house-views]');
       const is = h === house;
       h.querySelector('[data-house-open]').setAttribute('aria-expanded', String(is));
+      h.classList.toggle('is-open', is);
       if (is === Boolean(region.hidden)) unfold(region, is, still);
     });
   };
@@ -673,7 +678,7 @@ function initRoomChooser() {
     const radio = form.querySelector(`input[name="room"][value="${wanted}"]`);
     if (radio) {
       radio.checked = true;
-      openHouse(radio.closest('.house'));
+      openHouse(radio.closest('.cat'));
       if (window.__flow) window.__flow.markDone('room', window.__flow.roomSummary());
     }
   }
