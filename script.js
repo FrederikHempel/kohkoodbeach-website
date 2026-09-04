@@ -26,10 +26,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initRoomDetail();
   initRoomGalleries();
   initBookHero();
+  initFlow();
   initRoomChooser();
   initRoomDialogs();
   initBookPage();
-  initRail();
   initContactForm();
   initConsent();
   initMarquee();
@@ -476,7 +476,11 @@ function chosenRoom(form) {
    video's own first frame); the 2.4 MB clip is fetched only on a wide screen,
    without prefers-reduced-motion, and not on a save-data connection. */
 function initBookHero() {
-  const video = document.querySelector('[data-bhero] video[data-src]');
+  // ⚠️ Query the video directly. This read `[data-bhero] video` until the hero
+  // was rebuilt without that attribute, and then silently attached nothing —
+  // every guard passed and the poster just stayed. Don't couple it to a
+  // wrapper attribute the markup does not have to keep.
+  const video = document.querySelector('.bhero video[data-src]');
   if (!video) return;
   const wide = window.matchMedia('(min-width: 821px)').matches;
   const still = document.documentElement.classList.contains('no-motion');
@@ -488,124 +492,185 @@ function initBookHero() {
   video.play().catch(() => {});   // autoplay can be refused; the poster stays
 }
 
-/* The rail reads the enquiry back in words as it is filled in. */
-function initRail() {
+/* Measured-height unfold. Shared by the steps and by each house's views:
+   fr units do not interpolate in this engine, so a pixel height is what
+   animates. The flush is a synchronous offsetHeight read — a rAF never runs in
+   a throttled or backgrounded tab — and transitionend carries a timeout,
+   because it does not fire when the value did not change. */
+function unfold(region, open, still) {
+  const inner = region.firstElementChild;
+  if (still) { region.hidden = !open; region.style.height = open ? 'auto' : '0'; return; }
+
+  // ⚠️ Generation token. Each call claims the region; the settle below only
+  // acts if it is still the newest. Without it the 700ms fallback from an
+  // EARLIER unfold fires later and undoes the current one — opening step 2 and
+  // choosing a room inside 700ms left the rooms expanded again, because the
+  // open-timeout set height back to `auto` after the collapse had run.
+  const gen = (region._unfoldGen = (region._unfoldGen || 0) + 1);
+  let settled = false;
+  const settle = () => {
+    if (settled || region._unfoldGen !== gen) return;
+    settled = true;
+    region.removeEventListener('transitionend', onEnd);
+    if (open) region.style.height = 'auto';
+    else region.hidden = true;
+  };
+  // Height transitions on nested regions bubble; only this element's own
+  // transition may settle it.
+  const onEnd = (e) => { if (e.target === region && e.propertyName === 'height') settle(); };
+
+  region.addEventListener('transitionend', onEnd);
+  if (open) {
+    region.hidden = false;
+    region.style.height = '0px';
+    void region.offsetHeight;          // synchronous flush; rAF never runs in a throttled tab
+    region.style.height = `${inner.offsetHeight}px`;
+  } else {
+    region.style.height = `${inner.offsetHeight}px`;
+    void region.offsetHeight;
+    region.style.height = '0px';
+  }
+  setTimeout(settle, 700);             // transitionend does not fire when the value did not change
+}
+
+/* The three-step flow: when → which room → who you are. A finished step
+   collapses to a line saying what it holds; the next opens in its place. That
+   collapse is why the page has no sticky summary bar. Without JS every step
+   body is simply open and the page is one long form. */
+function initFlow() {
   const form = document.querySelector('[data-book-form]');
-  const rail = document.querySelector('[data-rail]');
-  if (!form || !rail) return;
-  const dates = rail.querySelector('[data-rail-dates]');
-  const guests = rail.querySelector('[data-rail-guests]');
-  const room = rail.querySelector('[data-rail-room]');
+  const steps = Array.from(document.querySelectorAll('.step'));
+  if (!form || !steps.length) return;
+  const still = document.documentElement.classList.contains('no-motion');
+  const byName = (n) => steps.find((s) => s.dataset.step === n);
+
   const fmt = (iso) => {
     const d = new Date(iso + 'T00:00:00');
     return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   };
-  const update = () => {
-    const a = form.checkin?.value, b = form.checkout?.value;
-    if (a && b) {
-      const nights = Math.round((new Date(b) - new Date(a)) / 86400000);
-      dates.textContent = `${fmt(a)} – ${fmt(b)}` + (nights > 0 ? ` · ${nights} night${nights === 1 ? '' : 's'}` : '');
-      dates.classList.remove('is-empty');
-    } else { dates.textContent = 'Your dates'; dates.classList.add('is-empty'); }
-    const ad = Number(form.adults?.value || 0), ch = Number(form.children?.value || 0), inf = Number(form.infants?.value || 0);
-    const parts = [`${ad} adult${ad === 1 ? '' : 's'}`];
-    if (ch) parts.push(`${ch} child${ch === 1 ? '' : 'ren'}`);
-    if (inf) parts.push(`${inf} infant${inf === 1 ? '' : 's'}`);
-    guests.textContent = parts.join(', ');
-    const r = chosenRoom(form);
-    room.textContent = r.id ? r.label.replace(' – ', ', ') : 'Any bungalow';
-    room.classList.toggle('is-empty', !r.id);
+  const datesSummary = () => {
+    const a = form.checkin.value, b = form.checkout.value;
+    if (!a || !b) return '';
+    const nights = Math.round((new Date(b) - new Date(a)) / 86400000);
+    const ad = Number(form.adults.value || 0), ch = Number(form.children.value || 0), inf = Number(form.infants.value || 0);
+    const who = [`${ad} adult${ad === 1 ? '' : 's'}`];
+    if (ch) who.push(`${ch} child${ch === 1 ? '' : 'ren'}`);
+    if (inf) who.push(`${inf} infant${inf === 1 ? '' : 's'}`);
+    const flex = form.querySelector('input[name="dates"]:checked')?.value === 'flexible';
+    return `${fmt(a)} – ${fmt(b)} · ${nights} night${nights === 1 ? '' : 's'}${flex ? ' (flexible)' : ''} · ${who.join(', ')}`;
   };
-  form.addEventListener('input', update);
-  form.addEventListener('change', update);
-  update();
-  document.querySelector('[data-continue]')?.addEventListener('click', () => {
-    document.getElementById('rooms')?.scrollIntoView({ behavior: document.documentElement.classList.contains('no-motion') ? 'auto' : 'smooth', block: 'start' });
+  const roomSummary = () => {
+    const on = form.querySelector('input[name="room"]:checked');
+    if (!on || !on.value) return 'Any bungalow — we will recommend one';
+    return `${on.dataset.label.replace(' – ', ', ')} · from ${on.dataset.price} THB`;
+  };
+
+  const open = (name) => {
+    steps.forEach((s) => {
+      const body = s.querySelector('[data-step-body]');
+      const is = s.dataset.step === name;
+      s.classList.toggle('is-open', is);
+      if (is === Boolean(body.hidden)) unfold(body, is, still);
+    });
+  };
+  const markDone = (name, text) => {
+    const s = byName(name); if (!s) return;
+    const sum = s.querySelector('[data-step-sum]'), ch = s.querySelector('[data-step-change]');
+    s.classList.add('is-done');
+    if (sum) { sum.textContent = text; sum.hidden = false; }
+    if (ch) ch.hidden = false;
+  };
+  const goto = (name) => {
+    open(name);
+    byName(name)?.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
+  };
+
+  steps.forEach((s) => {
+    const body = s.querySelector('[data-step-body]');
+    const first = s.dataset.step === 'dates';
+    body.hidden = !first;
+    body.style.height = first ? 'auto' : '0';
+    s.classList.toggle('is-open', first);
   });
+
+  byName('dates').querySelector('[data-step-next]').addEventListener('click', () => {
+    const err = byName('dates').querySelector('[data-step-err]');
+    for (const f of [form.checkin, form.checkout]) {
+      if (!f.value) { err.textContent = 'Please give both an arrival and a departure date.'; err.hidden = false; f.focus(); return; }
+    }
+    if (form.checkout.value <= form.checkin.value) {
+      err.textContent = 'Departure has to be after arrival.'; err.hidden = false; form.checkout.focus(); return;
+    }
+    err.hidden = true;
+    markDone('dates', datesSummary());
+    goto('room');
+  });
+
+  steps.forEach((s) => {
+    s.querySelector('[data-step-change]')?.addEventListener('click', () => {
+      s.classList.remove('is-done');
+      s.querySelector('[data-step-sum]').hidden = true;
+      s.querySelector('[data-step-change]').hidden = true;
+      goto(s.dataset.step);
+    });
+  });
+
+  // Choosing a room finishes step 2 and opens step 3 — the rooms fold away and
+  // the details take their place.
+  form.querySelectorAll('input[name="room"]').forEach((r) => {
+    r.addEventListener('change', () => {
+      if (!r.checked) return;
+      markDone('room', roomSummary());
+      goto('you');
+    });
+  });
+
+  form.addEventListener('input', () => {
+    const s = byName('dates');
+    if (s.classList.contains('is-done')) s.querySelector('[data-step-sum]').textContent = datesSummary();
+  });
+
+  window.__flow = { markDone, goto, roomSummary };
 }
 
-/* The houses. "Choose this room" unfolds that house's views in place; picking
-   a view marks the house chosen and folds the rest. Views are real radios, so
-   the choice submits without JS too. */
+/* The houses inside step 2. "Choose this room" unfolds that house's views;
+   picking one is a real radio change, which the flow above acts on. */
 function initRoomChooser() {
   const form = document.querySelector('[data-book-form]');
   const houses = Array.from(document.querySelectorAll('.house'));
   if (!form || !houses.length) return;
   const still = document.documentElement.classList.contains('no-motion');
 
-  const setHeight = (region, open) => {
-    const inner = region.firstElementChild;
-    if (still) { region.hidden = !open; region.style.height = open ? 'auto' : '0'; return; }
-    if (open) {
-      region.hidden = false;
-      region.style.height = '0px';
-      void region.offsetHeight;                       // synchronous flush; rAF never runs in a throttled tab
-      region.style.height = `${inner.offsetHeight}px`;
-      const done = () => { region.style.height = 'auto'; region.removeEventListener('transitionend', done); };
-      region.addEventListener('transitionend', done);
-      setTimeout(done, 700);                           // transitionend does not fire when nothing changed
-    } else {
-      region.style.height = `${inner.offsetHeight}px`;
-      void region.offsetHeight;
-      region.style.height = '0px';
-      const done = () => { region.hidden = true; region.removeEventListener('transitionend', done); };
-      region.addEventListener('transitionend', done);
-      setTimeout(done, 700);
-    }
-  };
-
-  const open = (house) => {
+  const openHouse = (house) => {
     houses.forEach((h) => {
       const region = h.querySelector('[data-house-views]');
-      const btn = h.querySelector('[data-house-open]');
-      const isThis = h === house;
-      if (!isThis && !region.hidden) setHeight(region, false);
-      if (isThis && region.hidden) setHeight(region, true);
-      btn.setAttribute('aria-expanded', String(isThis));
+      const is = h === house;
+      h.querySelector('[data-house-open]').setAttribute('aria-expanded', String(is));
+      if (is === Boolean(region.hidden)) unfold(region, is, still);
     });
   };
 
-  const mark = () => {
-    const on = form.querySelector('input[name="room"]:checked');
-    houses.forEach((h) => {
-      const mine = on && on.value && h.contains(on);
-      h.classList.toggle('is-chosen', Boolean(mine));
-      const line = h.querySelector('[data-house-chosen]');
-      if (line) line.textContent = mine ? `${on.closest('.view').querySelector('.view__name').textContent} · from ${on.dataset.price} THB` : '';
-      if (mine) setHeight(h.querySelector('[data-house-views]'), false);
-    });
-  };
+  houses.forEach((h) => h.querySelector('[data-house-open]').addEventListener('click', () => openHouse(h)));
 
-  houses.forEach((h) => {
-    h.querySelector('[data-house-open]').addEventListener('click', () => open(h));
-    h.querySelector('[data-house-change]').addEventListener('click', () => {
-      const any = form.querySelector('input[name="room"][value=""]');
-      if (any) any.checked = true;
-      mark(); open(h);
-      form.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-  });
-  form.querySelectorAll('input[name="room"]').forEach((r) => r.addEventListener('change', mark));
-
-  // The overlay's "Choose this room" checks the matching radio and marks it.
   document.querySelectorAll('[data-choose]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const radio = form.querySelector(`input[name="room"][value="${btn.dataset.choose}"]`);
       if (!radio) return;
       btn.closest('dialog')?.close();
-      radio.checked = true; mark();
-      form.dispatchEvent(new Event('change', { bubbles: true }));
-      radio.closest('.house')?.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'center' });
+      radio.checked = true;
+      radio.dispatchEvent(new Event('change', { bubbles: true }));
     });
   });
 
-  // accommodation.html links here as book.html?room=<id>.
   const wanted = new URLSearchParams(window.location.search).get('room');
   if (wanted) {
     const radio = form.querySelector(`input[name="room"][value="${wanted}"]`);
-    if (radio) { radio.checked = true; mark(); form.dispatchEvent(new Event('change', { bubbles: true })); }
+    if (radio) {
+      radio.checked = true;
+      openHouse(radio.closest('.house'));
+      if (window.__flow) window.__flow.markDone('room', window.__flow.roomSummary());
+    }
   }
-  mark();
 }
 
 /* Native <dialog>: Escape and the backdrop come free, and focus is trapped for
@@ -722,8 +787,8 @@ function initBookPage() {
 function initContactForm() {
   const form = document.querySelector('[data-contact-form]');
   if (!form) return;
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
+
+  const compose = () => {
     const get = (n) => form.querySelector(`[name="${n}"]`)?.value.trim() || '';
     const body = [
       `Name: ${get('name') || 'not given'}`,
@@ -732,12 +797,44 @@ function initContactForm() {
       '',
       get('message'),
     ].filter((l) => l !== null).join('\n');
-    const subject = 'Message from the resort website';
+    return { body, subject: 'Message from the resort website' };
+  };
+
+  const fallbackToMail = ({ subject, body }) => {
     window.location.href = `mailto:${RESORT_EMAIL}`
       + `?subject=${encodeURIComponent(subject)}`
       + `&body=${encodeURIComponent(body)}`;
+    showEnquirySent(form, subject, body, 'contact-message', false);
+  };
 
-    showEnquirySent(form, subject, body, 'contact-message');
+  // Same pattern as initBookPage(): a real POST if a backend is configured,
+  // mailto as the fallback if it isn't or fails. Kept as two copies rather
+  // than one shared function — the two forms compose different bodies and
+  // the duplication is small enough that a shared abstraction would cost
+  // more to read than it saves.
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const { subject, body } = compose();
+    const key = form.querySelector('[name="access_key"]')?.value.trim();
+
+    if (!key) { fallbackToMail({ subject, body }); return; }
+
+    const btn = form.querySelector('button[type="submit"]');
+    const restore = btn ? btn.innerHTML : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+    try {
+      const data = new FormData(form);
+      data.set('subject', subject);
+      data.set('message', body);
+      const res = await fetch(form.dataset.endpoint, { method: 'POST', body: data });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.success === false) throw new Error(json.message || 'send failed');
+      showEnquirySent(form, subject, body, 'contact-message', true);
+    } catch (err) {
+      if (btn) { btn.disabled = false; btn.innerHTML = restore; }
+      fallbackToMail({ subject, body });
+    }
   });
 }
 
