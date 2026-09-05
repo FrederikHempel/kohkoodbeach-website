@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initRoomDetail();
   initRoomGalleries();
   initBookHero();
+  initDateRanges();
   initFlow();
   initRoomChooser();
   initRoomDialogs();
@@ -616,6 +617,80 @@ function unfold(region, open, still, after) {
    collapses to a line saying what it holds; the next opens in its place. That
    collapse is why the page has no sticky summary bar. Without JS every step
    body is simply open and the page is one long form. */
+/* ==========================================================================
+   Arrival / departure pair
+   --------------------------------------------------------------------------
+   Two forms carry this pair: the booking page's own form and the homepage
+   booking bar, which GETs its values straight into it. Both need the same
+   floors, so the rules live here rather than inside either page's setup.
+   ========================================================================== */
+
+const isoToday = () => new Date().toISOString().slice(0, 10);
+
+/* ⚠️ All UTC, deliberately. `new Date('2026-09-24T00:00:00')` is LOCAL
+   midnight, and `toISOString()` then converts it back to UTC — east of
+   Greenwich that lands on the previous day, so "the day after" returned the
+   same date and the departure floor never moved. Parsing with a trailing Z
+   and stepping with setUTCDate keeps a plain calendar date a calendar date. */
+function dayAfter(iso) {
+  const d = new Date(iso + 'T00:00:00Z');
+  if (isNaN(d)) return isoToday();
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+/* ⚠️ A FUNCTION, not just a listener, and that is the whole point. A native
+   date picker renders its grid from `min` at the instant it opens, and the
+   booking page opens the departure picker for the visitor the moment an
+   arrival is chosen. Both used to hang off the same `change` event from
+   different init functions, so they ran in registration order: the picker
+   opened first, showing a month with nothing greyed out, and the floor landed
+   a tick later. Reopening the picker showed the right thing, which is why this
+   read as "it works the second time". Anything that opens the departure picker
+   must call this synchronously first — never rely on listener order.
+
+   Departure's floor is the night AFTER arrival, not arrival itself: `checkin`
+   as the floor leaves the arrival date selectable, which is a nought-night
+   stay the form would happily submit. */
+function applyDateFloors(form) {
+  const checkin = form.querySelector('[name="checkin"]');
+  const checkout = form.querySelector('[name="checkout"]');
+  if (!checkin || !checkout) return;
+  const today = isoToday();
+  checkin.min = today;
+  checkout.min = checkin.value ? dayAfter(checkin.value) : today;
+  if (checkout.value && checkout.value < checkout.min) checkout.value = '';
+}
+
+/* Wires every form on the page that has both fields. The homepage bar had no
+   floors at all for months — it is not `[data-book-form]`, so the booking
+   page's setup skipped it, and it would GET an impossible range into the
+   booking page without complaint. Selecting on the fields rather than on a
+   form attribute is what stops the next such form from being missed. */
+function initDateRanges() {
+  document.querySelectorAll('form').forEach((form) => {
+    const checkin = form.querySelector('[name="checkin"]');
+    const checkout = form.querySelector('[name="checkout"]');
+    if (!checkin || !checkout) return;
+
+    checkin.addEventListener('change', () => applyDateFloors(form));
+
+    /* ⚠️ Watch DEPARTURE as well. Listening only on arrival left the other half
+       open: pick a departure earlier than the arrival — by typing, or by setting
+       it first — and nothing corrected it. The field went `rangeUnderflow` and
+       simply stayed on screen showing an impossible stay. Snapping up to the
+       first legal night is never a dead end, and the picker already greys out
+       everything below `min`, so this only fires on a typed or pasted value. */
+    checkout.addEventListener('change', () => {
+      if (checkout.value && checkout.min && checkout.value < checkout.min) {
+        checkout.value = checkout.min;
+      }
+    });
+
+    applyDateFloors(form);
+  });
+}
+
 function initFlow() {
   const form = document.querySelector('[data-book-form]');
   const steps = Array.from(document.querySelectorAll('.step'));
@@ -734,6 +809,7 @@ function initFlow() {
      not in every engine — the focus() is what the rest get. */
   form.checkin.addEventListener('change', () => {
     if (!form.checkin.value || form.checkout.value) return;
+    applyDateFloors(form);   // ⚠️ before opening — the picker reads `min` once, on open
     try { form.checkout.showPicker(); } catch (err) { form.checkout.focus(); }
   });
 
@@ -842,48 +918,14 @@ function initBookPage() {
     if (flex) flex.checked = true;
   }
 
-  // No enquiries for dates that have already passed, and departure must follow
-  // arrival — the form used to accept both.
-  const checkin = form.querySelector('[name="checkin"]');
-  const checkout = form.querySelector('[name="checkout"]');
-  const today = new Date().toISOString().slice(0, 10);
-  /* ⚠️ Departure's floor is the night AFTER arrival, not arrival itself. It used
-     to be `checkin.value`, which left the arrival date selectable in the
-     departure picker — a nought-night stay the form would happily submit. */
-  /* ⚠️ All UTC, deliberately. `new Date('2026-09-24T00:00:00')` is LOCAL
-     midnight, and `toISOString()` then converts it back to UTC — east of
-     Greenwich that lands on the previous day, so "the day after" returned the
-     same date and the departure floor never moved. Parsing with a trailing Z
-     and stepping with setUTCDate keeps a plain calendar date a calendar date. */
-  const dayAfter = (iso) => {
-    const d = new Date(iso + 'T00:00:00Z');
-    if (isNaN(d)) return today;
-    d.setUTCDate(d.getUTCDate() + 1);
-    return d.toISOString().slice(0, 10);
-  };
-  const floorDeparture = () => {
-    if (!checkout) return;
-    checkout.min = checkin?.value ? dayAfter(checkin.value) : today;
-    if (checkout.value && checkout.value < checkout.min) checkout.value = '';
-  };
-  if (checkin) {
-    checkin.min = today;
-    checkin.addEventListener('change', floorDeparture);
-  }
-  /* ⚠️ Watch DEPARTURE as well. Listening only on arrival left the other half
-     open: pick a departure earlier than the arrival — by typing, or by setting
-     it first — and nothing corrected it. The field went `rangeUnderflow` and
-     simply stayed on screen showing an impossible stay. Snapping up to the
-     first legal night is never a dead end, and the picker already greys out
-     everything below `min`, so this only fires on a typed or pasted value. */
-  if (checkout) {
-    checkout.addEventListener('change', () => {
-      if (checkout.value && checkout.min && checkout.value < checkout.min) {
-        checkout.value = checkout.min;
-      }
-    });
-  }
-  floorDeparture();
+  /* ⚠️ Re-floor AFTER the prefill. initDateRanges() has already run and set the
+     floors from empty fields; arriving from the homepage bar with dates in the
+     query string fills them without firing `change`, so nothing recomputes.
+     Landing here with 10–14 November left departure's floor on today, and the
+     picker offered every date back to this morning. Setting a date field from
+     script never fires an event — whatever depends on that value has to be
+     re-run by hand. */
+  applyDateFloors(form);
 
   /* The transport request, in words rather than a field name. It is the one
      answer here the resort has to act on separately from the room. */

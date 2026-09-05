@@ -1798,3 +1798,59 @@ site is not being opened to search yet. Paid traffic works fine with both in
 place; only organic discovery is off. The revert is still a single coordinated
 pass when he asks for it: the meta tag on all 11 pages, `robots.txt`, and
 keeping the `facebookexternalhit` exception.
+
+### The departure floor, and the three ways it was missing (5 Sep 2026)
+
+Reported as "it doesn't work the first time, but if I change the date it does".
+That is one symptom of what turned out to be **three separate holes**, all in
+the same rule: departure must be at least the night after arrival.
+
+**1. The homepage booking bar had no floors at all.** `index.html`'s
+`.booking__form` is not `[data-book-form]`, so `initBookPage()` returned before
+reaching the date code. Measured: `checkin.min` and `checkout.min` both `null`,
+and `form.checkValidity()` returned **true** with a departure before the
+arrival. That bar GETs straight into `book.html`, so an impossible range could
+be handed over without a word. This is what the screenshot showed.
+
+**2. The picker opened before the floor was applied.** Both behaviours hung off
+`change` on `checkin`, registered in *different* init functions — `initFlow()`
+(call 29) opened the departure picker, `initBookPage()` (call 32) set its `min`.
+Listeners fire in registration order, so the picker opened first. Measured by
+stubbing `showPicker`: `min` was `2026-09-05` at the moment of opening and
+`2026-09-25` a tick later.
+
+⚠️ **A native date picker reads `min` once, when it opens.** Changing `min`
+afterwards does not redraw the open grid. That is the entire mechanism behind
+"the second time works" — reopening the picker rebuilt it from the value that
+had since landed.
+
+**3. A prefill from the query string never recomputed anything.** Arriving from
+the homepage bar at `book.html?checkin=2026-11-10&checkout=2026-11-14` left
+departure's floor on today, because setting `.value` from script fires no
+event. Whatever depends on a scripted value has to be re-run by hand.
+
+**The shape of the fix matters more than the fix.** The rule now lives in
+`applyDateFloors(form)` — a plain function, not a listener — so anything that
+needs the floors current can call it synchronously. `initFlow()` calls it on the
+line above `showPicker()`; `initBookPage()` calls it after the prefill;
+`initDateRanges()` calls it on load and on every `change`. Nothing depends on
+init order any more, which is what made hole 2 possible.
+
+⚠️ **`initDateRanges()` selects on the fields, not on a form attribute** —
+`document.querySelectorAll('form')`, then any form holding both `checkin` and
+`checkout`. Hole 1 existed for months precisely because the setup keyed off
+`[data-book-form]` and the homepage bar does not carry it. A third form with
+these fields is wired the moment it exists.
+
+### ⚠️ The preview pane serves a stale script.js
+
+Half a debugging cycle went into a fix that was already correct: the pane kept
+executing a cached `script.js` (`transferSize: 0`, `decodedBodySize` 67585 while
+the file on disk was 69350) through `location.reload(true)` and a `?nocache=`
+query on the *page*. `typeof someNewFunction` said `undefined` and it looked
+like the edit had not applied.
+
+**Restart the local server on a fresh port** — a new origin gets a cold cache.
+Cheap check before believing any "my change did nothing": compare
+`performance.getEntriesByType('resource')`'s `decodedBodySize` for `script.js`
+against the file's real byte count.
