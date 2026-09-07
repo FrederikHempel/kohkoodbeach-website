@@ -23,7 +23,7 @@ direct, by email, and expect a human reply.
 The website exists to turn interest into a direct booking enquiry — a dated,
 named email conversation with the front desk — for Koh Kood Beach Resort, a
 19-bungalow beach resort at Hat Taphao on the west coast of Koh Kood, Trat,
-inside the Koh Chang Marine Park. There is no booking engine and no online
+inside the Koh Chang Marine National Park. There is no booking engine and no online
 payment; the enquiry *is* the product's conversion, and the reply promise is
 within 24 hours, usually the same day.
 
