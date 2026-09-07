@@ -1933,15 +1933,20 @@ label.offer__opt {
 button.link { font: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 
 /* ---------- Where you'll stay — the plot from above (homepage) ----------
-   The drone frame pinned; the open-air restaurant circled in an opening beat;
-   then one house at a time in the left margin on a soft scrim, its circle
-   drawing itself where the house stands. Generated markup: scratchpad/build_plot.py.
-   Behaviour: initPlot(). Panel colours are custom properties so the unpinned
-   layouts (phones, reduced motion) swap to the page's own ink with one rule. */
+   The drone frame pinned; the restaurant and the massage hut circle themselves
+   as the section comes into view; then one house at a time in the left margin
+   on a soft scrim, its circle drawing itself where the house stands. Everything
+   in the column is SCROLL-LINKED — the lead leaves and each house arrives in
+   proportion to the scroll, from the first pixel — and the frame drifts a few
+   percent across the pin, so "scroll → something moves" never breaks.
+   Generated markup: scratchpad/build_plot.py. Behaviour: initPlot(). Panel
+   colours are custom properties so the unpinned layouts swap to the page's
+   own ink with one rule. */
 .plot { position: relative; background: var(--charcoal); --pl-ink: var(--warm-white); --pl-ink-2: rgba(248,246,241,.8); --pl-ink-3: rgba(248,246,241,.62); --pl-rule: rgba(248,246,241,.26); }
 .plot__stage { position: sticky; top: var(--nav-h, 70px); height: calc(100vh - var(--nav-h, 70px)); overflow: hidden; }
-.plot__frame { position: absolute; inset: 0; }
-/* anchored to the BOTTOM on purpose: the huts sit on the frame's lower edge; the sea at the top is what may go */
+/* the frame (photo + overlay + scrim, together, so the circles stay on their huts) scales from its bottom edge:
+   the huts sit on that edge, so the drift takes from the sea at the top, never from the back row */
+.plot__frame { position: absolute; inset: 0; transform-origin: 50% 100%; will-change: transform; }
 .plot__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; filter: saturate(1.06) sepia(.07) contrast(1.03); }
 .plot__svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 /* the left margin darkens softly — enough to carry text, never a box; the photograph itself is never dimmed */
@@ -1951,7 +1956,9 @@ button.link { font: inherit; background: none; border: 0; padding: 0; cursor: po
 [data-loop] { opacity: 0; transition: opacity 1s var(--ease); }
 [data-loop].is-on { opacity: 1; }
 [data-loop].is-past { opacity: .38; }
-[data-loop="-1"].is-past { opacity: .5; }          /* the restaurant is context, not a choice — it stays a little stronger */
+/* the landmarks draw themselves on entry (time-based), not with the scroll; they are context, so they stay a little stronger */
+[data-loop="-1"] { transition: opacity 1s var(--ease), stroke-dashoffset 1.4s var(--ease); }
+[data-loop="-1"].is-past { opacity: .5; }
 .mark { opacity: 0; transition: opacity 1s var(--ease); }
 .mark.is-on { opacity: 1; }
 .mark.is-past { opacity: .45; }
@@ -1959,23 +1966,22 @@ button.link { font: inherit; background: none; border: 0; padding: 0; cursor: po
 .hand--m { display: none; }
 .hand { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 300; font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 40; font-size: 30px; fill: var(--warm-white); filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
 
-/* the left column: an opening line first, then one house at a time. The block LOSING .is-on uses the
-   base transition; the one GAINING it waits a beat and arrives slower — that asymmetry is the crossfade. */
+/* the left column: the three names first, always; then one slot the lead and the houses share.
+   Opacity and transform on the lead and the houses are set inline by initPlot() from the scroll
+   position; the short transition only smooths the steps of a mouse wheel. */
 .plot__side { position: absolute; left: var(--gutter); top: 50%; transform: translateY(-50%); width: clamp(300px, 27vw, 400px); color: var(--pl-ink); }
-.plot__lead { position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; transform: translateY(12px); transition: opacity .7s var(--ease), transform .9s var(--ease); pointer-events: none; }
-.plot__lead.is-on { position: relative; opacity: 1; transform: none; pointer-events: auto; transition: opacity 1.2s var(--ease) .4s, transform 1.4s var(--ease) .4s; }
+.plot__tabs { display: flex; gap: 16px; margin-bottom: 18px; }
+.plot__tab { font-size: .64rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--pl-ink-3); padding: 6px 0; border-bottom: 1px solid transparent; transition: color var(--t-control) var(--ease-quick), border-color var(--t-control) var(--ease-quick), transform var(--t-press) var(--ease-quick); }
+.plot__tab.is-on { color: var(--pl-ink); border-bottom-color: var(--gold); }
+.plot__tab:active { transform: scale(.97); }
+.plot__slot { position: relative; }
+.plot__lead, .ph { position: absolute; inset: 0 auto auto 0; width: 100%; pointer-events: none; will-change: opacity, transform; transition: opacity .25s ease-out, transform .25s ease-out; }
+.ph { opacity: 0; }
+.plot__lead.is-on, .ph.is-on { pointer-events: auto; }
 .plot__lead .label { color: var(--pl-ink-3); }
 .plot__lead h2 { color: var(--pl-ink); font-size: clamp(2.2rem, 3.6vw, 3.4rem); line-height: 1.02; margin-top: 12px; max-width: 12ch; }
 .plot__lead p { color: var(--pl-ink-2); margin-top: 18px; max-width: 32ch; }
 .plot__lead .plot__hint { margin-top: 26px; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--pl-ink-3); }
-.plot__tabs { display: flex; gap: 16px; margin-bottom: 18px; opacity: 0; transition: opacity 1s var(--ease) .4s; }
-.plot__side.is-houses .plot__tabs { opacity: 1; }
-.plot__tab { font-size: .64rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--pl-ink-3); padding: 6px 0; border-bottom: 1px solid transparent; transition: color var(--t-control) var(--ease-quick), border-color var(--t-control) var(--ease-quick), transform var(--t-press) var(--ease-quick); }
-.plot__tab.is-on { color: var(--pl-ink); border-bottom-color: var(--gold); }
-.plot__tab:active { transform: scale(.97); }
-.plot__deck { position: relative; }
-.ph { position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; transform: translateY(18px); transition: opacity .7s var(--ease), transform .9s var(--ease); pointer-events: none; }
-.ph.is-on { position: relative; opacity: 1; transform: none; pointer-events: auto; transition: opacity 1.2s var(--ease) .4s, transform 1.4s var(--ease) .4s; }
 .ph__shot { overflow: hidden; }
 .ph__shot img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
 .ph__name { font-family: var(--font-display); font-weight: 300; font-size: clamp(1.7rem, 2.4vw, 2.3rem); line-height: 1.08; color: var(--pl-ink); margin-top: 18px; }
@@ -2009,31 +2015,37 @@ button.link { font: inherit; background: none; border: 0; padding: 0; cursor: po
    Same thresholds as the route map, and initPlot() must agree with them. */
 @media (max-width: 820px), (max-height: 560px) {
   .plot { background: var(--warm-white); --pl-ink: var(--charcoal); --pl-ink-2: var(--ink-muted); --pl-ink-3: var(--warm-gray-strong); --pl-rule: rgba(43,41,38,.16); }
-  .plot__stage { position: static; height: auto; overflow: visible; display: flex; flex-direction: column; }
-  .plot__frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; order: 2; }
+  .plot__stage { position: static; height: auto; overflow: visible; }
+  .plot__frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; order: 2; transform: none !important; }
   .plot__photo { object-position: 100% 100%; }     /* the phone crops to the right, where the huts are; the overlay follows in JS */
   .plot__scrim { display: none; }
   .pen { stroke-width: 5; }
   .hand--d { display: none; }
   .hand--m { display: block; font-size: 36px; }
-  .plot__side { position: static; transform: none; width: auto; display: contents; }
-  .plot__lead, .plot__lead.is-on { position: static; order: 1; opacity: 1; transform: none; pointer-events: auto; padding: clamp(28px, 6vw, 48px) var(--gutter) clamp(20px, 4vw, 30px); }
-  .plot__lead .plot__hint { display: none; }
+  /* the stage becomes one column: lead, photo, houses — the slot and the side column dissolve into it */
+  .plot__stage { display: grid; grid-template-columns: 1fr; }
+  .plot__side, .plot__slot { display: contents; }
   .plot__tabs { display: none; }
-  .plot__deck { order: 3; display: grid; gap: 28px; padding: clamp(24px, 5vw, 36px) var(--gutter) clamp(40px, 8vw, 64px); }
-  .ph, .ph.is-on { position: relative; opacity: 1; transform: none; pointer-events: auto; }
+  .plot__lead, .ph { position: static; opacity: 1 !important; transform: none !important; pointer-events: auto; }
+  .plot__lead { order: 1; padding: clamp(28px, 6vw, 48px) var(--gutter) clamp(20px, 4vw, 30px); }
+  .plot__lead .plot__hint { display: none; }
+  .ph { order: 3; padding: 0 var(--gutter); }
+  .ph:nth-of-type(1) { padding-top: clamp(24px, 5vw, 36px); }
+  .ph:last-of-type { padding-bottom: clamp(40px, 8vw, 64px); }
+  .ph + .ph { padding-top: 28px; }
   .ph__cta { background: var(--charcoal); color: var(--warm-white); }
   [data-loop], .mark { opacity: 1 !important; }
 }
 .no-motion .plot { background: var(--warm-white); --pl-ink: var(--charcoal); --pl-ink-2: var(--ink-muted); --pl-ink-3: var(--warm-gray-strong); --pl-rule: rgba(43,41,38,.16); }
-.no-motion .plot__stage { position: static; height: auto; overflow: visible; display: flex; flex-direction: column; }
-.no-motion .plot__frame { position: relative; aspect-ratio: 16 / 9; order: 2; }
+.no-motion .plot__stage { position: static; height: auto; overflow: visible; display: grid; grid-template-columns: repeat(3, 1fr); column-gap: 28px; padding: 0 var(--gutter) 56px; }
+.no-motion .plot__frame { position: relative; aspect-ratio: 16 / 9; order: 2; grid-column: 1 / -1; transform: none !important; margin: 0 calc(-1 * var(--gutter)); }
 .no-motion .plot__scrim { display: none; }
 .no-motion .plot__side { position: static; transform: none; width: auto; display: contents; }
-.no-motion .plot__lead, .no-motion .plot__lead.is-on { position: static; order: 1; opacity: 1; transform: none; pointer-events: auto; padding: 28px var(--gutter) 20px; }
-.no-motion .plot__lead .plot__hint { display: none; }
 .no-motion .plot__tabs { display: none; }
-.no-motion .plot__deck { order: 3; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; padding: 28px var(--gutter) 56px; }
-.no-motion .ph, .no-motion .ph.is-on { position: relative; opacity: 1; transform: none; pointer-events: auto; }
+.no-motion .plot__slot { display: contents; }
+.no-motion .plot__lead { order: 1; grid-column: 1 / -1; padding: 28px 0 20px; }
+.no-motion .plot__lead, .no-motion .ph { position: static; opacity: 1 !important; transform: none !important; pointer-events: auto; }
+.no-motion .plot__lead .plot__hint { display: none; }
+.no-motion .ph { order: 3; padding-top: 28px; }
 .no-motion .ph__cta { background: var(--charcoal); color: var(--warm-white); }
 .no-motion [data-loop], .no-motion .mark { opacity: 1 !important; }

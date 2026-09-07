@@ -1532,11 +1532,14 @@ function initRoute() {
 /* ==========================================================================
    Where you'll stay — the plot from above (homepage)
    --------------------------------------------------------------------------
-   Pinned and scroll-driven like the route map: the section is taller than the
-   stage, the stage sticks, and progress through the extra height first shows
-   the photograph on its own — the restaurant circling itself — then picks a
-   house and draws its circle. Reads scroll on rAF for the same reason
-   initRoute() does: this needs "how far", not "is it on screen".
+   Pinned and scroll-driven like the route map, but everything in the column is
+   scroll-LINKED, not merely scroll-triggered: the lead leaves and each house
+   arrives in proportion to the scroll, from the first pixel of the pin, and the
+   whole frame drifts a few percent across it. Time-based fades gated on
+   thresholds read as "the website just stops" to a visitor who does not know
+   the pattern (Frederik's mother, 8 Sep 2026); motion that follows the hand
+   does not. The two landmarks — restaurant, massage hut — draw themselves on
+   entry instead, so the section is already alive before it pins.
    ⚠️ The preview pane cannot exercise this: document.hidden is true there and
    rAF never runs. Verify with headless Chrome. Markup: scratchpad/build_plot.py.
    ========================================================================== */
@@ -1544,7 +1547,8 @@ function initPlot() {
   const root = document.querySelector('[data-plot]');
   if (!root) return;
   const stage = root.querySelector('.plot__stage');
-  const side  = root.querySelector('.plot__side');
+  const frame = root.querySelector('.plot__frame');
+  const slot  = root.querySelector('[data-slot]');
   const lead  = root.querySelector('[data-lead]');
   const cards = [...root.querySelectorAll('[data-card]')];
   const loops = [...root.querySelectorAll('[data-loop]')];
@@ -1552,63 +1556,94 @@ function initPlot() {
   const tabs  = [...root.querySelectorAll('[data-tab]')];
   const overlay = root.querySelector('[data-overlay]');
   const N = cards.length;
-  const INTRO = 0.7;                                     // the photograph alone, in step lengths, before the first house
-  const STEP_VH = 1.0;                                   // scroll per step, in viewport heights
-  const DRAW = 0.5;                                      // a circle draws over the first half of its step
+  const INTRO = 0.3;      // the photograph alone, in step lengths, before the first house — short: the first flick brings a house
+  const STEP_VH = 1.0;    // scroll per house, in viewport heights
+  const ZONE = 0.3;       // a block enters over this much of a step, and leaves over as much
+  const GAP = 0.05;       // the slot is empty for this long between one block leaving and the next arriving
+  const DRAW = 0.5;       // a house's circle draws over the first half of its step
+  const DRIFT = 0.05;     // the frame scales by this much across the whole pin
+  const RISE = 40;        // px a block travels while arriving or leaving
   const navH = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
   // must agree with the un-pinning media queries in style.css
   const pinned = () => matchMedia('(min-width: 821px) and (min-height: 561px)').matches
                       && !document.documentElement.classList.contains('no-motion');
+  const ease = (p) => p <= 0 ? 0 : p >= 1 ? 1 : p * p * (3 - 2 * p);
 
   loops.forEach((l) => { const len = l.getTotalLength(); l.dataset.len = len; l.style.strokeDasharray = len; l.style.strokeDashoffset = len; });
-  const stepIds = [-1, ...cards.map((_, i) => i)];      // -1: the opening beat and its landmark
-  const byStep = stepIds.map((k) => loops.filter((l) => +l.dataset.loop === k));
+  const landmarks = loops.filter((l) => +l.dataset.loop === -1);
+  const houseLoops = cards.map((_, i) => loops.filter((l) => +l.dataset.loop === i));
 
-  let current = null;
-  function show(i) {                                    // i = -1 is the opening beat: no house yet
-    if (i === current) return;
-    current = i;
-    lead.classList.toggle('is-on', i < 0);
-    side.classList.toggle('is-houses', i >= 0);
-    cards.forEach((c, k) => c.classList.toggle('is-on', k === i));
-    tabs.forEach((t, k) => { t.classList.toggle('is-on', k === i); t.setAttribute('aria-selected', String(k === i)); });
+  /* Presence of a block, 0..1, from where the scroll is: in over [a, b], full
+     until c, out over [c, d]. Its travel follows the direction of the scroll,
+     so scrolling back up brings it back the way it went. */
+  const presence = (seg, a, b, c, d) =>
+    seg < a ? 0 : seg < b ? ease((seg - a) / (b - a)) : seg < c ? 1 : seg < d ? 1 - ease((seg - c) / (d - c)) : 0;
+  const place = (el, pres, centre, seg) => {
+    el.style.opacity = pres.toFixed(3);
+    el.style.transform = pres >= 1 ? 'none' : `translateY(${((1 - pres) * RISE * (seg < centre ? 1 : -1)).toFixed(1)}px)`;
+    el.classList.toggle('is-on', pres > 0.5);
+  };
+
+  let seen = false;
+  function drawLandmarks() {                 // once, as the section comes into view — before the scroll does anything
+    if (seen) return;
+    seen = true;
+    landmarks.forEach((l, j) => { l.style.transitionDelay = `${j * 0.6}s`; l.classList.add('is-on'); l.style.strokeDashoffset = 0; });
+    setTimeout(() => marks.forEach((m) => { if (+m.dataset.label === -1) m.classList.add('is-on'); }), 900);
   }
-  function draw(i, t) {
-    byStep.forEach((group, idx) => group.forEach((l, j) => {
-      const k = stepIds[idx];
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) drawLandmarks(); }, { threshold: 0.25 }).observe(stage);   // a quarter of the stage in view: the circles are drawing before it pins
+  } else drawLandmarks();
+
+  function update() {
+    if (!pinned()) return;
+    const travel = root.offsetHeight - stage.offsetHeight;
+    const y = Math.min(Math.max(navH() - root.getBoundingClientRect().top, 0), travel);
+    const seg = (travel ? y / travel : 1) * (N + INTRO) - INTRO;            // -INTRO … N
+    const i = seg < 0 ? -1 : Math.min(N - 1, Math.floor(seg));
+
+    // the column: the lead leaves from the first pixel; house k is in over [k+GAP, k+ZONE], out over [k+1-ZONE, k+1-GAP]
+    place(lead, seg <= -INTRO ? 1 : 1 - ease((seg + INTRO) / (INTRO - GAP)), -INTRO, seg);
+    cards.forEach((c, k) => {
+      const last = k === N - 1;
+      place(c, presence(seg, k + GAP, k + ZONE, last ? Infinity : k + 1 - ZONE, last ? Infinity : k + 1 - GAP), k + 0.5, seg);
+    });
+    tabs.forEach((t, k) => { t.classList.toggle('is-on', k === i); t.setAttribute('aria-selected', String(k === i)); });
+
+    // the frame drifts with the scroll — the one thing that always answers the hand
+    frame.style.transform = `scale(${(1 + DRIFT * Math.min(1, Math.max(0, (seg + INTRO) / (N + INTRO)))).toFixed(4)})`;
+
+    // the circles: a house's strokes draw in turn over the first half of its step; earlier ones stay, faded
+    houseLoops.forEach((group, k) => group.forEach((l, j) => {
       const len = +l.dataset.len;
-      const tj = k < i ? 1 : k > i ? 0 : Math.min(1, Math.max(0, t * group.length - j));   // several strokes per step draw in turn
-      l.style.strokeDashoffset = len * (1 - tj);
+      const t = k < i ? 1 : k > i ? 0 : Math.min(1, Math.max(0, ((seg - k) / DRAW) * group.length - j));
+      l.style.strokeDashoffset = len * (1 - t);
       l.classList.toggle('is-on', k === i); l.classList.toggle('is-past', k < i);
     }));
+    const housesBegun = seg >= ZONE;
+    landmarks.forEach((l) => { l.classList.toggle('is-past', housesBegun); if (housesBegun) l.classList.remove('is-on'); else if (seen) l.classList.add('is-on'); });
     // two label sets share each step (desktop and phone positions) — read the step off the element, never the array index
-    marks.forEach((m) => { const k = +m.dataset.label; m.classList.toggle('is-on', k === i && t > 0.55); m.classList.toggle('is-past', k < i); });
+    marks.forEach((m) => {
+      const k = +m.dataset.label;
+      if (k === -1) { m.classList.toggle('is-past', housesBegun); if (housesBegun) m.classList.remove('is-on'); else if (seen) m.classList.add('is-on'); return; }
+      m.classList.toggle('is-on', k === i && (seg - k) / DRAW > 0.55); m.classList.toggle('is-past', k < i);
+    });
   }
-  function settle() {                                    // unpinned: everything drawn, every house shown, the lead in the flow
-    root.style.height = '';
+  function settle() {                        // unpinned: everything drawn, every house shown, the lead in the flow
+    root.style.height = ''; slot.style.height = ''; frame.style.transform = '';
+    [lead, ...cards].forEach((el) => { el.style.opacity = ''; el.style.transform = ''; el.classList.add('is-on'); });
     loops.forEach((l) => { l.style.strokeDashoffset = 0; l.classList.add('is-on'); l.classList.remove('is-past'); });
     marks.forEach((m) => { m.classList.add('is-on'); m.classList.remove('is-past'); });
-    cards.forEach((c) => c.classList.add('is-on'));
-    lead.classList.add('is-on');
-    current = null;
   }
   function layout() {
     // the SVG has to crop exactly as the photograph does, or the circles drift off the huts
     overlay.setAttribute('preserveAspectRatio', matchMedia('(max-width: 820px)').matches ? 'xMaxYMax slice' : 'xMidYMax slice');
     if (!pinned()) return settle();
     root.style.height = `calc((100vh - ${navH()}px) + ${(N + INTRO) * STEP_VH * 100}vh)`;
-    current = null;
+    // the slot holds the lead and the houses stacked; it takes the tallest of them so the column never jumps
+    slot.style.height = '';
+    slot.style.height = Math.max(...[lead, ...cards].map((el) => el.offsetHeight)) + 'px';
     update();
-  }
-  function update() {
-    if (!pinned()) return;
-    const travel = root.offsetHeight - stage.offsetHeight;
-    const y = Math.min(Math.max(navH() - root.getBoundingClientRect().top, 0), travel);
-    const seg = (travel ? y / travel : 1) * (N + INTRO) - INTRO;
-    if (seg < 0) { show(-1); draw(-1, Math.min(1, (seg + INTRO) / (INTRO * 0.7))); return; }   // the landmark draws through the opening beat
-    const i = Math.min(N - 1, Math.floor(seg));
-    const t = Math.min(1, (seg - i) / DRAW);
-    show(i); draw(i, t);
   }
   let ticking = false;
   window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });
@@ -1618,8 +1653,10 @@ function initPlot() {
   tabs.forEach((tab, k) => tab.addEventListener('click', () => {
     if (!pinned()) return;
     const travel = root.offsetHeight - stage.offsetHeight;
-    const top = root.getBoundingClientRect().top + scrollY - navH() + travel * (INTRO + k + DRAW * 0.9) / (N + INTRO);
+    const top = root.getBoundingClientRect().top + scrollY - navH() + travel * (INTRO + k + 0.5) / (N + INTRO);
     window.scrollTo({ top, behavior: 'smooth' });
   }));
   layout();
+  // the photographs are lazy; when one lands, the tallest block may have grown
+  cards.forEach((c) => c.querySelector('img')?.addEventListener('load', () => { if (pinned()) layout(); }, { once: true }));
 }

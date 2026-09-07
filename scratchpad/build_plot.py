@@ -34,6 +34,8 @@ END = '<!-- /WHERE YOU\'LL STAY -->'
 # few units of the neighbouring huts. Step -1 is the opening beat.
 LOOPS = {
     'restaurant':  [dict(cx=416, cy=153, rx=38,  ry=33, rot=0.1, n=2.2, shear=0, wob=0.04, seed=15)],
+    # the massage hut: the small pavilion on the eastern corner of the sand, a few metres from the water — Frederik, 8 Sep 2026
+    'massage':     [dict(cx=735, cy=150, rx=23,  ry=19, rot=0.0, n=2.0, shear=0, wob=0.05, seed=16)],
     'bali-house':  [dict(cx=604, cy=479, rx=146, ry=82, rot=0.0, n=8,   shear=16, wob=0.015, seed=11),
                     dict(cx=770, cy=380, rx=36,  ry=26, rot=0.0, n=2,   shear=0,  wob=0.05,  seed=14)],
     'bali-deluxe': [dict(cx=409, cy=479, rx=53.5, ry=82, rot=0.0, n=6,  shear=16, wob=0.015, seed=12)],
@@ -42,12 +44,13 @@ LOOPS = {
 # hand-lettered names — desktop position, phone position; '|' breaks a line
 LABELS = {
     'restaurant':  dict(x=458, y=104, mx=458, my=100, text='Open-air|restaurant'),
+    'massage':     dict(x=764, y=158, mx=764, my=160, text='Massage hut'),
     'bali-house':  dict(x=560, y=374, mx=560, my=374, text='Bali House'),
     'bali-deluxe': dict(x=350, y=386, mx=312, my=388, text='Bali Deluxe'),
     'thai-twin':   dict(x=690, y=222, mx=660, my=222, text='Thai Twin House'),
 }
 # (key, step id, accommodation.html card id)
-STEPS = [('restaurant', -1, None), ('bali-house', 0, 'bali-house'), ('bali-deluxe', 1, 'bali-deluxe'), ('thai-twin', 2, 'thai-twin-house')]
+STEPS = [('restaurant', -1, None), ('massage', -1, None), ('bali-house', 0, 'bali-house'), ('bali-deluxe', 1, 'bali-deluxe'), ('thai-twin', 2, 'thai-twin-house')]
 # the card frames on accommodation.html are 800x600 at best; these are the sharpest frames of each house
 PHOTOS = {
     'bali-house':      (A + 'room-photos/bali-house-sea-view/img_2p9896.webp', 2000, 1500),
@@ -131,7 +134,7 @@ def section():
 <section class="plot" data-plot aria-labelledby="plot-h">
   <div class="plot__stage">
     <div class="plot__frame">
-      <img class="plot__photo" src="{A}hero-carousel/hero-4.webp" alt="Koh Kood Beach Resort from above: the beach, the pool, the open-air restaurant, the lawn and the bungalows among the palms" width="2000" height="1125" loading="lazy">
+      <img class="plot__photo" src="{A}hero-carousel/hero-4.webp" alt="Koh Kood Beach Resort from above: the beach, the pool, the open-air restaurant, the massage hut, the lawn and the bungalows among the palms" width="2000" height="1125" loading="lazy">
       <svg class="plot__svg" viewBox="0 0 1000 562" preserveAspectRatio="xMidYMax slice" data-overlay aria-hidden="true">
         {''.join(svg_paths)}
         {''.join(labels)}
@@ -139,14 +142,14 @@ def section():
       <div class="plot__scrim"></div>
     </div>
     <div class="plot__side">
-      <div class="plot__lead is-on" data-lead>
-        <span class="label">The resort from above</span>
-        <h2 id="plot-h">Where you'll stay</h2>
-        <p>The whole resort in one picture — the beach, the pool, the open-air restaurant, and the houses among the palms. We've circled where each one stands, so you can see for yourself how close to the water you'd be.</p>
-        <p class="plot__hint">Scroll to see the houses</p>
-      </div>
       <div class="plot__tabs" role="tablist" aria-label="Houses">{''.join(tabs)}</div>
-      <div class="plot__deck">{''.join(cards)}
+      <div class="plot__slot" data-slot>
+        <div class="plot__lead is-on" data-lead>
+          <span class="label">The resort from above</span>
+          <h2 id="plot-h">Where you'll stay</h2>
+          <p>The whole resort in one picture — the beach, the pool, the restaurant and the massage hut, and the houses among the palms. We've circled where each one stands, so you can see for yourself how close to the water you'd be.</p>
+          <p class="plot__hint">Scroll to see the houses</p>
+        </div>{''.join(cards)}
       </div>
     </div>
   </div>

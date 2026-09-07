@@ -2102,3 +2102,44 @@ says so.
 stay" beat as "the website just stops" until she discovered that scrolling
 moves it. Frederik asked for a read on that, not a change — see the reply of
 8 Sep. The route map has the same pattern; she meets it twice on one page.
+
+### The beat is scroll-linked now, and the massage hut is on the map (8 Sep 2026)
+
+Frederik's mother read the pinned beat as "the website just stops"; his
+brother liked the idea but expected others to feel the same, and suggested the
+three houses above a static map. Frederik chose to try the three fixes first:
+
+1. **Everything in the column moves with the scroll, from the first pixel.**
+   `initPlot()` no longer toggles classes that trigger timed fades; it sets
+   opacity and a small vertical travel *inline*, from a presence function of
+   scroll position: the lead leaves over the opening beat, house *k* arrives
+   over `[k+0.05, k+0.3]` and leaves over `[k+0.7, k+0.95]`, with the slot empty
+   for a tenth of a step between. Scrolling back brings a block back the way it
+   went. A 0.25 s CSS transition only smooths the steps of a mouse wheel.
+   **And the frame drifts** — `scale(1 → 1.05)` across the whole pin, from its
+   bottom edge so the back row is never cropped — the one thing that answers
+   the hand even when nothing else is due to change.
+2. **The opening beat is 0.3 of a step** (was 0.7): a house is on its way
+   within the first flick.
+3. **The three names are visible and clickable throughout**, at the top of the
+   column; the lead and the houses share one slot beneath them, sized by JS to
+   the tallest of them so the column never jumps.
+
+**The landmarks — restaurant and massage hut — draw on entry, not on scroll**
+(an IntersectionObserver at a quarter of the stage, staggered 0.6 s), so the
+section is already alive before it pins. They fade to their landmark state
+once the first house is fully in.
+
+**The massage hut is at (735, 150)** — the small pavilion on the eastern
+corner of the sand, a few metres from the water; Frederik's identification.
+Its name sits to its right, over the trees.
+
+Measured across the pin in headless Chrome: lead 1 → 0.61 → 0 over the
+opening beat with the frame already at 1.0016; Bali House at 0.42 and its
+circle at 65% at seg 0.2; the hand-off to Bali Deluxe at seg 1.2 with the
+Deluxe circle at 35%; scale 1.05 at the end; no page errors. The phone layout
+is the same flat one, with both landmarks.
+
+**Not done, kept in reserve:** the brother's version — the three houses in
+a row above a static map — is the fallback if the tester still stalls. It is
+the phone layout on a laptop, and one media query away.
