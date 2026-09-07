@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initMenu();
   initReveal();
   initHero();
-  initRoomSlider();
   initAccordion();
   initGalleryTabs();
   initLightbox();
@@ -35,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initConsent();
   initMarquee();
   initRoute();
+  initPlot();
 });
 
 /* Respect the OS "reduce motion" setting. Note it *reduces* rather than removes:
@@ -80,7 +80,12 @@ function publishNavHeight() {
   const set = () => document.documentElement.style
     .setProperty('--nav-h', Math.round(nav.getBoundingClientRect().height) + 'px');
   set();
-  if (window.ResizeObserver) new ResizeObserver(set).observe(nav);
+  /* ⚠️ border-box, not the default content-box. Going solid past the hero only
+     changes the nav's PADDING (114px → 74px at 1440); its content box never
+     moves, so the default observer never fired and --nav-h stayed at the tall
+     value on every page with a hero — and everything pinned to it (the plot,
+     the route stage) sat 40px below the nav with the section ground showing. */
+  if (window.ResizeObserver) new ResizeObserver(set).observe(nav, { box: 'border-box' });
   else window.addEventListener('resize', set);
 }
 
@@ -176,68 +181,6 @@ function initHero() {
 }
 
 /* Room collection slider — image cross-fades, meta text swaps, prev/next wrap. */
-function initRoomSlider() {
-  const root = document.querySelector('[data-rooms]');
-  if (!root) return;
-
-  const rooms = Array.from(root.querySelectorAll('[data-room]')).map((el) => ({
-    image: el.dataset.image,
-    name: el.dataset.name,
-    desc: el.dataset.desc,
-    href: el.dataset.href,
-    price: el.dataset.price || '',
-  }));
-  if (!rooms.length) return;
-
-  const img = root.querySelector('[data-room-img]');
-  const name = root.querySelector('[data-room-name]');
-  const desc = root.querySelector('[data-room-desc]');
-  const link = root.querySelector('[data-room-link]');
-  const price = root.querySelector('[data-room-price]');
-  const count = root.querySelector('[data-room-count]');
-  const peek = root.querySelector('[data-room-peek]');
-  const peekName = root.querySelector('[data-room-peek-name]');
-  let i = 0;
-
-  const render = (next) => {
-    i = (next + rooms.length) % rooms.length;
-    const room = rooms[i];
-
-    img.classList.add('is-swapping');
-    const swap = new Image();
-    swap.src = room.image;
-    const apply = () => {
-      img.src = room.image;
-      img.alt = room.name;
-      img.classList.remove('is-swapping');
-    };
-    swap.complete ? setTimeout(apply, 220) : swap.addEventListener('load', () => setTimeout(apply, 220));
-
-    if (name) name.textContent = room.name;
-    if (desc) desc.textContent = room.desc;
-    if (link) link.href = room.href;
-    if (price) price.textContent = room.price;
-    if (count) count.textContent = `${String(i + 1).padStart(2, '0')} / ${String(rooms.length).padStart(2, '0')}`;
-
-    // The sliver on the right always shows whichever room comes next.
-    if (peek) {
-      const upcoming = rooms[(i + 1) % rooms.length];
-      peek.src = upcoming.image;
-      if (peekName) peekName.textContent = upcoming.name;
-    }
-  };
-
-  root.querySelectorAll('[data-room-prev]').forEach((b) => b.addEventListener('click', () => render(i - 1)));
-  root.querySelectorAll('[data-room-next]').forEach((b) => {
-    b.addEventListener('click', () => render(i + 1));
-    // The peek is a <figure>, not a <button>, so give it keyboard parity.
-    b.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); render(i + 1); }
-    });
-  });
-
-  render(0);
-}
 
 /* FAQ accordion — uses a grid-rows transition so it animates to auto height. */
 function initAccordion() {
@@ -1419,6 +1362,13 @@ function initRoomDetail() {
       if (open !== a.dataset.rsSee) openFor(a.dataset.rsSee);
     });
   });
+
+  /* Arriving with a house in the hash — the homepage's "Learn more" links this
+     way — opens that house's panel, so nobody lands on the card only to have
+     to click once more for what they came for. initHashLanding() has already
+     put the card at the top; the panel unfolds beneath it. */
+  const fromHash = decodeURIComponent(window.location.hash.slice(1));
+  if (fromHash && buttons.some((b) => b.dataset.expand === fromHash)) openFor(fromHash);
 }
 
 /* ==========================================================================
@@ -1560,4 +1510,99 @@ function initRoute() {
   window.addEventListener('resize', sync);
   pinned.addEventListener('change', sync);
   sync();
+}
+
+/* ==========================================================================
+   Where you'll stay — the plot from above (homepage)
+   --------------------------------------------------------------------------
+   Pinned and scroll-driven like the route map: the section is taller than the
+   stage, the stage sticks, and progress through the extra height first shows
+   the photograph on its own — the restaurant circling itself — then picks a
+   house and draws its circle. Reads scroll on rAF for the same reason
+   initRoute() does: this needs "how far", not "is it on screen".
+   ⚠️ The preview pane cannot exercise this: document.hidden is true there and
+   rAF never runs. Verify with headless Chrome. Markup: scratchpad/build_plot.py.
+   ========================================================================== */
+function initPlot() {
+  const root = document.querySelector('[data-plot]');
+  if (!root) return;
+  const stage = root.querySelector('.plot__stage');
+  const side  = root.querySelector('.plot__side');
+  const lead  = root.querySelector('[data-lead]');
+  const cards = [...root.querySelectorAll('[data-card]')];
+  const loops = [...root.querySelectorAll('[data-loop]')];
+  const marks = [...root.querySelectorAll('[data-label]')];
+  const tabs  = [...root.querySelectorAll('[data-tab]')];
+  const overlay = root.querySelector('[data-overlay]');
+  const N = cards.length;
+  const INTRO = 0.7;                                     // the photograph alone, in step lengths, before the first house
+  const STEP_VH = 1.0;                                   // scroll per step, in viewport heights
+  const DRAW = 0.5;                                      // a circle draws over the first half of its step
+  const navH = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
+  // must agree with the un-pinning media queries in style.css
+  const pinned = () => matchMedia('(min-width: 821px) and (min-height: 561px)').matches
+                      && !document.documentElement.classList.contains('no-motion');
+
+  loops.forEach((l) => { const len = l.getTotalLength(); l.dataset.len = len; l.style.strokeDasharray = len; l.style.strokeDashoffset = len; });
+  const stepIds = [-1, ...cards.map((_, i) => i)];      // -1: the opening beat and its landmark
+  const byStep = stepIds.map((k) => loops.filter((l) => +l.dataset.loop === k));
+
+  let current = null;
+  function show(i) {                                    // i = -1 is the opening beat: no house yet
+    if (i === current) return;
+    current = i;
+    lead.classList.toggle('is-on', i < 0);
+    side.classList.toggle('is-houses', i >= 0);
+    cards.forEach((c, k) => c.classList.toggle('is-on', k === i));
+    tabs.forEach((t, k) => { t.classList.toggle('is-on', k === i); t.setAttribute('aria-selected', String(k === i)); });
+  }
+  function draw(i, t) {
+    byStep.forEach((group, idx) => group.forEach((l, j) => {
+      const k = stepIds[idx];
+      const len = +l.dataset.len;
+      const tj = k < i ? 1 : k > i ? 0 : Math.min(1, Math.max(0, t * group.length - j));   // several strokes per step draw in turn
+      l.style.strokeDashoffset = len * (1 - tj);
+      l.classList.toggle('is-on', k === i); l.classList.toggle('is-past', k < i);
+    }));
+    // two label sets share each step (desktop and phone positions) — read the step off the element, never the array index
+    marks.forEach((m) => { const k = +m.dataset.label; m.classList.toggle('is-on', k === i && t > 0.55); m.classList.toggle('is-past', k < i); });
+  }
+  function settle() {                                    // unpinned: everything drawn, every house shown, the lead in the flow
+    root.style.height = '';
+    loops.forEach((l) => { l.style.strokeDashoffset = 0; l.classList.add('is-on'); l.classList.remove('is-past'); });
+    marks.forEach((m) => { m.classList.add('is-on'); m.classList.remove('is-past'); });
+    cards.forEach((c) => c.classList.add('is-on'));
+    lead.classList.add('is-on');
+    current = null;
+  }
+  function layout() {
+    // the SVG has to crop exactly as the photograph does, or the circles drift off the huts
+    overlay.setAttribute('preserveAspectRatio', matchMedia('(max-width: 820px)').matches ? 'xMaxYMax slice' : 'xMidYMax slice');
+    if (!pinned()) return settle();
+    root.style.height = `calc((100vh - ${navH()}px) + ${(N + INTRO) * STEP_VH * 100}vh)`;
+    current = null;
+    update();
+  }
+  function update() {
+    if (!pinned()) return;
+    const travel = root.offsetHeight - stage.offsetHeight;
+    const y = Math.min(Math.max(navH() - root.getBoundingClientRect().top, 0), travel);
+    const seg = (travel ? y / travel : 1) * (N + INTRO) - INTRO;
+    if (seg < 0) { show(-1); draw(-1, Math.min(1, (seg + INTRO) / (INTRO * 0.7))); return; }   // the landmark draws through the opening beat
+    const i = Math.min(N - 1, Math.floor(seg));
+    const t = Math.min(1, (seg - i) / DRAW);
+    show(i); draw(i, t);
+  }
+  let ticking = false;
+  window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });
+  window.addEventListener('resize', layout);
+  // a viewport can cross the pin threshold without a resize event reaching us — the media queries are the reliable signal
+  ['(min-width: 821px)', '(min-height: 561px)', '(max-width: 820px)'].forEach((q) => matchMedia(q).addEventListener('change', layout));
+  tabs.forEach((tab, k) => tab.addEventListener('click', () => {
+    if (!pinned()) return;
+    const travel = root.offsetHeight - stage.offsetHeight;
+    const top = root.getBoundingClientRect().top + scrollY - navH() + travel * (INTRO + k + DRAW * 0.9) / (N + INTRO);
+    window.scrollTo({ top, behavior: 'smooth' });
+  }));
+  layout();
 }

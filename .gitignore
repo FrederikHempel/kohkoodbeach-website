@@ -23,5 +23,4 @@ assets/**/*.mov
 # Design staging prototypes — options shown to Frederik, not part of the site.
 # The directory's CONTENTS are ignored, not the directory, so one file can be
 # re-included: build_plot.py generates staging-plot.html at the root.
-scratchpad/staging/*
-!scratchpad/staging/build_plot.py
+scratchpad/staging/
