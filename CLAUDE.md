@@ -2216,3 +2216,37 @@ site's `.link` underline. The photograph's anchor is `tabindex="-1"
 aria-hidden="true"` on purpose — three links to one destination in a card is
 noise for a screen reader, so the photo is a pointer convenience and the
 heading and the button are the real links.
+
+### The room photograph is a control on both pages (8 Sep 2026)
+
+Frederik wanted the homepage's hover on `accommodation.html` too, and pressing
+it to open the room and take him down to it.
+
+**`.veil` / `.veil__label` is one shared component now**, used by the
+homepage's plot cards (`.ph__shot`) and the rooms page's cards
+(`.cat__shot`). Renamed from `.ph__veil`; add a new hover parent to the one
+`@media (hover: hover)` block rather than copying the rules.
+
+**On `accommodation.html` the photograph is a `<button>`, not a link** — it
+opens a panel on the same page rather than going anywhere. `tabindex="-1"`
+and `aria-hidden="true"`, because the "See more" button directly beneath it
+does the same job with a real label; the picture is a pointer convenience.
+Same reasoning as the homepage, different element.
+
+⚠️ **The photograph never toggles closed.** `[data-expand]` (See more) toggles;
+`[data-open]` (the photograph) only ever opens. Someone clicking a picture
+means "show me this one", never "hide it" — and with the glide attached, a
+toggle-closed would scroll them to an empty region.
+
+**Both controls glide on open**, because two controls on one card doing the
+same thing differently reads as a bug. Measured before: pressing "See more"
+left the panel's top 525px down a 900px viewport — 375px of a 1201px panel in
+view. After: top at 92px, 808px visible. The panel sits *below* the card row
+so its top does not move as it unfolds, which is why the target can be read
+before the animation — unlike the booking page's steps, which collapse one
+another and had to be measured after settling.
+
+**`scratchpad/build_book.py` survives this**, checked rather than assumed: it
+finds each card's photograph with the first `<img src… width… height…>` inside
+the `<article>`, not by the `.cat__shot` wrapper, so the div → button change
+does not reach it. Verified all three cards still parse (img, line, 3 facts).
