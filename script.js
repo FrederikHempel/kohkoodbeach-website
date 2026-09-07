@@ -1532,13 +1532,14 @@ function initRoute() {
 /* ==========================================================================
    Where you'll stay — the plot from above (homepage)
    --------------------------------------------------------------------------
-   Pinned and scroll-driven like the route map, but everything in the column is
-   scroll-LINKED, not merely scroll-triggered: the lead leaves and each house
-   arrives in proportion to the scroll, from the first pixel of the pin, and the
-   whole frame drifts a few percent across it. Time-based fades gated on
-   thresholds read as "the website just stops" to a visitor who does not know
-   the pattern (Frederik's mother, 8 Sep 2026); motion that follows the hand
-   does not. The two landmarks — restaurant, massage hut — draw themselves on
+   Pinned and scroll-driven like the route map, but the column is a STRIP that
+   scrolls: the lead and the three houses are stacked in one clipped slot and
+   travel through it together, so a block scrolls up out of sight under the
+   three names and the next rises from below — in proportion to the scroll,
+   from the first pixel of the pin. The whole frame drifts a few percent across
+   it as well. Time-based fades gated on thresholds read as "the website just
+   stops" to a visitor who does not know the pattern (Frederik's mother, 8 Sep
+   2026); a column that moves with the hand does not. The two landmarks — restaurant, massage hut — draw themselves on
    entry instead, so the section is already alive before it pins.
    ⚠️ The preview pane cannot exercise this: document.hidden is true there and
    rAF never runs. Verify with headless Chrome. Markup: scratchpad/build_plot.py.
@@ -1557,32 +1558,28 @@ function initPlot() {
   const overlay = root.querySelector('[data-overlay]');
   const N = cards.length;
   const INTRO = 0.3;      // the photograph alone, in step lengths, before the first house — short: the first flick brings a house
-  const STEP_VH = 1.0;    // scroll per house, in viewport heights
-  const ZONE = 0.3;       // a block enters over this much of a step, and leaves over as much
-  const GAP = 0.05;       // the slot is empty for this long between one block leaving and the next arriving
-  const DRAW = 0.5;       // a house's circle draws over the first half of its step
-  const DRIFT = 0.05;     // the frame scales by this much across the whole pin
-  const RISE = 40;        // px a block travels while arriving or leaving
+  const STEP_VH = 0.67;   // scroll per house, in viewport heights — a third less than the first cut
+  const DRIFT = 0.07;     // the frame scales by this much across the whole pin (from its bottom edge, so it reads as a slow descent)
   const navH = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
   // must agree with the un-pinning media queries in style.css
   const pinned = () => matchMedia('(min-width: 821px) and (min-height: 561px)').matches
                       && !document.documentElement.classList.contains('no-motion');
-  const ease = (p) => p <= 0 ? 0 : p >= 1 ? 1 : p * p * (3 - 2 * p);
+  const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 
   loops.forEach((l) => { const len = l.getTotalLength(); l.dataset.len = len; l.style.strokeDasharray = len; l.style.strokeDashoffset = len; });
   const landmarks = loops.filter((l) => +l.dataset.loop === -1);
   const houseLoops = cards.map((_, i) => loops.filter((l) => +l.dataset.loop === i));
 
-  /* Presence of a block, 0..1, from where the scroll is: in over [a, b], full
-     until c, out over [c, d]. Its travel follows the direction of the scroll,
-     so scrolling back up brings it back the way it went. */
-  const presence = (seg, a, b, c, d) =>
-    seg < a ? 0 : seg < b ? ease((seg - a) / (b - a)) : seg < c ? 1 : seg < d ? 1 - ease((seg - c) / (d - c)) : 0;
-  const place = (el, pres, centre, seg) => {
-    el.style.opacity = pres.toFixed(3);
-    el.style.transform = pres >= 1 ? 'none' : `translateY(${((1 - pres) * RISE * (seg < centre ? 1 : -1)).toFixed(1)}px)`;
-    el.classList.toggle('is-on', pres > 0.5);
-  };
+  /* The strip. Blocks are the lead (0) and the houses (1..N), stacked in the
+     clipped slot. `strip(seg)` is where the strip stands, in blocks: 0 = the
+     lead centred, 1 = the first house centred, and so on. Block j then sits at
+     (j - strip) slot-heights, which is one clean multiplication — the uneven
+     gap between the lead and the first house (INTRO, not a whole step) is
+     absorbed here rather than in every block's own arithmetic. */
+  const blocks = [lead, ...cards];
+  const strip = (seg) => seg <= -INTRO ? 0
+                       : seg < 0.5 ? (seg + INTRO) / (INTRO + 0.5)
+                       : Math.min(N, 1 + (seg - 0.5));
 
   let seen = false;
   function drawLandmarks() {                 // once, as the section comes into view — before the scroll does anything
@@ -1600,33 +1597,44 @@ function initPlot() {
     const travel = root.offsetHeight - stage.offsetHeight;
     const y = Math.min(Math.max(navH() - root.getBoundingClientRect().top, 0), travel);
     const seg = (travel ? y / travel : 1) * (N + INTRO) - INTRO;            // -INTRO … N
-    const i = seg < 0 ? -1 : Math.min(N - 1, Math.floor(seg));
 
-    // the column: the lead leaves from the first pixel; house k is in over [k+GAP, k+ZONE], out over [k+1-ZONE, k+1-GAP]
-    place(lead, seg <= -INTRO ? 1 : 1 - ease((seg + INTRO) / (INTRO - GAP)), -INTRO, seg);
-    cards.forEach((c, k) => {
-      const last = k === N - 1;
-      place(c, presence(seg, k + GAP, k + ZONE, last ? Infinity : k + 1 - ZONE, last ? Infinity : k + 1 - GAP), k + 0.5, seg);
+    // the strip: every block moves together, clipped by the slot
+    const at = strip(seg);
+    const h = slot.clientHeight;
+    blocks.forEach((el, j) => {
+      const d = j - at;                                   // in slot heights: 0 = centred, -1 = just above, +1 = just below
+      el.style.opacity = 1;
+      el.style.transform = `translateY(calc(-50% + ${(d * h).toFixed(1)}px))`;
+      el.classList.toggle('is-on', Math.abs(d) < 0.5);    // only the block in the slot takes clicks
     });
-    tabs.forEach((t, k) => { t.classList.toggle('is-on', k === i); t.setAttribute('aria-selected', String(k === i)); });
+    // the nearest house is the one being read; a tab lights when its card is essentially centred
+    const near = Math.max(0, Math.round(at) - 1);
+    tabs.forEach((t, k) => { t.classList.toggle('is-on', k === near && at >= 0.5); t.setAttribute('aria-selected', String(k === near && at >= 0.5)); });
 
     // the frame drifts with the scroll — the one thing that always answers the hand
     frame.style.transform = `scale(${(1 + DRIFT * Math.min(1, Math.max(0, (seg + INTRO) / (N + INTRO)))).toFixed(4)})`;
 
-    // the circles: a house's strokes draw in turn over the first half of its step; earlier ones stay, faded
-    houseLoops.forEach((group, k) => group.forEach((l, j) => {
-      const len = +l.dataset.len;
-      const t = k < i ? 1 : k > i ? 0 : Math.min(1, Math.max(0, ((seg - k) / DRAW) * group.length - j));
-      l.style.strokeDashoffset = len * (1 - t);
-      l.classList.toggle('is-on', k === i); l.classList.toggle('is-past', k < i);
-    }));
-    const housesBegun = seg >= ZONE;
+    /* the circles follow the strip, so a house is fully circled exactly when its
+       card is fully in the slot: drawn over the last 0.7 of its approach, held
+       while it is the nearest, faded once it has scrolled past. */
+    houseLoops.forEach((group, k) => {
+      const d = (k + 1) - at;
+      const t = clamp((1 - Math.abs(d)) / 0.7, 0, 1);
+      group.forEach((l, j) => {
+        const len = +l.dataset.len;
+        const tj = d < 0 ? 1 : clamp(t * group.length - j, 0, 1);   // several strokes per house draw in turn
+        l.style.strokeDashoffset = len * (1 - tj);
+        l.classList.toggle('is-on', k === near && at >= 0.5);
+        l.classList.toggle('is-past', d < -0.5);
+      });
+    });
+    const housesBegun = at > 0.35;
     landmarks.forEach((l) => { l.classList.toggle('is-past', housesBegun); if (housesBegun) l.classList.remove('is-on'); else if (seen) l.classList.add('is-on'); });
     // two label sets share each step (desktop and phone positions) — read the step off the element, never the array index
     marks.forEach((m) => {
       const k = +m.dataset.label;
       if (k === -1) { m.classList.toggle('is-past', housesBegun); if (housesBegun) m.classList.remove('is-on'); else if (seen) m.classList.add('is-on'); return; }
-      m.classList.toggle('is-on', k === i && (seg - k) / DRAW > 0.55); m.classList.toggle('is-past', k < i);
+      m.classList.toggle('is-on', k === near && at >= 0.5); m.classList.toggle('is-past', (k + 1) - at < -0.5);
     });
   }
   function settle() {                        // unpinned: everything drawn, every house shown, the lead in the flow
@@ -1640,9 +1648,11 @@ function initPlot() {
     overlay.setAttribute('preserveAspectRatio', matchMedia('(max-width: 820px)').matches ? 'xMaxYMax slice' : 'xMidYMax slice');
     if (!pinned()) return settle();
     root.style.height = `calc((100vh - ${navH()}px) + ${(N + INTRO) * STEP_VH * 100}vh)`;
-    // the slot holds the lead and the houses stacked; it takes the tallest of them so the column never jumps
+    // the slot holds the strip and clips it; it takes the tallest block, so the column never jumps
+    // and a block's travel of one slot height always carries it fully out of sight
     slot.style.height = '';
-    slot.style.height = Math.max(...[lead, ...cards].map((el) => el.offsetHeight)) + 'px';
+    blocks.forEach((el) => { el.style.transform = 'translateY(-50%)'; });   // measure at rest, not mid-strip
+    slot.style.height = Math.max(...blocks.map((el) => el.offsetHeight)) + 'px';
     update();
   }
   let ticking = false;

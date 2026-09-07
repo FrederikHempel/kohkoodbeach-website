@@ -1936,9 +1936,10 @@ button.link { font: inherit; background: none; border: 0; padding: 0; cursor: po
    The drone frame pinned; the restaurant and the massage hut circle themselves
    as the section comes into view; then one house at a time in the left margin
    on a soft scrim, its circle drawing itself where the house stands. Everything
-   in the column is SCROLL-LINKED — the lead leaves and each house arrives in
-   proportion to the scroll, from the first pixel — and the frame drifts a few
-   percent across the pin, so "scroll → something moves" never breaks.
+   in the column is SCROLL-LINKED — the blocks form one strip that scrolls up
+   under the three names, in proportion to the scroll and from the first pixel —
+   and the frame drifts a few percent across the pin, so "scroll → something
+   moves" never breaks.
    Generated markup: scratchpad/build_plot.py. Behaviour: initPlot(). Panel
    colours are custom properties so the unpinned layouts swap to the page's
    own ink with one rule. */
@@ -1970,12 +1971,22 @@ button.link { font: inherit; background: none; border: 0; padding: 0; cursor: po
    Opacity and transform on the lead and the houses are set inline by initPlot() from the scroll
    position; the short transition only smooths the steps of a mouse wheel. */
 .plot__side { position: absolute; left: var(--gutter); top: 50%; transform: translateY(-50%); width: clamp(300px, 27vw, 400px); color: var(--pl-ink); }
-.plot__tabs { display: flex; gap: 16px; margin-bottom: 18px; }
-.plot__tab { font-size: .64rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--pl-ink-3); padding: 6px 0; border-bottom: 1px solid transparent; transition: color var(--t-control) var(--ease-quick), border-color var(--t-control) var(--ease-quick), transform var(--t-press) var(--ease-quick); }
+/* the three names are the ceiling the column scrolls under — always there, always clickable */
+.plot__tabs { display: flex; flex-wrap: wrap; gap: 6px 22px; margin-bottom: 20px; }
+.plot__tab { font-size: .82rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--pl-ink-3); padding: 6px 0; border-bottom: 2px solid transparent; transition: color var(--t-control) var(--ease-quick), border-color var(--t-control) var(--ease-quick), transform var(--t-press) var(--ease-quick); }
 .plot__tab.is-on { color: var(--pl-ink); border-bottom-color: var(--gold); }
 .plot__tab:active { transform: scale(.97); }
-.plot__slot { position: relative; }
-.plot__lead, .ph { position: absolute; inset: 0 auto auto 0; width: 100%; pointer-events: none; will-change: opacity, transform; transition: opacity .25s ease-out, transform .25s ease-out; }
+/* ⚠️ The slot CLIPS, and that is the whole effect: each block travels the slot's
+   own height, so it scrolls up out of sight under the names and the next one
+   rises from below — a column that moves with the hand, not a crossfade. The
+   mask softens both cut edges so the clip never reads as a hard box.
+   The negative inline margin keeps a focus ring from being clipped sideways. */
+.plot__slot { position: relative; overflow: hidden; padding-inline: 6px; margin-inline: -6px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 7%, #000 93%, transparent 100%);
+          mask-image: linear-gradient(to bottom, transparent 0, #000 7%, #000 93%, transparent 100%); }
+/* centred in the slot, not top-aligned: the slot is as tall as the TALLEST block, so a
+   short one sitting at the top would have its first line eaten by the mask's fade. */
+.plot__lead, .ph { position: absolute; top: 50%; left: 6px; width: calc(100% - 12px); pointer-events: none; will-change: transform; transition: transform .15s ease-out; }
 .ph { opacity: 0; }
 .plot__lead.is-on, .ph.is-on { pointer-events: auto; }
 .plot__lead .label { color: var(--pl-ink-3); }
@@ -2025,6 +2036,7 @@ button.link { font: inherit; background: none; border: 0; padding: 0; cursor: po
   /* the stage becomes one column: lead, photo, houses — the slot and the side column dissolve into it */
   .plot__stage { display: grid; grid-template-columns: 1fr; }
   .plot__side, .plot__slot { display: contents; }
+  .plot__slot { overflow: visible; padding-inline: 0; margin-inline: 0; -webkit-mask-image: none; mask-image: none; }
   .plot__tabs { display: none; }
   .plot__lead, .ph { position: static; opacity: 1 !important; transform: none !important; pointer-events: auto; }
   .plot__lead { order: 1; padding: clamp(28px, 6vw, 48px) var(--gutter) clamp(20px, 4vw, 30px); }
@@ -2042,7 +2054,7 @@ button.link { font: inherit; background: none; border: 0; padding: 0; cursor: po
 .no-motion .plot__scrim { display: none; }
 .no-motion .plot__side { position: static; transform: none; width: auto; display: contents; }
 .no-motion .plot__tabs { display: none; }
-.no-motion .plot__slot { display: contents; }
+.no-motion .plot__slot { display: contents; overflow: visible; padding-inline: 0; margin-inline: 0; -webkit-mask-image: none; mask-image: none; }
 .no-motion .plot__lead { order: 1; grid-column: 1 / -1; padding: 28px 0 20px; }
 .no-motion .plot__lead, .no-motion .ph { position: static; opacity: 1 !important; transform: none !important; pointer-events: auto; }
 .no-motion .plot__lead .plot__hint { display: none; }

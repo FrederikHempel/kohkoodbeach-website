@@ -2143,3 +2143,41 @@ is the same flat one, with both landmarks.
 **Not done, kept in reserve:** the brother's version — the three houses in
 a row above a static map — is the fallback if the tester still stalls. It is
 the phone layout on a laptop, and one media query away.
+
+### The column became a strip that scrolls under the names (8 Sep 2026)
+
+Frederik's fourth round on the beat, and his own proposal for the mechanic:
+*the three categories act like a ceiling — the cards scroll away under them and
+the next appears from the bottom.* That is what it does now, and it is a better
+answer to "the website just stops" than the crossfade it replaces, because the
+column visibly **moves with the hand** instead of dissolving on a timer.
+
+**The strip.** The lead and the three houses are stacked in one slot with
+`overflow: hidden`, and `strip(seg)` gives where the strip stands *in blocks*
+— 0 = lead centred, 1 = first house centred. Block *j* then sits at
+`(j - strip) × slotHeight`, one multiplication. The uneven first gap (the
+opening beat is `INTRO`, not a whole step) is absorbed in `strip()` rather
+than in every block's arithmetic. Opacity is no longer animated at all: the
+clip does the work, and a mask fades both cut edges so it never reads as a box.
+
+⚠️ **Blocks are centred in the slot (`top: 50%` + `translateY(calc(-50% + …))`),
+not top-aligned.** The slot is as tall as the *tallest* block, so a short one —
+the lead is 312px against the slot's 600 — sat at the top with its eyebrow
+inside the mask's fade. Caught in a screenshot, not in the numbers.
+
+**Other numbers this round:** `STEP_VH` 1.0 → **0.67** (Frederik: a third less
+scroll — the section is 3.1 viewport heights now, was 4.3); `DRIFT` 0.05 →
+**0.07**, still scaling from the frame's bottom edge so the back row is never
+cropped and the drift reads as a slow descent; tabs 0.64rem/500 →
+**0.82rem/600** with a 2px rule.
+
+**The circles follow the strip, not the scroll directly** — a house is fully
+circled exactly when its card is fully in the slot (`t = (1 - |d|) / 0.7`),
+held while it is nearest, faded once it has scrolled past. That is Frederik's
+"the circle still highlights whichever category is fully visible".
+
+⚠️ **`.plot__slot`'s clip would crop a focus ring**, the same trap as
+`.step__body` on the booking page. Sideways is handled (6px padding, -6px
+margin); vertically only a block that is mid-travel can be clipped, and those
+are not the interactive one. If a keyboard user ever reports a lost ring here,
+that is where it is.
