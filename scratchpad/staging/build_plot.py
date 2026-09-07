@@ -25,8 +25,8 @@ A = 'assets/'
 # amplitude — kept low on the two row loops, where the strokes pass within a
 # few units of the neighbouring huts.
 LOOPS = {
-    # the long low roof between the beach and the lawn — best reading of the frame, to be confirmed
-    'restaurant':  [dict(cx=371, cy=203, rx=50,  ry=34, rot=-0.15, n=2.4, shear=0, wob=0.04, seed=15)],
+    # the hexagonal roof nearest the water — Frederik, 8 Sep 2026 (the long low roof south of it was my wrong guess)
+    'restaurant':  [dict(cx=416, cy=153, rx=38,  ry=33, rot=0.1, n=2.2, shear=0, wob=0.04, seed=15)],
     'bali-house':  [dict(cx=604, cy=479, rx=146, ry=82, rot=0.0, n=8,   shear=16, wob=0.015, seed=11),
                     dict(cx=770, cy=380, rx=36,  ry=26, rot=0.0, n=2,   shear=0,  wob=0.05,  seed=14)],
     'bali-deluxe': [dict(cx=409, cy=479, rx=53.5, ry=82, rot=0.0, n=6,  shear=16, wob=0.015, seed=12)],
@@ -34,7 +34,7 @@ LOOPS = {
 }
 # hand-lettered names, each sat just above its loop — desktop position, phone position
 LABELS = {
-    'restaurant':  dict(x=338, y=270, mx=330, my=272, text='Open-air restaurant'),
+    'restaurant':  dict(x=458, y=104, mx=458, my=100, text='Open-air|restaurant'),   # above-right of the roof, on two lines so it stays over the trees, not the sand
     'bali-house':  dict(x=560, y=374, mx=560, my=374, text='Bali House'),
     'bali-deluxe': dict(x=350, y=386, mx=312, my=388, text='Bali Deluxe'),
     'thai-twin':   dict(x=690, y=222, mx=660, my=222, text='Thai Twin House'),
@@ -91,8 +91,13 @@ def build():
         for L in LOOPS[k]:
             svg_paths.append(f'<path class="pen" data-loop="{i}" d="{loop(**L)}"/>')
         Lb = LABELS[k]
-        labels.append(f'<text class="hand hand--d mark" data-label="{i}" x="{Lb["x"]}" y="{Lb["y"]}">{Lb["text"]}</text>'
-                      f'<text class="hand hand--m mark" data-label="{i}" x="{Lb["mx"]}" y="{Lb["my"]}">{Lb["text"]}</text>')
+        def text(x, y, lh):
+            parts = Lb['text'].split('|')
+            if len(parts) == 1:
+                return parts[0]
+            return ''.join(f'<tspan x="{x}" dy="{0 if j == 0 else lh}">{t}</tspan>' for j, t in enumerate(parts))
+        labels.append(f'<text class="hand hand--d mark" data-label="{i}" x="{Lb["x"]}" y="{Lb["y"]}">{text(Lb["x"], Lb["y"], 30)}</text>'
+                      f'<text class="hand hand--m mark" data-label="{i}" x="{Lb["mx"]}" y="{Lb["my"]}">{text(Lb["mx"], Lb["my"], 36)}</text>')
 
     houses = []
     for i, h in enumerate(HOUSES):

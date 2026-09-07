@@ -2008,12 +2008,12 @@ the intro) before the first house arrives. Once a house takes over the
 landmark drops to `.is-past` at **.5** (houses drop to .38) — context worth
 keeping, not a choice being made. The lead sentence names it.
 
-⚠️ **Which roof is the restaurant is my reading of the frame, not a fact.**
-Two roofs sit between the beach and the lawn: a two-storey hipped roof nearest
-the water, and a long low roof just south of it. An open-air restaurant is a
-large single-storey pavilion, so the loop is on the long low one
-(`cx 371, cy 203`). If Frederik says it is the other, it is one line in
-`LOOPS` — do not guess a third time.
+**The restaurant is the hexagonal roof nearest the water (`cx 416, cy 153`)
+— Frederik, 8 Sep 2026.** My first guess was the long low roof just south of
+it, on the reasoning that an open-air restaurant is a big single-storey
+pavilion; the reasoning was fine and the answer was wrong, which is the usual
+shape of guessing at a photograph. Its label sits above and to the right of
+the roof, away from the house circles.
 
 ⚠️ **A patch that asserts must gate everything after it.** Twice today an
 assert stopped the write, and the build and the screenshots ran on the
