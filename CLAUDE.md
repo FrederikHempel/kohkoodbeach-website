@@ -1942,3 +1942,49 @@ emulated resize reaches the page without a `resize` event.
 house's panel on arrival is a one-line addition to `initHashLanding()` when the
 beat is built for real. The "we" sentence introducing the beat sits in the
 staging band for now — on the homepage it needs a home in the band above.
+
+### Staging page, second pass — the opening beat, the gradient, the leaning loop (8 Sep 2026)
+
+Three notes from Frederik on the first version, all built in.
+
+**The beat opens on the photograph alone.** The first house used to be on
+screen the moment the section pinned; now progress runs `INTRO` (0.6 of a
+step) before the first house, with the lead copy — "Where you'll stay" and the
+"we've circled…" sentence — in the left column, fading out as Bali House fades
+in. The three names are hidden during that opening and arrive with the first
+house.
+
+**The sand card is gone; it is copy on a gradient now.** His words: "not just a
+card on top of a map — make it more integrated." The left margin carries a soft
+scrim (`.80 → .66 @24% → .26 @46% → 0 @62%`) and the house is set directly on it
+in warm-white — photo, name, line, facts, price, a warm-white filled *Learn
+more*. The panel colours are custom properties (`--pl-ink`, `--pl-ink-2`,
+`--pl-ink-3`, `--pl-rule`) so the unpinned layouts (phones, reduced motion)
+swap to the page's own charcoal-on-warm-white with one rule. The photograph
+itself is never dimmed; that was the "Call of Duty" part.
+
+⚠️ **`.house` was already a class in `style.css`** (a leftover row layout from
+the booking page's third pass, still at ~line 1956) and the staging block
+silently inherited its two-column grid — photo 150px at the left, text at the
+right — on desktop *and* phone. The block is `.ph` / `.ph__…` now. **Grep
+`style.css` before naming a new block**; every page loads the whole sheet, and a
+stray earlier rule wins by simply existing.
+
+**The Deluxe loop leans.** The back pair of huts sits ~25 viewBox units further
+right than the front pair, so a straight rounded rectangle either cut the
+fourth hut or swallowed the neighbour. `loop()` takes `shear` (bottom edge
+right, top edge left, by that many units) and `n` (superellipse exponent — 6–8
+draws the rounded rectangle a hand draws round a row). Deluxe: `cx 409, rx
+53.5, ry 82, n 6, shear 16`; Bali House gets the same shear so the two facing
+edges stay parallel across the ~16 units of grass between hut 2 and hut 3. The
+strokes graze the corners of neighbouring roofs by a unit or two on purpose —
+a marker line over a roof edge does not read as "including" that hut; a line
+through the middle of one does.
+
+⚠️ **The rename took three attempts, and the reason is worth keeping:** a
+regex for `.house` followed by whitespace/`{`/`.`/`:` missed the
+comma-separated selectors, and a replace for `class="house ` (trailing space)
+missed `class="house"`. Both times the assert stopped the write, and both times
+the build and the screenshots ran on the **unchanged** file. When a rename is
+asserted, assert on the *built output* too — `grep -c 'class="ph'` on the page
+is the check that would have caught it first time.

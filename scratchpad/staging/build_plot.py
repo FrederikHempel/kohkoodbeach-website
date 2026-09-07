@@ -1,31 +1,39 @@
 """Builds staging-plot.html at the project root — a standalone page to test the
-"where you'll stay" beat: the drone frame pinned, one house card in the left
-margin at a time, its circle drawing itself as you scroll.
+"where you'll stay" beat: the drone frame pinned, the houses one at a time in
+the left margin on a soft scrim, each circle drawing itself as you scroll.
 
 Loop geometry is in viewBox units (1000 x 562 over the 2000 x 1125 frame).
 Positions came from Frederik on 7 Sep 2026: the four leftmost huts (two per
 row) are Bali Deluxe, the rest of both rows are Bali House, the four houses in
 the cluster to the north-east are Thai Twin.
+
+Second pass, 8 Sep 2026: the section opens on the photograph alone and the
+first house arrives with the scroll; the sand card became copy on a gradient;
+the Deluxe loop leans with the rows (the back pair sits ~25 units further
+right than the front pair) and no longer cuts its fourth hut.
 """
 import math, random, re, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 A = 'assets/'
 
-# --- loop geometry: centre, radii, rotation (radians), a seed for the wobble --
-# `n` is the superellipse exponent: 2 is an ellipse, ~3.5 a rounded rectangle —
-# what a hand draws round a row of huts. Several strokes per house are allowed;
-# the lone Bali hut east of the rows gets its own small loop, drawn second.
+# --- loop geometry ------------------------------------------------------------
+# cx, cy, rx, ry: the box. `n` is the superellipse exponent (2 = ellipse; 6–8 = a
+# rounded rectangle, which is what a hand draws round a row of huts). `shear`
+# leans the shape: the bottom edge moves right by that much and the top edge
+# left, because the back row is offset from the front row. `wob` is the wobble
+# amplitude — kept low on the two row loops, where the strokes pass within a
+# few units of the neighbouring huts.
 LOOPS = {
-    'bali-house':  [dict(cx=600, cy=478, rx=146, ry=74, rot=0.0,  n=3.5, wob=0.025, seed=11),
-                    dict(cx=770, cy=380, rx=36,  ry=26, rot=0.0,  n=2.0, wob=0.05,  seed=14)],
-    'bali-deluxe': [dict(cx=388, cy=478, rx=62,  ry=80, rot=0.0,  n=3.5, wob=0.025, seed=12)],
-    'thai-twin':   [dict(cx=762, cy=290, rx=118, ry=55, rot=0.10, n=2.6, wob=0.04,  seed=13)],
+    'bali-house':  [dict(cx=604, cy=479, rx=146, ry=82, rot=0.0, n=8,   shear=16, wob=0.015, seed=11),
+                    dict(cx=770, cy=380, rx=36,  ry=26, rot=0.0, n=2,   shear=0,  wob=0.05,  seed=14)],
+    'bali-deluxe': [dict(cx=409, cy=479, rx=53.5, ry=82, rot=0.0, n=6,  shear=16, wob=0.015, seed=12)],
+    'thai-twin':   [dict(cx=762, cy=290, rx=118, ry=55, rot=0.10, n=2.6, shear=0, wob=0.04,  seed=13)],
 }
-# hand-lettered names, each sat just above its loop — no leaders, no arrows
-LABELS = {   # desktop position, phone position
-    'bali-house':  dict(x=545, y=372, mx=548, my=372, text='Bali House'),
-    'bali-deluxe': dict(x=338, y=384, mx=300, my=386, text='Bali Deluxe'),
+# hand-lettered names, each sat just above its loop — desktop position, phone position
+LABELS = {
+    'bali-house':  dict(x=560, y=374, mx=560, my=374, text='Bali House'),
+    'bali-deluxe': dict(x=350, y=386, mx=312, my=388, text='Bali Deluxe'),
     'thai-twin':   dict(x=690, y=222, mx=660, my=222, text='Thai Twin House'),
 }
 
@@ -43,24 +51,24 @@ HOUSES = [
 KEYS = ['bali-house', 'bali-deluxe', 'thai-twin']
 
 
-def loop(cx, cy, rx, ry, rot, n, wob, seed):
-    """One marker stroke round a superellipse: low-frequency wobble, and the
-    pen overshoots its start the way a hand does."""
+def loop(cx, cy, rx, ry, rot, n, shear, wob, seed):
+    """One marker stroke round a (sheared) superellipse: low-frequency wobble,
+    and the pen overshoots its start the way a hand does."""
     random.seed(seed)
     ph = [random.uniform(0, math.tau) for _ in range(3)]
     amp = [random.uniform(wob * 0.6, wob) for _ in range(3)]
-    pts, steps = [], 96
+    pts, steps = [], 120
     sgn = lambda v: (v > 0) - (v < 0)
-    for i in range(steps + 9):
+    for i in range(steps + 11):
         t = i / steps * math.tau
         w = 1 + sum(a * math.sin(k * t + p) for k, (a, p) in enumerate(zip(amp, ph), start=2))
         c, s_ = math.cos(t), math.sin(t)
         x = rx * w * sgn(c) * abs(c) ** (2 / n)
         y = ry * w * sgn(s_) * abs(s_) ** (2 / n)
+        x += shear * (y / ry)                       # lean: bottom right, top left
         xr, yr = x * math.cos(rot) - y * math.sin(rot), x * math.sin(rot) + y * math.cos(rot)
         pts.append((cx + xr, cy + yr))
     return 'M' + ' L'.join(f'{x:.1f} {y:.1f}' for x, y in pts)
-
 
 
 def chrome():
@@ -82,25 +90,21 @@ def build():
         labels.append(f'<text class="hand hand--d mark" data-label="{i}" x="{Lb["x"]}" y="{Lb["y"]}">{Lb["text"]}</text>'
                       f'<text class="hand hand--m mark" data-label="{i}" x="{Lb["mx"]}" y="{Lb["my"]}">{Lb["text"]}</text>')
 
-    cards = []
+    houses = []
     for i, h in enumerate(HOUSES):
-        cards.append(f'''
-      <article class="cat plot__card" data-card="{i}">
-        <div class="cat__shot"><img src="{h['img']}" alt="{h['name']}" width="{h['w']}" height="{h['h']}"></div>
-        <div class="cat__body">
-          <h3 class="cat__name">{h['name']}</h3>
-          <p class="cat__line">{h['line']}</p>
-          <dl class="cat__facts">
+        houses.append(f'''
+        <article class="ph" data-card="{i}">
+          <div class="ph__shot"><img src="{h['img']}" alt="{h['name']}" width="{h['w']}" height="{h['h']}"></div>
+          <h3 class="ph__name">{h['name']}</h3>
+          <p class="ph__line">{h['line']}</p>
+          <dl class="ph__facts">
             <div><dt>Size</dt><dd>{h['size']}</dd></div>
             <div><dt>Beds</dt><dd>{h['beds']}</dd></div>
             <div><dt>Sleeps</dt><dd>{h['sleeps']}</dd></div>
           </dl>
-          <p class="cat__price">from {h['price']} <span class="cat__unit">THB per night</span></p>
-          <div class="cat__actions">
-            <a class="cat__book" href="accommodation.html#{h['id']}">Learn more <span aria-hidden="true">&#8594;</span></a>
-          </div>
-        </div>
-      </article>''')
+          <p class="ph__price">from {h['price']} THB <span class="ph__unit">per night</span></p>
+          <a class="ph__cta" href="accommodation.html#{h['id']}">Learn more <span class="arrow" aria-hidden="true">&#8594;</span></a>
+        </article>''')
     tabs = ''.join(f'<button type="button" role="tab" class="plot__tab" data-tab="{i}">{h["name"]}</button>' for i, h in enumerate(HOUSES))
 
     page = f'''<!DOCTYPE html>
@@ -119,12 +123,15 @@ def build():
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@1,9..144,300..400,100,1&display=swap">
 <style>
 /* ---------- Where you'll stay: the plot from above (staging) ---------- */
-.plot {{ position: relative; background: var(--charcoal); }}
+.plot {{ position: relative; background: var(--charcoal); --pl-ink: var(--warm-white); --pl-ink-2: rgba(248,246,241,.8); --pl-ink-3: rgba(248,246,241,.62); --pl-rule: rgba(248,246,241,.26); }}
 .plot__stage {{ position: sticky; top: var(--nav-h, 70px); height: calc(100vh - var(--nav-h, 70px)); overflow: hidden; }}
+.plot__frame {{ position: absolute; inset: 0; }}
 .plot__photo {{ position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; filter: saturate(1.06) sepia(.07) contrast(1.03); }}
 .plot__svg {{ position: absolute; inset: 0; width: 100%; height: 100%; }}
+/* the left margin darkens softly — enough to carry text, never a box */
+.plot__scrim {{ position: absolute; inset: 0; pointer-events: none;
+                background: linear-gradient(90deg, rgba(28,26,24,.80) 0%, rgba(28,26,24,.66) 24%, rgba(28,26,24,.26) 46%, rgba(28,26,24,0) 62%); }}
 .pen {{ fill: none; stroke: var(--gold); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }}
-.pen--thin {{ stroke-width: 2.6; }}
 [data-loop] {{ opacity: 0; transition: opacity .5s var(--ease); }}
 [data-loop].is-on {{ opacity: 1; }}
 [data-loop].is-past {{ opacity: .38; }}
@@ -134,59 +141,82 @@ def build():
 .hand--m {{ display: none; }}
 .hand {{ font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 300; font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 40; font-size: 30px; fill: var(--warm-white); filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }}
 
-/* the card panel: the three names as a strip on top, then accommodation.html's own .cat —
-   sat in the left margin, where it covers the neighbours' roofs */
-.plot__cards {{ position: absolute; left: var(--gutter); top: 50%; transform: translateY(-50%); width: clamp(300px, 27vw, 400px); background: var(--sand); box-shadow: var(--shadow-soft); }}
-.plot__tabs {{ display: flex; gap: 16px; padding: 12px 18px 0; border-bottom: var(--rule); }}
-.plot__tab {{ font-size: .64rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted); padding: 6px 0 10px; margin-bottom: -1px; border-bottom: 2px solid transparent; transition: color var(--t-control) var(--ease-quick), border-color var(--t-control) var(--ease-quick), transform var(--t-press) var(--ease-quick); }}
-.plot__tab.is-on {{ color: var(--charcoal); border-bottom-color: var(--gold); }}
+/* the left column: an opening line first, then one house at a time */
+.plot__side {{ position: absolute; left: var(--gutter); top: 50%; transform: translateY(-50%); width: clamp(300px, 27vw, 400px); color: var(--pl-ink); }}
+.plot__lead {{ position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; transform: translateY(10px); transition: opacity .55s var(--ease), transform .7s var(--ease); pointer-events: none; }}
+.plot__lead.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; }}
+.plot__lead .label {{ color: var(--pl-ink-3); }}
+.plot__lead h2 {{ color: var(--pl-ink); font-size: clamp(2.2rem, 3.6vw, 3.4rem); line-height: 1.02; margin-top: 12px; max-width: 12ch; }}
+.plot__lead p {{ color: var(--pl-ink-2); margin-top: 18px; max-width: 32ch; }}
+.plot__lead .plot__hint {{ margin-top: 26px; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--pl-ink-3); }}
+.plot__tabs {{ display: flex; gap: 16px; margin-bottom: 18px; opacity: 0; transition: opacity .5s var(--ease); }}
+.plot__side.is-houses .plot__tabs {{ opacity: 1; }}
+.plot__tab {{ font-size: .64rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--pl-ink-3); padding: 6px 0; border-bottom: 1px solid transparent; transition: color var(--t-control) var(--ease-quick), border-color var(--t-control) var(--ease-quick), transform var(--t-press) var(--ease-quick); }}
+.plot__tab.is-on {{ color: var(--pl-ink); border-bottom-color: var(--gold); }}
 .plot__tab:active {{ transform: scale(.97); }}
 .plot__deck {{ position: relative; }}
-.plot__card {{ position: absolute; inset: 0 auto auto 0; width: 100%; background: var(--sand); border: 0;
-               opacity: 0; transform: translateY(14px); transition: opacity .55s var(--ease), transform .7s var(--ease); pointer-events: none; }}
-.plot__card.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; }}
-.plot__card .cat__shot img {{ aspect-ratio: 3 / 2; }}
-.plot__card .cat__book {{ flex: 1; }}
+.ph {{ position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; transform: translateY(14px); transition: opacity .55s var(--ease), transform .7s var(--ease); pointer-events: none; }}
+.ph.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; }}
+.ph__shot {{ overflow: hidden; }}
+.ph__shot img {{ width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }}
+.ph__name {{ font-family: var(--font-display); font-weight: 300; font-size: clamp(1.7rem, 2.4vw, 2.3rem); line-height: 1.08; color: var(--pl-ink); margin-top: 18px; }}
+.ph__line {{ color: var(--pl-ink-2); margin-top: 8px; font-size: .95rem; max-width: 34ch; }}
+.ph__facts {{ margin: 16px 0 0; padding-top: 12px; border-top: 1px solid var(--pl-rule); display: grid; gap: 6px; }}
+.ph__facts > div {{ display: flex; justify-content: space-between; gap: 14px; align-items: baseline; }}
+.ph__facts dt {{ font-size: .64rem; font-weight: 500; letter-spacing: .15em; text-transform: uppercase; color: var(--pl-ink-3); }}
+.ph__facts dd {{ margin: 0; font-size: .88rem; text-align: right; color: var(--pl-ink-2); }}
+.ph__price {{ margin-top: 16px; font-family: var(--font-display); font-size: 1.28rem; font-variant-numeric: tabular-nums; color: var(--pl-ink); }}
+.ph__unit {{ font-family: var(--font-body); font-size: .62rem; letter-spacing: .12em; text-transform: uppercase; color: var(--pl-ink-3); margin-left: 6px; }}
+.ph__cta {{ display: inline-flex; align-items: center; gap: 10px; margin-top: 20px; padding: 14px 26px; background: var(--warm-white); color: var(--charcoal);
+               font-size: .7rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; transition: background var(--t-control) var(--ease-quick), transform var(--t-press) var(--ease-quick); }}
+.ph__cta .arrow {{ transition: transform var(--t-control) var(--ease-quick); }}
+@media (hover: hover) and (pointer: fine) {{ .ph__cta:hover {{ background: var(--sand); }} .ph__cta:hover .arrow {{ transform: translateX(3px); }} }}
+.ph__cta:active {{ transform: scale(.985); }}
 
-/* shorter laptops: keep the pin, tighten the card */
+/* shorter laptops: keep the pin, tighten the column */
 @media (max-height: 840px) {{
-  .plot__card .cat__shot img {{ aspect-ratio: 16 / 9; }}
-  .plot__card .cat__body {{ padding: 16px 18px; }}
-  .plot__card .cat__facts {{ margin-top: 10px; padding-top: 10px; gap: 5px; }}
-  .plot__card .cat__price {{ margin-top: 10px; }}
-  .plot__card .cat__actions {{ padding-top: 12px; }}
+  .ph__shot img {{ aspect-ratio: 16 / 9; }}
+  .ph__name {{ margin-top: 14px; }}
+  .ph__facts {{ margin-top: 12px; padding-top: 10px; gap: 5px; }}
+  .ph__price {{ margin-top: 12px; }}
+  .ph__cta {{ margin-top: 14px; }}
 }}
 @media (max-height: 700px) {{
-  .plot__card .cat__facts {{ display: none; }}
+  .ph__facts {{ display: none; }}
+  .plot__lead p {{ display: none; }}
 }}
 
-/* phones and very short screens: no pin — the photo, all three circles, the cards stacked */
+/* phones and very short screens: no pin — the lead, the photo with all three circles, the houses stacked */
 @media (max-width: 820px), (max-height: 560px) {{
-  .plot {{ background: var(--warm-white); }}
-  .plot__stage {{ position: static; height: auto; overflow: visible; }}
-  .plot__frame {{ position: relative; aspect-ratio: 4 / 3; overflow: hidden; }}
+  .plot {{ background: var(--warm-white); --pl-ink: var(--charcoal); --pl-ink-2: var(--ink-muted); --pl-ink-3: var(--warm-gray-strong); --pl-rule: rgba(43,41,38,.16); }}
+  .plot__stage {{ position: static; height: auto; overflow: visible; display: flex; flex-direction: column; }}
+  .plot__frame {{ position: relative; aspect-ratio: 4 / 3; overflow: hidden; order: 2; }}
   .plot__photo {{ object-position: 100% 100%; }}
+  .plot__scrim {{ display: none; }}
   .pen {{ stroke-width: 5; }}
   .hand--d {{ display: none; }}
   .hand--m {{ display: block; font-size: 36px; }}
-  .plot__svg {{ position: absolute; }}
-  .hand {{ font-size: 44px; }}
-  .plot__cards {{ position: static; transform: none; width: auto; padding: clamp(20px, 5vw, 36px) var(--gutter) 0; background: none; box-shadow: none; }}
-  .plot__deck {{ display: grid; gap: 16px; }}
-  .plot__card, .plot__card.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; border: var(--rule); }}
+  .plot__side {{ position: static; transform: none; width: auto; display: contents; }}
+  .plot__lead, .plot__lead.is-on {{ position: static; order: 1; opacity: 1; transform: none; pointer-events: auto; padding: clamp(28px, 6vw, 48px) var(--gutter) clamp(20px, 4vw, 30px); }}
+  .plot__lead .plot__hint {{ display: none; }}
   .plot__tabs {{ display: none; }}
+  .plot__deck {{ order: 3; display: grid; gap: 28px; padding: clamp(24px, 5vw, 36px) var(--gutter) clamp(40px, 8vw, 64px); }}
+  .ph, .ph.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; }}
+  .ph__cta {{ background: var(--charcoal); color: var(--warm-white); }}
   [data-loop], .mark {{ opacity: 1 !important; }}
 }}
-@media (min-width: 821px) and (min-height: 561px) {{
-  .plot__frame {{ position: absolute; inset: 0; }}
-}}
-.no-motion .plot__stage {{ position: static; height: auto; }}
-.no-motion .plot__frame {{ position: relative; aspect-ratio: 16 / 9; }}
-.no-motion .plot__cards {{ position: static; transform: none; width: auto; padding: 24px var(--gutter) 0; background: none; box-shadow: none; }}
-.no-motion .plot__deck {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }}
-.no-motion .plot__card, .no-motion .plot__card.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; border: var(--rule); }}
-.no-motion [data-loop], .no-motion .mark {{ opacity: 1 !important; }}
+.no-motion .plot {{ background: var(--warm-white); --pl-ink: var(--charcoal); --pl-ink-2: var(--ink-muted); --pl-ink-3: var(--warm-gray-strong); --pl-rule: rgba(43,41,38,.16); }}
+.no-motion .plot__stage {{ position: static; height: auto; overflow: visible; display: flex; flex-direction: column; }}
+.no-motion .plot__frame {{ position: relative; aspect-ratio: 16 / 9; order: 2; }}
+.no-motion .plot__scrim {{ display: none; }}
+.no-motion .plot__side {{ position: static; transform: none; width: auto; display: contents; }}
+.no-motion .plot__lead, .no-motion .plot__lead.is-on {{ position: static; order: 1; opacity: 1; transform: none; pointer-events: auto; padding: 28px var(--gutter) 20px; }}
+.no-motion .plot__lead .plot__hint {{ display: none; }}
 .no-motion .plot__tabs {{ display: none; }}
+.no-motion .plot__deck {{ order: 3; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; padding: 28px var(--gutter) 56px; }}
+.no-motion .ph, .no-motion .ph.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; }}
+.no-motion .ph__cta {{ background: var(--charcoal); color: var(--warm-white); }}
+.no-motion [data-loop], .no-motion .mark {{ opacity: 1 !important; }}
 
 .stg {{ background: var(--sand); }}
 .stg p {{ max-width: 60ch; }}
@@ -199,23 +229,29 @@ def build():
 <section class="band band--tight wrap stg">
   <span class="label">Staging · not linked from the site</span>
   <h1 style="font-size:clamp(2rem,4vw,3.4rem)">Where you'll stay, as a scroll</h1>
-  <p class="lead" style="margin-top:18px">Scroll on. The photograph holds while one house at a time takes the left margin, and its circle draws itself where the house actually stands. On a phone, or under reduced motion, it lays out flat instead: the photo with all three circles, then the three houses.</p>
-  <p style="margin-top:14px;max-width:60ch">On the homepage this beat would be introduced in the resort's own voice, something like: <em>"The whole resort from above. We've circled where each house stands, so you can see for yourself how close to the water you'd be."</em></p>
+  <p class="lead" style="margin-top:18px">Scroll on. The photograph holds, the resort reads first on its own, and then one house at a time takes the left margin while its circle draws itself where the house actually stands. On a phone, or under reduced motion, it lays out flat instead.</p>
 </section>
 
 <section class="plot" data-plot aria-labelledby="plot-h">
-  <h2 id="plot-h" class="visually-hidden">Where you'll stay</h2>
   <div class="plot__stage">
     <div class="plot__frame">
       <img class="plot__photo" src="{A}hero-carousel/hero-4.webp" alt="Koh Kood Beach Resort from above: the beach, the pool, the lawn and the bungalows among the palms" width="2000" height="1125">
-      <svg class="plot__svg" viewBox="0 0 1000 562" preserveAspectRatio="xMidYMid slice" data-overlay aria-hidden="true">
+      <svg class="plot__svg" viewBox="0 0 1000 562" preserveAspectRatio="xMidYMax slice" data-overlay aria-hidden="true">
         {''.join(svg_paths)}
         {''.join(labels)}
       </svg>
+      <div class="plot__scrim"></div>
     </div>
-    <div class="plot__cards">
+    <div class="plot__side">
+      <div class="plot__lead is-on" data-lead>
+        <span class="label">The resort from above</span>
+        <h2 id="plot-h">Where you'll stay</h2>
+        <p>The whole resort in one picture — the beach, the pool, the lawn, and the houses among the palms. We've circled where each one stands, so you can see for yourself how close to the water you'd be.</p>
+        <p class="plot__hint">Scroll to see the houses</p>
+      </div>
       <div class="plot__tabs" role="tablist" aria-label="Houses">{tabs}</div>
-      <div class="plot__deck">{''.join(cards)}</div>
+      <div class="plot__deck">{''.join(houses)}
+      </div>
     </div>
   </div>
 </section>
@@ -229,34 +265,41 @@ def build():
 <script src="script.js"></script>
 <script>
 /* Pinned, scroll-driven, like the route map: the section is taller than the
-   stage, the stage sticks, and progress through the extra height picks the
-   house and draws its circle. Reads scroll on rAF for the same reason
-   initRoute() does — this needs "how far", not "is it on screen". */
+   stage, the stage sticks, and progress through the extra height first shows
+   the photograph on its own, then picks the house and draws its circle. Reads
+   scroll on rAF for the same reason initRoute() does — this needs "how far",
+   not "is it on screen". */
 (() => {{
   const root = document.querySelector('[data-plot]');
   if (!root) return;
   const stage = root.querySelector('.plot__stage');
+  const side  = root.querySelector('.plot__side');
+  const lead  = root.querySelector('[data-lead]');
   const cards = [...root.querySelectorAll('[data-card]')];
   const loops = [...root.querySelectorAll('[data-loop]')];
   const marks = [...root.querySelectorAll('[data-label]')];
   const tabs  = [...root.querySelectorAll('[data-tab]')];
+  const overlay = root.querySelector('[data-overlay]');
   const N = cards.length;
-  const STEP_VH = 0.9;                                   // scroll per house, in viewport heights
-  const DRAW = 0.45;                                     // the circle draws over the first 45% of its step
+  const INTRO = 0.6;                                     // the photograph alone, in step lengths, before the first house
+  const STEP_VH = 0.85;                                  // scroll per step, in viewport heights
+  const DRAW = 0.45;                                     // a circle draws over the first 45% of its step
   const navH = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
   const pinned = () => matchMedia('(min-width: 821px) and (min-height: 561px)').matches
                       && !document.documentElement.classList.contains('no-motion');
 
   loops.forEach((l) => {{ const len = l.getTotalLength(); l.dataset.len = len; l.style.strokeDasharray = len; l.style.strokeDashoffset = len; }});
+  const byStep = cards.map((_, i) => loops.filter((l) => +l.dataset.loop === i));
 
-  let current = -1;
-  function show(i) {{
+  let current = null;
+  function show(i) {{                                    // i = -1 is the opening beat: no house yet
     if (i === current) return;
     current = i;
+    lead.classList.toggle('is-on', i < 0);
+    side.classList.toggle('is-houses', i >= 0);
     cards.forEach((c, k) => c.classList.toggle('is-on', k === i));
     tabs.forEach((t, k) => {{ t.classList.toggle('is-on', k === i); t.setAttribute('aria-selected', String(k === i)); }});
   }}
-  const byStep = cards.map((_, i) => loops.filter((l) => +l.dataset.loop === i));
   function draw(i, t) {{
     byStep.forEach((group, k) => group.forEach((l, j) => {{
       const len = +l.dataset.len;
@@ -267,27 +310,28 @@ def build():
     // two label sets share each step (desktop and phone positions) — read the step off the element, never the array index
     marks.forEach((m) => {{ const k = +m.dataset.label; m.classList.toggle('is-on', k === i && t > 0.55); m.classList.toggle('is-past', k < i); }});
   }}
-  function settle() {{                                    // unpinned: everything drawn, every card shown
+  function settle() {{                                    // unpinned: everything drawn, every house shown, the lead in the flow
     root.style.height = '';
     loops.forEach((l) => {{ l.style.strokeDashoffset = 0; l.classList.add('is-on'); l.classList.remove('is-past'); }});
     marks.forEach((m) => {{ m.classList.add('is-on'); m.classList.remove('is-past'); }});
     cards.forEach((c) => c.classList.add('is-on'));
-    current = -2;
+    lead.classList.add('is-on');
+    current = null;
   }}
-  const overlay = root.querySelector('[data-overlay]');
   function layout() {{
     // the SVG has to crop exactly as the photograph does, or the circles drift off the huts
     overlay.setAttribute('preserveAspectRatio', matchMedia('(max-width: 820px)').matches ? 'xMaxYMax slice' : 'xMidYMax slice');
     if (!pinned()) return settle();
-    root.style.height = `calc((100vh - ${{navH()}}px) + ${{N * STEP_VH * 100}}vh)`;
-    cards.forEach((c, k) => c.classList.toggle('is-on', k === Math.max(0, current)));
+    root.style.height = `calc((100vh - ${{navH()}}px) + ${{(N + INTRO) * STEP_VH * 100}}vh)`;
+    current = null;
     update();
   }}
   function update() {{
     if (!pinned()) return;
     const travel = root.offsetHeight - stage.offsetHeight;
     const y = Math.min(Math.max(navH() - root.getBoundingClientRect().top, 0), travel);
-    const seg = travel ? (y / travel) * N : N;
+    const seg = (travel ? y / travel : 1) * (N + INTRO) - INTRO;
+    if (seg < 0) {{ show(-1); draw(-1, 0); return; }}
     const i = Math.min(N - 1, Math.floor(seg));
     const t = Math.min(1, (seg - i) / DRAW);
     show(i); draw(i, t);
@@ -301,7 +345,7 @@ def build():
   tabs.forEach((tab, k) => tab.addEventListener('click', () => {{
     if (!pinned()) return;
     const travel = root.offsetHeight - stage.offsetHeight;
-    const top = root.getBoundingClientRect().top + scrollY - navH() + (travel / N) * (k + DRAW * 0.9);
+    const top = root.getBoundingClientRect().top + scrollY - navH() + travel * (INTRO + k + DRAW * 0.9) / (N + INTRO);
     window.scrollTo({{ top, behavior: 'smooth' }});
   }}));
   layout();
