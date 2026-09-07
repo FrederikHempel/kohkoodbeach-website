@@ -2077,3 +2077,28 @@ now, and `--nav-h` reads `74px` when solid. Every consumer benefits: the plot
 stage, `scroll-margin-top` on the rooms page, the booking page's glide offsets
 (all of which were landing ~40px low on pages that open with a hero). The route
 stage was never affected — it pins at `top: 0` and runs under the nav on purpose.
+
+### The rooms gallery never changed its picture (8 Sep 2026)
+
+Found by Frederik's mother, testing the site: clicking through a room's
+thumbnails moved the highlight and the "3 / 8" counter but never the big
+picture. Measured: every `<img hidden>` frame computed `display: block`.
+
+⚠️ **The global reset `img, svg, video { display: block }` outranks the
+browser's own `[hidden] { display: none }`** — an author rule beats the UA
+stylesheet, attribute or not. All eight frames rendered stacked at
+`position: absolute; inset: 0`, and the last one in the DOM was always on top.
+It had been that way since the rooms page's third pass. `[hidden] { display:
+none !important; }` now sits directly under the reset; nothing else on the
+site had a hidden image, video or svg, so its only effect is the gallery.
+**Never rely on the `hidden` attribute for an element the reset styles.**
+
+The big picture also opens the page's lightbox at the current frame now
+(`openLightbox`, set by `initLightbox()`, used by `initRoomGalleries()`) — the
+first thing a visitor tries, and until now it did nothing. `cursor: zoom-in`
+says so.
+
+**Also from that session, not acted on:** she read the pinned "Where you'll
+stay" beat as "the website just stops" until she discovered that scrolling
+moves it. Frederik asked for a read on that, not a change — see the reply of
+8 Sep. The route map has the same pattern; she meets it twice on one page.
