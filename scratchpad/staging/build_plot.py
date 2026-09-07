@@ -25,6 +25,8 @@ A = 'assets/'
 # amplitude — kept low on the two row loops, where the strokes pass within a
 # few units of the neighbouring huts.
 LOOPS = {
+    # the long low roof between the beach and the lawn — best reading of the frame, to be confirmed
+    'restaurant':  [dict(cx=371, cy=203, rx=50,  ry=34, rot=-0.15, n=2.4, shear=0, wob=0.04, seed=15)],
     'bali-house':  [dict(cx=604, cy=479, rx=146, ry=82, rot=0.0, n=8,   shear=16, wob=0.015, seed=11),
                     dict(cx=770, cy=380, rx=36,  ry=26, rot=0.0, n=2,   shear=0,  wob=0.05,  seed=14)],
     'bali-deluxe': [dict(cx=409, cy=479, rx=53.5, ry=82, rot=0.0, n=6,  shear=16, wob=0.015, seed=12)],
@@ -32,6 +34,7 @@ LOOPS = {
 }
 # hand-lettered names, each sat just above its loop — desktop position, phone position
 LABELS = {
+    'restaurant':  dict(x=338, y=270, mx=330, my=272, text='Open-air restaurant'),
     'bali-house':  dict(x=560, y=374, mx=560, my=374, text='Bali House'),
     'bali-deluxe': dict(x=350, y=386, mx=312, my=388, text='Bali Deluxe'),
     'thai-twin':   dict(x=690, y=222, mx=660, my=222, text='Thai Twin House'),
@@ -48,7 +51,8 @@ HOUSES = [
          img=A+'room-photos/thai-twin-house-garden-view/img_4p680.webp', w=750, h=500,
          size='63 m²', beds='King and twin, two rooms', sleeps='4 adults, 2 children', price='7,000'),
 ]
-KEYS = ['bali-house', 'bali-deluxe', 'thai-twin']
+# step ids: -1 is the opening beat (the photograph alone), then one step per house
+STEPS = [('restaurant', -1), ('bali-house', 0), ('bali-deluxe', 1), ('thai-twin', 2)]
 
 
 def loop(cx, cy, rx, ry, rot, n, shear, wob, seed):
@@ -83,7 +87,7 @@ def chrome():
 def build():
     nav, foot = chrome()
     svg_paths, labels = [], []
-    for i, k in enumerate(KEYS):
+    for k, i in STEPS:
         for L in LOOPS[k]:
             svg_paths.append(f'<path class="pen" data-loop="{i}" d="{loop(**L)}"/>')
         Lb = LABELS[k]
@@ -132,10 +136,12 @@ def build():
 .plot__scrim {{ position: absolute; inset: 0; pointer-events: none;
                 background: linear-gradient(90deg, rgba(28,26,24,.80) 0%, rgba(28,26,24,.66) 24%, rgba(28,26,24,.26) 46%, rgba(28,26,24,0) 62%); }}
 .pen {{ fill: none; stroke: var(--gold); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }}
-[data-loop] {{ opacity: 0; transition: opacity .5s var(--ease); }}
+[data-loop] {{ opacity: 0; transition: opacity 1s var(--ease); }}
 [data-loop].is-on {{ opacity: 1; }}
 [data-loop].is-past {{ opacity: .38; }}
-.mark {{ opacity: 0; transition: opacity .6s var(--ease); }}
+[data-loop="-1"].is-past {{ opacity: .5; }}
+.mark[data-label="-1"].is-past {{ opacity: .6; }}
+.mark {{ opacity: 0; transition: opacity 1s var(--ease); }}
 .mark.is-on {{ opacity: 1; }}
 .mark.is-past {{ opacity: .45; }}
 .hand--m {{ display: none; }}
@@ -143,20 +149,20 @@ def build():
 
 /* the left column: an opening line first, then one house at a time */
 .plot__side {{ position: absolute; left: var(--gutter); top: 50%; transform: translateY(-50%); width: clamp(300px, 27vw, 400px); color: var(--pl-ink); }}
-.plot__lead {{ position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; transform: translateY(10px); transition: opacity .55s var(--ease), transform .7s var(--ease); pointer-events: none; }}
-.plot__lead.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; }}
+.plot__lead {{ position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; transform: translateY(12px); transition: opacity .7s var(--ease), transform .9s var(--ease); pointer-events: none; }}
+.plot__lead.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; transition: opacity 1.2s var(--ease) .4s, transform 1.4s var(--ease) .4s; }}
 .plot__lead .label {{ color: var(--pl-ink-3); }}
 .plot__lead h2 {{ color: var(--pl-ink); font-size: clamp(2.2rem, 3.6vw, 3.4rem); line-height: 1.02; margin-top: 12px; max-width: 12ch; }}
 .plot__lead p {{ color: var(--pl-ink-2); margin-top: 18px; max-width: 32ch; }}
 .plot__lead .plot__hint {{ margin-top: 26px; font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--pl-ink-3); }}
-.plot__tabs {{ display: flex; gap: 16px; margin-bottom: 18px; opacity: 0; transition: opacity .5s var(--ease); }}
+.plot__tabs {{ display: flex; gap: 16px; margin-bottom: 18px; opacity: 0; transition: opacity 1s var(--ease) .4s; }}
 .plot__side.is-houses .plot__tabs {{ opacity: 1; }}
 .plot__tab {{ font-size: .64rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--pl-ink-3); padding: 6px 0; border-bottom: 1px solid transparent; transition: color var(--t-control) var(--ease-quick), border-color var(--t-control) var(--ease-quick), transform var(--t-press) var(--ease-quick); }}
 .plot__tab.is-on {{ color: var(--pl-ink); border-bottom-color: var(--gold); }}
 .plot__tab:active {{ transform: scale(.97); }}
 .plot__deck {{ position: relative; }}
-.ph {{ position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; transform: translateY(14px); transition: opacity .55s var(--ease), transform .7s var(--ease); pointer-events: none; }}
-.ph.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; }}
+.ph {{ position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; transform: translateY(18px); transition: opacity .7s var(--ease), transform .9s var(--ease); pointer-events: none; }}
+.ph.is-on {{ position: relative; opacity: 1; transform: none; pointer-events: auto; transition: opacity 1.2s var(--ease) .4s, transform 1.4s var(--ease) .4s; }}
 .ph__shot {{ overflow: hidden; }}
 .ph__shot img {{ width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }}
 .ph__name {{ font-family: var(--font-display); font-weight: 300; font-size: clamp(1.7rem, 2.4vw, 2.3rem); line-height: 1.08; color: var(--pl-ink); margin-top: 18px; }}
@@ -246,7 +252,7 @@ def build():
       <div class="plot__lead is-on" data-lead>
         <span class="label">The resort from above</span>
         <h2 id="plot-h">Where you'll stay</h2>
-        <p>The whole resort in one picture — the beach, the pool, the lawn, and the houses among the palms. We've circled where each one stands, so you can see for yourself how close to the water you'd be.</p>
+        <p>The whole resort in one picture — the beach, the pool, the open-air restaurant, and the houses among the palms. We've circled where each one stands, so you can see for yourself how close to the water you'd be.</p>
         <p class="plot__hint">Scroll to see the houses</p>
       </div>
       <div class="plot__tabs" role="tablist" aria-label="Houses">{tabs}</div>
@@ -281,15 +287,16 @@ def build():
   const tabs  = [...root.querySelectorAll('[data-tab]')];
   const overlay = root.querySelector('[data-overlay]');
   const N = cards.length;
-  const INTRO = 0.6;                                     // the photograph alone, in step lengths, before the first house
-  const STEP_VH = 0.85;                                  // scroll per step, in viewport heights
-  const DRAW = 0.45;                                     // a circle draws over the first 45% of its step
+  const INTRO = 0.7;                                     // the photograph alone, in step lengths, before the first house
+  const STEP_VH = 1.0;                                   // scroll per step, in viewport heights
+  const DRAW = 0.5;                                      // a circle draws over the first half of its step
   const navH = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
   const pinned = () => matchMedia('(min-width: 821px) and (min-height: 561px)').matches
                       && !document.documentElement.classList.contains('no-motion');
 
   loops.forEach((l) => {{ const len = l.getTotalLength(); l.dataset.len = len; l.style.strokeDasharray = len; l.style.strokeDashoffset = len; }});
-  const byStep = cards.map((_, i) => loops.filter((l) => +l.dataset.loop === i));
+  const stepIds = [-1, ...cards.map((_, i) => i)];      // -1: the opening beat and its landmark
+  const byStep = stepIds.map((k) => loops.filter((l) => +l.dataset.loop === k));
 
   let current = null;
   function show(i) {{                                    // i = -1 is the opening beat: no house yet
@@ -301,7 +308,8 @@ def build():
     tabs.forEach((t, k) => {{ t.classList.toggle('is-on', k === i); t.setAttribute('aria-selected', String(k === i)); }});
   }}
   function draw(i, t) {{
-    byStep.forEach((group, k) => group.forEach((l, j) => {{
+    byStep.forEach((group, idx) => group.forEach((l, j) => {{
+      const k = stepIds[idx];
       const len = +l.dataset.len;
       const tj = k < i ? 1 : k > i ? 0 : Math.min(1, Math.max(0, t * group.length - j));   // strokes in turn
       l.style.strokeDashoffset = len * (1 - tj);
@@ -331,7 +339,7 @@ def build():
     const travel = root.offsetHeight - stage.offsetHeight;
     const y = Math.min(Math.max(navH() - root.getBoundingClientRect().top, 0), travel);
     const seg = (travel ? y / travel : 1) * (N + INTRO) - INTRO;
-    if (seg < 0) {{ show(-1); draw(-1, 0); return; }}
+    if (seg < 0) {{ show(-1); draw(-1, Math.min(1, (seg + INTRO) / (INTRO * 0.7))); return; }}   // the landmark draws through the opening beat
     const i = Math.min(N - 1, Math.floor(seg));
     const t = Math.min(1, (seg - i) / DRAW);
     show(i); draw(i, t);

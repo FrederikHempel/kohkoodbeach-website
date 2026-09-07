@@ -1988,3 +1988,37 @@ missed `class="house"`. Both times the assert stopped the write, and both times
 the build and the screenshots ran on the **unchanged** file. When a rename is
 asserted, assert on the *built output* too — `grep -c 'class="ph'` on the page
 is the check that would have caught it first time.
+
+### Staging page, third pass — slower crossfade, the restaurant as a landmark (8 Sep 2026)
+
+**The crossfade is staggered and on the editorial curve now.** It was one
+0.55 s swap fired at a hard scroll boundary — outgoing and incoming at once —
+which is what Frederik read as "too quick". The outgoing block leaves over
+0.7 s; the incoming waits 0.4 s and arrives over 1.2 s with a small rise; the
+names strip, the circles' opacity and the labels all moved to ~1 s. The
+element *losing* `.is-on` uses the base transition, the one gaining it uses
+the delayed one — that asymmetry is the whole effect, keep it. Each house also
+holds a full screen of scroll now (`STEP_VH` 1.0, was 0.85), the opening beat
+0.7 of a step, and a circle draws over the first half of its step.
+
+**The restaurant is a landmark in the opening beat, not a category.** Step
+ids are `[-1, 0, 1, 2]`; `-1` is the photograph-alone beat, and its loop and
+label draw through it (`draw(-1, t)` with `t` running over the first 70% of
+the intro) before the first house arrives. Once a house takes over the
+landmark drops to `.is-past` at **.5** (houses drop to .38) — context worth
+keeping, not a choice being made. The lead sentence names it.
+
+⚠️ **Which roof is the restaurant is my reading of the frame, not a fact.**
+Two roofs sit between the beach and the lawn: a two-storey hipped roof nearest
+the water, and a long low roof just south of it. An open-air restaurant is a
+large single-storey pavilion, so the loop is on the long low one
+(`cx 371, cy 203`). If Frederik says it is the other, it is one line in
+`LOOPS` — do not guess a third time.
+
+⚠️ **A patch that asserts must gate everything after it.** Twice today an
+assert stopped the write, and the build and the screenshots ran on the
+unchanged file — the first time on the `.house` rename, the second on this
+pass (the `LABELS` comment sits above the line, not beside it, so the anchor
+missed). The chain is now `python3 patch && build && grep the built output &&
+render`; a failed anchor stops the whole thing instead of producing convincing
+screenshots of the old page.
