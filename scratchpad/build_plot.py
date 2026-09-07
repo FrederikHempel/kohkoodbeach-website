@@ -119,7 +119,7 @@ def section():
         <article class="ph" data-card="{step}">
           <a class="ph__shot" href="accommodation.html#{cid}" tabindex="-1" aria-hidden="true">
             <img src="{img}" alt="{h['name']}" width="{w}" height="{hh}" loading="lazy">
-            <span class="ph__veil"><span class="ph__veil-label">Learn more <span class="arrow" aria-hidden="true">&#8594;</span></span></span>
+            <span class="veil"><span class="veil__label">Learn more <span class="arrow" aria-hidden="true">&#8594;</span></span></span>
           </a>
           <h3 class="ph__name"><a class="link" href="accommodation.html#{cid}">{h['name']}</a></h3>
           <p class="ph__line">{h['line']}</p>

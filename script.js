@@ -1366,10 +1366,33 @@ function initRoomDetail() {
     else afterHeight(() => { if (open === null) panels.forEach((p) => { p.hidden = true; }); });
   };
 
+  /* Opening puts the panel's top just under the nav. The panel sits BELOW the
+     card row, so its top does not move as it unfolds — the target can be read
+     before the animation, unlike the booking page's steps, which collapse each
+     other and had to be measured after settling. Measured here: pressing "See
+     more" left the panel starting 525px down a 900px viewport, so only 375px
+     of a 1201px panel was in view. */
+  const glideToPanel = () => {
+    const nav = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
+    glideTo(Math.max(0, region.getBoundingClientRect().top + window.scrollY - nav - 18), still);
+  };
+
   buttons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.expand;
-      if (open === id) close(); else openFor(id);
+      if (open === id) { close(); return; }
+      openFor(id);
+      glideToPanel();
+    });
+  });
+
+  /* The photograph is the same action as "See more" beside it — pointer only,
+     so it never toggles closed: someone clicking a picture means "show me this
+     one", never "hide it". */
+  document.querySelectorAll('[data-open]').forEach((el) => {
+    el.addEventListener('click', () => {
+      if (open !== el.dataset.open) openFor(el.dataset.open);
+      glideToPanel();
     });
   });
 

@@ -1997,14 +1997,23 @@ button.link { font: inherit; background: none; border: 0; padding: 0; cursor: po
 /* the photograph is a link too: hovering veils it and offers the same words as the button */
 .ph__shot { display: block; position: relative; overflow: hidden; }
 .ph__shot img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; transition: transform 1.1s var(--ease); }
-.ph__veil { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(28,26,24,.44); opacity: 0; transition: opacity var(--t-control) var(--ease-quick); }
-.ph__veil-label { display: inline-flex; align-items: center; gap: 10px; padding: 12px 22px; border: 1px solid rgba(248,246,241,.75); color: var(--warm-white);
-                  font-size: .7rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; transform: translateY(8px); transition: transform var(--t-panel) var(--ease-quick); }
+/* .veil is shared with accommodation.html's room cards — see "Room card photo" below */
+.veil { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(28,26,24,.44); opacity: 0; transition: opacity var(--t-control) var(--ease-quick); }
+.veil__label { display: inline-flex; align-items: center; gap: 10px; padding: 12px 22px; border: 1px solid rgba(248,246,241,.75); color: var(--warm-white);
+               font-size: .7rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; transform: translateY(8px); transition: transform var(--t-panel) var(--ease-quick); }
 @media (hover: hover) and (pointer: fine) {
-  .ph__shot:hover .ph__veil { opacity: 1; }
-  .ph__shot:hover .ph__veil-label { transform: none; }
+  .ph__shot:hover .veil, .cat__shot:hover .veil { opacity: 1; }
+  .ph__shot:hover .veil__label, .cat__shot:hover .veil__label { transform: none; }
   .ph__shot:hover img { transform: scale(1.04); }
 }
+
+/* ---------- Room card photo (accommodation.html) ----------
+   The photograph is a control: hovering veils it with the same words the
+   "See more" button carries, and pressing it opens that room and glides down
+   to the panel. A <button>, not a link — it opens a panel on this page rather
+   than going anywhere — and hidden from assistive tech, because "See more"
+   right beneath it already does the same job with a proper label. */
+.cat__shot { display: block; position: relative; width: 100%; padding: 0; text-align: inherit; }
 .ph__name { font-family: var(--font-display); font-weight: 300; font-size: clamp(1.7rem, 2.4vw, 2.3rem); line-height: 1.08; color: var(--pl-ink); margin-top: 18px; }
 .ph__name .link { padding-bottom: 4px; }
 .ph__line { color: var(--pl-ink-2); margin-top: 8px; font-size: .95rem; max-width: 34ch; }
