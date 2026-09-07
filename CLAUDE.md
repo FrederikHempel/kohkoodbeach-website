@@ -1854,3 +1854,91 @@ like the edit had not applied.
 Cheap check before believing any "my change did nothing": compare
 `performance.getEntriesByType('resource')`'s `decodedBodySize` for `script.js`
 against the file's real byte count.
+
+### The aerial idea was Frederik's, and why it was not mine (6 Sep 2026)
+
+Asked for staging examples of the homepage rooms beat, I produced three
+layouts of the same three photo cards (side by side, staggered, pinned
+chapters — prototypes in `scratchpad/staging/`, board published as an
+artifact). Frederik then proposed the idea that is actually right: **the drone
+frame of the plot as a map, with the three house types lit where they stand**
+— the route map's spotlight language on a sharp photograph. It also shows the
+one thing the photography never could: how far each row sits from the water,
+i.e. the view difference that prices the rooms.
+
+⚠️ **Every ingredient was already in this file.** `hero-4.webp` had been worked
+with for a day; "the photography cannot show what the sea-view premium buys" is
+written above; PRODUCT.md lists the drone footage under Evidence on Hand. They
+were never put together because the request was framed as "a rooms module" and
+answered with layout variants of it. Three things to do differently:
+
+1. **Run the concept step before variants**, even on a precise brief. Its first
+   question — *what is uniquely true here that no template could claim?* — has
+   "the plot from above" as its answer on this site.
+2. **Make at least one option from the subject's own assets**, not from layout
+   vocabulary. List Evidence on Hand and build from it.
+3. **Read earlier work as evidence, not only as style.** Option C borrowed the
+   route map's pinning; the route map's actual lesson was *real geography beats
+   photography*.
+
+Also: a constraint (Thai Twin has nothing above 750px) pushed the thinking
+toward layouts that hide the weakness. The aerial needs no close-ups at all.
+Constraint-first narrows the search; asset-first widens it.
+
+**Status:** sketch delivered (`scratchpad/staging/plot-sketch.html`), zones are
+placeholders. Waiting on Frederik for: which bungalows are which on the frame,
+whether the pull-back clip's last frame matches this angle (entrance video),
+and whether the map should also mark the rows. Not building yet — his words.
+
+### Where you'll stay — the plot from above, as a staging page (7 Sep 2026)
+
+Frederik's concept, not mine (see the entry above): the drone frame as a map,
+one house at a time in the left margin, its circle drawing itself where the
+house stands. His first reaction to my sketch was "looks like Call of Duty" —
+the route map's dimming mask, hairlines, dotted stops and tracked capitals are a
+*map's* vocabulary and read as a targeting overlay on a family's lawn. The
+register is now **a photograph someone circled with a marker**: photo kept
+bright, one wobbly gold stroke per house, names hand-lettered in Fraunces's own
+SOFT/WONK axes, and `accommodation.html`'s `.cat` card unchanged in the left
+margin — which also covers the neighbours' roofs, which is why it sits left.
+
+**`staging-plot.html` at the repo root is a test page, not part of the site.**
+Unlinked, `noindex`, nav and footer copied from `index.html`. Built by
+`scratchpad/staging/build_plot.py`; edit the script, not the page. Delete both
+when the beat is built into the homepage.
+
+**The positions are Frederik's (7 Sep 2026), read off the frame at grid
+scale:** the four leftmost huts — two per row — are Bali Deluxe; the rest of
+both rows are Bali House, *plus the lone hut east of the rows*, which gets its
+own small second stroke; the four houses in the north-east cluster are Thai
+Twin. Loops are superellipses (`n≈3.5` draws the rounded rectangle a hand draws
+round a row) with a low wobble; geometry lives in `LOOPS` in viewBox units
+(1000×562 over the 2000×1125 frame).
+
+⚠️ **The overlay must crop exactly as the photograph does.** `preserveAspectRatio`
+on the SVG and `object-position` on the `<img>` are set as a pair — `xMidYMax` /
+`50% 100%` pinned, `xMaxYMax` / `100% 100%` on phones — and the JS switches the
+attribute on layout because it is not a CSS property. **Anchored to the
+bottom on purpose:** the huts sit on the frame's lower edge, so a centred crop
+cut the back row on any screen shorter than 900px; the sea at the top is what
+may go.
+
+⚠️ **Six labels share three steps** (a desktop and a phone set, positioned
+separately because the phone's frame is a fifth the size). The step is read off
+`data-label`, never the array index — indexing by position gave "Bali Deluxe"
+step 2 and its name never appeared on its own step. Loops already did this
+right (`data-loop`); several strokes per step draw in turn.
+
+⚠️ **The preview pane cannot exercise this section.** `document.hidden` is
+true there and **`requestAnimationFrame` never runs** — measured: a rAF
+callback did not fire in 400ms while `scrollTo` worked fine. The scroll
+listener schedules a frame, so every state read back as the initial one and
+looked like a bug. It is the same starvation recorded for the unfold; verify
+scroll-driven work with headless Chrome (`shot2.mjs`, `js:` targets), not the
+pane. `layout()` also listens to the media queries' `change` events because an
+emulated resize reaches the page without a `resize` event.
+
+**Open:** "Learn more" lands on `accommodation.html#<house>`; opening that
+house's panel on arrival is a one-line addition to `initHashLanding()` when the
+beat is built for real. The "we" sentence introducing the beat sits in the
+staging band for now — on the homepage it needs a home in the band above.

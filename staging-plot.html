@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staging — Where you'll stay — Koh Kood Beach Resort</title>
+<meta name="description" content="Staging page for the homepage's rooms beat. Not linked from the site.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/logo/favicon.svg?v=2" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>document.documentElement.classList.add('js');</script>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@1,9..144,300..400,100,1&display=swap">
+<style>
+/* ---------- Where you'll stay: the plot from above (staging) ---------- */
+.plot { position: relative; background: var(--charcoal); }
+.plot__stage { position: sticky; top: var(--nav-h, 70px); height: calc(100vh - var(--nav-h, 70px)); overflow: hidden; }
+.plot__photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; filter: saturate(1.06) sepia(.07) contrast(1.03); }
+.plot__svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pen { fill: none; stroke: var(--gold); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 1px 1px rgba(0,0,0,.35)); }
+.pen--thin { stroke-width: 2.6; }
+[data-loop] { opacity: 0; transition: opacity .5s var(--ease); }
+[data-loop].is-on { opacity: 1; }
+[data-loop].is-past { opacity: .38; }
+.mark { opacity: 0; transition: opacity .6s var(--ease); }
+.mark.is-on { opacity: 1; }
+.mark.is-past { opacity: .45; }
+.hand--m { display: none; }
+.hand { font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 300; font-variation-settings: 'SOFT' 100, 'WONK' 1, 'opsz' 40; font-size: 30px; fill: var(--warm-white); filter: drop-shadow(0 1px 2px rgba(0,0,0,.6)); }
+
+/* the card panel: the three names as a strip on top, then accommodation.html's own .cat —
+   sat in the left margin, where it covers the neighbours' roofs */
+.plot__cards { position: absolute; left: var(--gutter); top: 50%; transform: translateY(-50%); width: clamp(300px, 27vw, 400px); background: var(--sand); box-shadow: var(--shadow-soft); }
+.plot__tabs { display: flex; gap: 16px; padding: 12px 18px 0; border-bottom: var(--rule); }
+.plot__tab { font-size: .64rem; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-muted); padding: 6px 0 10px; margin-bottom: -1px; border-bottom: 2px solid transparent; transition: color var(--t-control) var(--ease-quick), border-color var(--t-control) var(--ease-quick), transform var(--t-press) var(--ease-quick); }
+.plot__tab.is-on { color: var(--charcoal); border-bottom-color: var(--gold); }
+.plot__tab:active { transform: scale(.97); }
+.plot__deck { position: relative; }
+.plot__card { position: absolute; inset: 0 auto auto 0; width: 100%; background: var(--sand); border: 0;
+               opacity: 0; transform: translateY(14px); transition: opacity .55s var(--ease), transform .7s var(--ease); pointer-events: none; }
+.plot__card.is-on { position: relative; opacity: 1; transform: none; pointer-events: auto; }
+.plot__card .cat__shot img { aspect-ratio: 3 / 2; }
+.plot__card .cat__book { flex: 1; }
+
+/* shorter laptops: keep the pin, tighten the card */
+@media (max-height: 840px) {
+  .plot__card .cat__shot img { aspect-ratio: 16 / 9; }
+  .plot__card .cat__body { padding: 16px 18px; }
+  .plot__card .cat__facts { margin-top: 10px; padding-top: 10px; gap: 5px; }
+  .plot__card .cat__price { margin-top: 10px; }
+  .plot__card .cat__actions { padding-top: 12px; }
+}
+@media (max-height: 700px) {
+  .plot__card .cat__facts { display: none; }
+}
+
+/* phones and very short screens: no pin — the photo, all three circles, the cards stacked */
+@media (max-width: 820px), (max-height: 560px) {
+  .plot { background: var(--warm-white); }
+  .plot__stage { position: static; height: auto; overflow: visible; }
+  .plot__frame { position: relative; aspect-ratio: 4 / 3; overflow: hidden; }
+  .plot__photo { object-position: 100% 100%; }
+  .pen { stroke-width: 5; }
+  .hand--d { display: none; }
+  .hand--m { display: block; font-size: 36px; }
+  .plot__svg { position: absolute; }
+  .hand { font-size: 44px; }
+  .plot__cards { position: static; transform: none; width: auto; padding: clamp(20px, 5vw, 36px) var(--gutter) 0; background: none; box-shadow: none; }
+  .plot__deck { display: grid; gap: 16px; }
+  .plot__card, .plot__card.is-on { position: relative; opacity: 1; transform: none; pointer-events: auto; border: var(--rule); }
+  .plot__tabs { display: none; }
+  [data-loop], .mark { opacity: 1 !important; }
+}
+@media (min-width: 821px) and (min-height: 561px) {
+  .plot__frame { position: absolute; inset: 0; }
+}
+.no-motion .plot__stage { position: static; height: auto; }
+.no-motion .plot__frame { position: relative; aspect-ratio: 16 / 9; }
+.no-motion .plot__cards { position: static; transform: none; width: auto; padding: 24px var(--gutter) 0; background: none; box-shadow: none; }
+.no-motion .plot__deck { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.no-motion .plot__card, .no-motion .plot__card.is-on { position: relative; opacity: 1; transform: none; pointer-events: auto; border: var(--rule); }
+.no-motion [data-loop], .no-motion .mark { opacity: 1 !important; }
+.no-motion .plot__tabs { display: none; }
+
+.stg { background: var(--sand); }
+.stg p { max-width: 60ch; }
+.stg .label { display: block; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <a href="index.html" class="nav__logo"><img src="assets/logo/logo.webp" alt="Koh Kood Beach Resort" width="635" height="154"></a>
+  <div class="nav__right">
+    <a href="book.html" class="nav__book">Book Now +</a>
+    <button class="nav__menu" data-menu-open aria-expanded="false" aria-label="Open menu">
+      <span class="nav__menu-label">Menu</span>
+      <span class="nav__burger"><span></span><span></span></span>
+    </button>
+  </div>
+</header>
+
+<div class="menu" role="dialog" aria-modal="true" aria-label="Site menu">
+  <button class="menu__close" data-menu-close>Close <span aria-hidden="true">&times;</span></button>
+  <nav class="menu__nav">
+    <a href="index.html">Home</a>
+    <a href="accommodation.html">Rooms</a>
+    <a href="getting-here.html">Getting Here</a>
+    <a href="activities.html">Activities</a>
+    <a href="facilities.html">Facilities</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <div class="menu__aside" style="background-image:url('assets/gallery/panorama/img4p29.webp')">
+    <div class="menu__contact">
+      <span class="label" style="color:rgba(248,246,241,.6)">Reservations</span>
+      <a href="tel:+66819088966">+66 (0) 8 1908 8966</a>
+      <a href="mailto:reservation@kohkoodbeachresorts.com">reservation@kohkoodbeachresorts.com</a>
+    </div>
+  </div>
+</div>
+
+<section class="band band--tight wrap stg">
+  <span class="label">Staging · not linked from the site</span>
+  <h1 style="font-size:clamp(2rem,4vw,3.4rem)">Where you'll stay, as a scroll</h1>
+  <p class="lead" style="margin-top:18px">Scroll on. The photograph holds while one house at a time takes the left margin, and its circle draws itself where the house actually stands. On a phone, or under reduced motion, it lays out flat instead: the photo with all three circles, then the three houses.</p>
+  <p style="margin-top:14px;max-width:60ch">On the homepage this beat would be introduced in the resort's own voice, something like: <em>"The whole resort from above. We've circled where each house stands, so you can see for yourself how close to the water you'd be."</em></p>
+</section>
+
+<section class="plot" data-plot aria-labelledby="plot-h">
+  <h2 id="plot-h" class="visually-hidden">Where you'll stay</h2>
+  <div class="plot__stage">
+    <div class="plot__frame">
+      <img class="plot__photo" src="assets/hero-carousel/hero-4.webp" alt="Koh Kood Beach Resort from above: the beach, the pool, the lawn and the bungalows among the palms" width="2000" height="1125">
+      <svg class="plot__svg" viewBox="0 0 1000 562" preserveAspectRatio="xMidYMid slice" data-overlay aria-hidden="true">
+        <path class="pen" data-loop="0" d="M744.4 478.0 L744.1 493.4 L743.5 500.8 L742.7 506.7 L741.5 511.8 L740.0 516.3 L738.0 520.3 L735.7 523.9 L733.0 527.2 L729.8 530.2 L726.2 533.0 L722.1 535.4 L717.7 537.7 L712.9 539.7 L707.6 541.5 L702.0 543.1 L696.0 544.6 L689.5 545.9 L682.5 547.2 L674.8 548.3 L666.3 549.3 L656.6 550.2 L645.2 551.1 L630.7 551.7 L600.0 552.2 L569.0 552.6 L553.7 552.7 L541.5 552.6 L531.0 552.3 L521.6 551.6 L513.3 550.7 L505.8 549.5 L499.1 548.0 L493.1 546.2 L487.8 544.1 L483.1 541.8 L479.0 539.3 L475.4 536.6 L472.3 533.6 L469.5 530.5 L467.0 527.3 L464.7 523.8 L462.6 520.1 L460.7 516.1 L458.9 511.7 L457.3 506.7 L455.8 500.9 L454.5 493.5 L453.5 478.0 L452.8 462.3 L452.4 454.5 L452.6 448.3 L453.2 443.0 L454.5 438.2 L456.3 434.0 L458.9 430.2 L462.0 426.9 L465.8 424.0 L470.1 421.4 L475.0 419.2 L480.4 417.4 L486.2 415.8 L492.3 414.5 L498.7 413.4 L505.5 412.4 L512.5 411.6 L519.9 410.8 L527.7 410.1 L536.2 409.3 L545.6 408.6 L556.6 407.9 L570.6 407.2 L600.0 406.5 L630.0 405.9 L645.0 405.4 L657.2 405.1 L668.0 404.9 L677.7 405.0 L686.6 405.3 L694.8 406.0 L702.3 407.0 L709.1 408.4 L715.2 410.0 L720.6 412.1 L725.4 414.5 L729.4 417.1 L732.9 420.1 L735.7 423.4 L738.1 426.9 L739.9 430.6 L741.4 434.7 L742.5 439.0 L743.4 443.8 L743.9 449.0 L744.3 455.0 L744.4 462.6 L744.4 478.0 L744.1 493.4 L743.5 500.8 L742.7 506.7 L741.5 511.8 L740.0 516.3 L738.0 520.3 L735.7 523.9 L733.0 527.2"/><path class="pen" data-loop="0" d="M804.8 380.0 L804.7 381.6 L804.6 383.3 L804.4 384.9 L804.2 386.6 L803.8 388.3 L803.4 390.0 L802.9 391.7 L802.3 393.5 L801.4 395.2 L800.4 396.8 L799.1 398.4 L797.6 399.9 L795.9 401.3 L793.9 402.5 L791.8 403.6 L789.5 404.4 L787.1 405.0 L784.6 405.5 L782.1 405.7 L779.6 405.8 L777.1 405.7 L774.6 405.5 L772.3 405.1 L770.0 404.7 L767.8 404.3 L765.7 403.8 L763.6 403.3 L761.6 402.8 L759.5 402.2 L757.5 401.7 L755.5 401.2 L753.5 400.6 L751.5 400.0 L749.5 399.3 L747.5 398.5 L745.6 397.6 L743.7 396.7 L741.9 395.6 L740.2 394.4 L738.7 393.0 L737.3 391.6 L736.1 390.1 L735.1 388.6 L734.3 386.9 L733.6 385.2 L733.2 383.5 L732.9 381.8 L732.7 380.0 L732.7 378.2 L732.9 376.5 L733.2 374.7 L733.7 373.0 L734.3 371.2 L735.1 369.5 L736.0 367.9 L737.1 366.3 L738.4 364.7 L739.8 363.3 L741.5 361.9 L743.3 360.7 L745.2 359.6 L747.3 358.6 L749.5 357.8 L751.7 357.1 L754.0 356.6 L756.4 356.2 L758.7 355.9 L761.0 355.8 L763.3 355.7 L765.6 355.7 L767.8 355.7 L770.0 355.8 L772.2 355.9 L774.4 356.0 L776.6 356.2 L778.8 356.4 L781.0 356.7 L783.2 357.0 L785.4 357.4 L787.7 357.9 L789.9 358.5 L792.0 359.3 L794.1 360.2 L796.0 361.2 L797.8 362.4 L799.4 363.7 L800.8 365.2 L801.9 366.7 L802.9 368.3 L803.6 369.9 L804.2 371.6 L804.6 373.3 L804.8 375.0 L804.9 376.7 L804.9 378.3 L804.8 380.0 L804.7 381.6 L804.6 383.3 L804.4 384.9 L804.2 386.6 L803.8 388.3 L803.4 390.0 L802.9 391.7 L802.3 393.5"/><path class="pen" data-loop="1" d="M448.4 478.0 L448.0 494.3 L447.5 502.1 L447.0 508.3 L446.5 513.6 L446.0 518.4 L445.4 522.8 L444.7 526.8 L443.9 530.7 L443.0 534.3 L441.9 537.7 L440.5 540.9 L439.0 543.8 L437.2 546.5 L435.2 548.9 L432.9 550.9 L430.3 552.7 L427.4 554.1 L424.2 555.3 L420.7 556.2 L416.8 556.8 L412.4 557.2 L407.3 557.3 L401.0 557.3 L388.0 557.2 L375.1 556.9 L368.9 556.5 L364.0 556.0 L359.7 555.4 L356.0 554.7 L352.5 553.8 L349.3 552.8 L346.3 551.7 L343.5 550.3 L340.9 548.8 L338.5 546.9 L336.2 544.8 L334.2 542.4 L332.5 539.6 L330.9 536.5 L329.6 533.1 L328.5 529.3 L327.6 525.1 L326.9 520.5 L326.4 515.5 L326.1 509.7 L325.9 503.1 L325.9 494.9 L326.1 478.0 L326.3 461.2 L326.6 453.1 L327.1 446.8 L327.7 441.3 L328.3 436.5 L329.1 432.1 L330.1 428.1 L331.1 424.4 L332.4 421.0 L333.8 417.9 L335.5 415.1 L337.3 412.6 L339.3 410.3 L341.6 408.3 L344.1 406.6 L346.8 405.2 L349.7 404.0 L352.9 403.0 L356.3 402.2 L360.1 401.5 L364.3 401.0 L369.2 400.7 L375.3 400.4 L388.0 400.2 L400.7 400.0 L407.0 400.0 L412.0 400.0 L416.4 400.1 L420.4 400.4 L424.1 400.9 L427.6 401.5 L430.8 402.4 L433.8 403.6 L436.5 405.2 L439.0 407.0 L441.3 409.3 L443.2 411.9 L444.9 414.9 L446.3 418.3 L447.4 422.0 L448.2 426.1 L448.8 430.6 L449.1 435.5 L449.2 440.8 L449.2 446.6 L449.0 453.3 L448.7 461.5 L448.4 478.0 L448.0 494.3 L447.5 502.1 L447.0 508.3 L446.5 513.6 L446.0 518.4 L445.4 522.8 L444.7 526.8 L443.9 530.7"/><path class="pen" data-loop="2" d="M877.9 301.6 L876.6 308.2 L875.3 312.7 L874.0 316.7 L872.6 320.3 L871.0 323.8 L869.3 327.0 L867.2 330.1 L864.8 333.1 L862.0 335.8 L858.7 338.3 L854.9 340.6 L850.6 342.6 L845.6 344.3 L840.2 345.7 L834.2 346.7 L827.7 347.4 L820.7 347.7 L813.4 347.7 L805.8 347.4 L797.7 346.8 L789.3 346.0 L780.4 344.9 L770.5 343.6 L756.8 341.9 L743.3 340.1 L733.9 338.6 L725.7 337.3 L718.1 336.0 L711.0 334.7 L704.1 333.3 L697.5 331.9 L691.1 330.5 L684.8 328.8 L678.8 327.1 L673.1 325.1 L667.6 323.0 L662.6 320.6 L658.0 318.0 L653.8 315.3 L650.2 312.3 L647.1 309.0 L644.5 305.6 L642.5 302.0 L641.0 298.2 L640.1 294.1 L639.6 289.7 L639.6 284.8 L640.3 277.8 L641.3 270.9 L642.5 266.1 L643.9 261.9 L645.8 258.1 L648.0 254.7 L650.6 251.5 L653.6 248.7 L657.0 246.0 L660.9 243.7 L665.2 241.6 L669.9 239.9 L675.1 238.4 L680.7 237.2 L686.7 236.3 L692.9 235.7 L699.5 235.4 L706.3 235.3 L713.3 235.4 L720.6 235.7 L728.1 236.1 L735.9 236.6 L744.3 237.3 L753.7 238.1 L767.1 239.3 L780.5 240.5 L790.1 241.4 L798.7 242.2 L806.8 243.0 L814.6 243.9 L822.2 244.9 L829.5 246.1 L836.6 247.5 L843.4 249.1 L849.8 250.9 L855.7 253.0 L861.1 255.4 L865.9 258.0 L870.0 260.9 L873.4 264.0 L876.1 267.3 L878.2 270.7 L879.6 274.3 L880.4 278.1 L880.7 282.0 L880.5 286.0 L880.0 290.3 L879.1 295.0 L877.9 301.6 L876.6 308.2 L875.3 312.7 L874.0 316.7 L872.6 320.3 L871.0 323.8 L869.3 327.0 L867.2 330.1 L864.8 333.1"/>
+        <text class="hand hand--d mark" data-label="0" x="545" y="372">Bali House</text><text class="hand hand--m mark" data-label="0" x="548" y="372">Bali House</text><text class="hand hand--d mark" data-label="1" x="338" y="384">Bali Deluxe</text><text class="hand hand--m mark" data-label="1" x="300" y="386">Bali Deluxe</text><text class="hand hand--d mark" data-label="2" x="690" y="222">Thai Twin House</text><text class="hand hand--m mark" data-label="2" x="660" y="222">Thai Twin House</text>
+      </svg>
+    </div>
+    <div class="plot__cards">
+      <div class="plot__tabs" role="tablist" aria-label="Houses"><button type="button" role="tab" class="plot__tab" data-tab="0">Bali House</button><button type="button" role="tab" class="plot__tab" data-tab="1">Bali Deluxe</button><button type="button" role="tab" class="plot__tab" data-tab="2">Thai Twin House</button></div>
+      <div class="plot__deck">
+      <article class="cat plot__card" data-card="0">
+        <div class="cat__shot"><img src="assets/room-photos/bali-house-sea-view/img_2p9896.webp" alt="Bali House" width="2000" height="1500"></div>
+        <div class="cat__body">
+          <h3 class="cat__name">Bali House</h3>
+          <p class="cat__line">The classic bungalow, on stilts among the palms.</p>
+          <dl class="cat__facts">
+            <div><dt>Size</dt><dd>46 m²</dd></div>
+            <div><dt>Beds</dt><dd>King or twin</dd></div>
+            <div><dt>Sleeps</dt><dd>2 adults, up to 3 children</dd></div>
+          </dl>
+          <p class="cat__price">from 2,900 <span class="cat__unit">THB per night</span></p>
+          <div class="cat__actions">
+            <a class="cat__book" href="accommodation.html#bali-house">Learn more <span aria-hidden="true">&#8594;</span></a>
+          </div>
+        </div>
+      </article>
+      <article class="cat plot__card" data-card="1">
+        <div class="cat__shot"><img src="assets/room-photos/bali-deluxe-partial-sea-view/img_9p8136.webp" alt="Bali Deluxe" width="2000" height="1500"></div>
+        <div class="cat__body">
+          <h3 class="cat__name">Bali Deluxe</h3>
+          <p class="cat__line">Half as big again, with a second bedroom.</p>
+          <dl class="cat__facts">
+            <div><dt>Size</dt><dd>63 m²</dd></div>
+            <div><dt>Beds</dt><dd>King plus two singles</dd></div>
+            <div><dt>Sleeps</dt><dd>4 adults</dd></div>
+          </dl>
+          <p class="cat__price">from 5,500 <span class="cat__unit">THB per night</span></p>
+          <div class="cat__actions">
+            <a class="cat__book" href="accommodation.html#bali-deluxe">Learn more <span aria-hidden="true">&#8594;</span></a>
+          </div>
+        </div>
+      </article>
+      <article class="cat plot__card" data-card="2">
+        <div class="cat__shot"><img src="assets/room-photos/thai-twin-house-garden-view/img_4p680.webp" alt="Thai Twin House" width="750" height="500"></div>
+        <div class="cat__body">
+          <h3 class="cat__name">Thai Twin House</h3>
+          <p class="cat__line">Two rooms around one long deck, with a jacuzzi on it.</p>
+          <dl class="cat__facts">
+            <div><dt>Size</dt><dd>63 m²</dd></div>
+            <div><dt>Beds</dt><dd>King and twin, two rooms</dd></div>
+            <div><dt>Sleeps</dt><dd>4 adults, 2 children</dd></div>
+          </dl>
+          <p class="cat__price">from 7,000 <span class="cat__unit">THB per night</span></p>
+          <div class="cat__actions">
+            <a class="cat__book" href="accommodation.html#thai-twin-house">Learn more <span aria-hidden="true">&#8594;</span></a>
+          </div>
+        </div>
+      </article></div>
+    </div>
+  </div>
+</section>
+
+<section class="band wrap">
+  <p class="lead" style="max-width:52ch">That is the whole beat. On the homepage the page would continue here with the highlights, the pool and the journey.</p>
+  <a href="index.html" class="link" style="display:inline-block;margin-top:24px">Back to the homepage</a>
+</section>
+
+<footer class="footer">
+  <div class="footer-illustration">
+    <div class="footer-illustration__art" role="img" aria-label="Illustration of a thatched parasol, sun loungers, a bungalow and a palm on the beach"></div>
+    </div>
+  <div class="wrap">
+    <div class="footer__logo">
+      <img src="assets/logo/logo-footer.webp" alt="Koh Kood Beach Resort" width="317" height="77">
+    </div>
+    <div class="footer__grid">
+      <div>
+        <h4>Stay</h4>
+        <ul>
+          <li><a href="accommodation.html">Accommodation</a></li>
+          <li><a href="family.html">Family Stays</a></li>
+          <li><a href="book.html">Book Now</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="activities.html">Activities</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="getting-here.html">Getting Here</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Resort</h4>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="facilities.html">Facilities &amp; Service</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Find Us</h4>
+        <ul>
+          <li>121 Moo 1, KohKood District,<br>Trat 23000, Thailand</li>
+          <li><a href="tel:+66819088966">+66 (0) 8 1908 8966</a></li>
+          <li><a href="mailto:reservation@kohkoodbeachresorts.com">reservation@kohkoodbeachresorts.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="footer__social">
+        <a href="https://www.facebook.com/KohKoodBeachResort/" target="_blank" rel="noopener" aria-label="Facebook">f</a>
+        <a href="https://www.instagram.com/kohkoodbeachresort/" target="_blank" rel="noopener" aria-label="Instagram">ig</a>
+        <a href="https://youtu.be/VrWQOEPs9qI" target="_blank" rel="noopener" aria-label="YouTube">yt</a>
+      </div>
+      <span>© 2026 Koh Kood Beach Resort. All rights reserved.</span>
+      <span>4.3/5 — 331 TripAdvisor reviews</span>
+      <button type="button" class="footer__cookie-link" data-cookie-settings>Cookie settings</button>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+/* Pinned, scroll-driven, like the route map: the section is taller than the
+   stage, the stage sticks, and progress through the extra height picks the
+   house and draws its circle. Reads scroll on rAF for the same reason
+   initRoute() does — this needs "how far", not "is it on screen". */
+(() => {
+  const root = document.querySelector('[data-plot]');
+  if (!root) return;
+  const stage = root.querySelector('.plot__stage');
+  const cards = [...root.querySelectorAll('[data-card]')];
+  const loops = [...root.querySelectorAll('[data-loop]')];
+  const marks = [...root.querySelectorAll('[data-label]')];
+  const tabs  = [...root.querySelectorAll('[data-tab]')];
+  const N = cards.length;
+  const STEP_VH = 0.9;                                   // scroll per house, in viewport heights
+  const DRAW = 0.45;                                     // the circle draws over the first 45% of its step
+  const navH = () => parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
+  const pinned = () => matchMedia('(min-width: 821px) and (min-height: 561px)').matches
+                      && !document.documentElement.classList.contains('no-motion');
+
+  loops.forEach((l) => { const len = l.getTotalLength(); l.dataset.len = len; l.style.strokeDasharray = len; l.style.strokeDashoffset = len; });
+
+  let current = -1;
+  function show(i) {
+    if (i === current) return;
+    current = i;
+    cards.forEach((c, k) => c.classList.toggle('is-on', k === i));
+    tabs.forEach((t, k) => { t.classList.toggle('is-on', k === i); t.setAttribute('aria-selected', String(k === i)); });
+  }
+  const byStep = cards.map((_, i) => loops.filter((l) => +l.dataset.loop === i));
+  function draw(i, t) {
+    byStep.forEach((group, k) => group.forEach((l, j) => {
+      const len = +l.dataset.len;
+      const tj = k < i ? 1 : k > i ? 0 : Math.min(1, Math.max(0, t * group.length - j));   // strokes in turn
+      l.style.strokeDashoffset = len * (1 - tj);
+      l.classList.toggle('is-on', k === i); l.classList.toggle('is-past', k < i);
+    }));
+    // two label sets share each step (desktop and phone positions) — read the step off the element, never the array index
+    marks.forEach((m) => { const k = +m.dataset.label; m.classList.toggle('is-on', k === i && t > 0.55); m.classList.toggle('is-past', k < i); });
+  }
+  function settle() {                                    // unpinned: everything drawn, every card shown
+    root.style.height = '';
+    loops.forEach((l) => { l.style.strokeDashoffset = 0; l.classList.add('is-on'); l.classList.remove('is-past'); });
+    marks.forEach((m) => { m.classList.add('is-on'); m.classList.remove('is-past'); });
+    cards.forEach((c) => c.classList.add('is-on'));
+    current = -2;
+  }
+  const overlay = root.querySelector('[data-overlay]');
+  function layout() {
+    // the SVG has to crop exactly as the photograph does, or the circles drift off the huts
+    overlay.setAttribute('preserveAspectRatio', matchMedia('(max-width: 820px)').matches ? 'xMaxYMax slice' : 'xMidYMax slice');
+    if (!pinned()) return settle();
+    root.style.height = `calc((100vh - ${navH()}px) + ${N * STEP_VH * 100}vh)`;
+    cards.forEach((c, k) => c.classList.toggle('is-on', k === Math.max(0, current)));
+    update();
+  }
+  function update() {
+    if (!pinned()) return;
+    const travel = root.offsetHeight - stage.offsetHeight;
+    const y = Math.min(Math.max(navH() - root.getBoundingClientRect().top, 0), travel);
+    const seg = travel ? (y / travel) * N : N;
+    const i = Math.min(N - 1, Math.floor(seg));
+    const t = Math.min(1, (seg - i) / DRAW);
+    show(i); draw(i, t);
+  }
+  let ticking = false;
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });
+  addEventListener('resize', layout);
+  // a viewport can cross the pin threshold without a resize event reaching us (device emulation,
+  // some tablet rotations) — the media queries themselves are the reliable signal
+  ['(min-width: 821px)', '(min-height: 561px)', '(max-width: 820px)'].forEach((q) => matchMedia(q).addEventListener('change', layout));
+  tabs.forEach((tab, k) => tab.addEventListener('click', () => {
+    if (!pinned()) return;
+    const travel = root.offsetHeight - stage.offsetHeight;
+    const top = root.getBoundingClientRect().top + scrollY - navH() + (travel / N) * (k + DRAW * 0.9);
+    window.scrollTo({ top, behavior: 'smooth' });
+  }));
+  layout();
+})();
+</script>
+</body>
+</html>
