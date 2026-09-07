@@ -2181,3 +2181,38 @@ held while it is nearest, faded once it has scrolled past. That is Frederik's
 margin); vertically only a block that is mid-travel can be clipped, and those
 are not the interactive one. If a keyboard user ever reports a lost ring here,
 that is where it is.
+
+### The strip's last card could never reach its own centre (8 Sep 2026)
+
+Reported as "the last Learn more never becomes very visible". Two causes,
+stacked — the second only found because the first did not fully explain it.
+
+⚠️ **`root.style.height` was baked with the nav's height at layout time, and
+the nav shrinks by 40px when it goes solid — which happens exactly as the
+visitor scrolls into this section.** The stage is `calc(100vh - var(--nav-h))`
+and stayed live; the section's height did not. So the travel shrank by 40px
+mid-scroll, the strip topped out at 94% of its range, and the last card rested
+6% short with its button inside the mask's fade. It is
+`calc(100vh - var(--nav-h, 70px) + Xvh)` now — **keep the custom property in
+the expression; do not resolve it to a number.** Anything else sized against
+the nav on a page that opens with a hero has the same trap.
+
+⚠️ **The slot must be taller than its tallest block by the fade at each end.**
+It was exactly as tall, so the tallest card's own top and bottom edges sat
+permanently in the mask. `slot.height = tallest + 2 × --pl-fade + 12`;
+measured 32px of clearance against a 26px fade.
+
+**Also this round:** the strip map is linear across the whole pin
+(`clamp((seg + INTRO) / (N + INTRO), 0, 1) × N`) — the earlier piecewise
+version centred the last card half a step early, leaving a final half-screen
+where scrolling moved nothing, which is the exact complaint this beat exists
+to avoid. And the rAF throttle now makes a **trailing call**: a plain
+`ticking` guard drops any scroll event arriving while a frame is scheduled,
+and the dropped one is often the last.
+
+**The photograph and the heading are links too.** Hovering the photograph
+veils it and offers the same words as the button; the heading carries the
+site's `.link` underline. The photograph's anchor is `tabindex="-1"
+aria-hidden="true"` on purpose — three links to one destination in a card is
+noise for a screen reader, so the photo is a pointer convenience and the
+heading and the button are the real links.

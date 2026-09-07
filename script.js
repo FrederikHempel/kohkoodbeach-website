@@ -1577,9 +1577,11 @@ function initPlot() {
      gap between the lead and the first house (INTRO, not a whole step) is
      absorbed here rather than in every block's own arithmetic. */
   const blocks = [lead, ...cards];
-  const strip = (seg) => seg <= -INTRO ? 0
-                       : seg < 0.5 ? (seg + INTRO) / (INTRO + 0.5)
-                       : Math.min(N, 1 + (seg - 0.5));
+  /* Linear across the whole pin: every block gets the same share of the scroll,
+     and the last card is centred exactly at the end — the earlier piecewise
+     version parked it half a step early, so the final half-screen of scrolling
+     moved nothing, which is the very complaint this beat exists to avoid. */
+  const strip = (seg) => clamp((seg + INTRO) / (N + INTRO), 0, 1) * N;
 
   let seen = false;
   function drawLandmarks() {                 // once, as the section comes into view — before the scroll does anything
@@ -1647,23 +1649,49 @@ function initPlot() {
     // the SVG has to crop exactly as the photograph does, or the circles drift off the huts
     overlay.setAttribute('preserveAspectRatio', matchMedia('(max-width: 820px)').matches ? 'xMaxYMax slice' : 'xMidYMax slice');
     if (!pinned()) return settle();
-    root.style.height = `calc((100vh - ${navH()}px) + ${(N + INTRO) * STEP_VH * 100}vh)`;
+    /* ⚠️ `var(--nav-h)`, NOT the measured number. The nav shrinks by 40px when it
+       goes solid — which happens exactly as the visitor scrolls into this
+       section — so a baked height changed the section's size mid-scroll: the
+       stage grew, the root did not, and the strip could never reach its last
+       position (the final card rested 6% short, its "Learn more" inside the
+       mask's fade). Keeping the property live means the stage and the section
+       change together and the travel is exactly the scroll asked for. */
+    root.style.height = `calc(100vh - var(--nav-h, 70px) + ${(N + INTRO) * STEP_VH * 100}vh)`;
     // the slot holds the strip and clips it; it takes the tallest block, so the column never jumps
     // and a block's travel of one slot height always carries it fully out of sight
     slot.style.height = '';
     blocks.forEach((el) => { el.style.transform = 'translateY(-50%)'; });   // measure at rest, not mid-strip
-    slot.style.height = Math.max(...blocks.map((el) => el.offsetHeight)) + 'px';
+    /* ⚠️ The slot must be TALLER than its tallest block by the mask's fade at
+       each end. When it was exactly as tall, the tallest card's own top and
+       bottom edges sat permanently inside the fade — which is why the last
+       card's "Learn more" never came up to full strength. */
+    const fade = parseInt(getComputedStyle(slot).getPropertyValue('--pl-fade'), 10) || 26;
+    slot.style.height = (Math.max(...blocks.map((el) => el.offsetHeight)) + 2 * fade + 12) + 'px';
     update();
   }
-  let ticking = false;
-  window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });
+  /* ⚠️ rAF throttle WITH a trailing call. A plain `ticking` guard drops any
+     scroll event that arrives while a frame is already scheduled — and the
+     dropped one is often the LAST, so the strip settles a few per cent short
+     of where the scroll actually stopped. Measured: the final card resting at
+     6% off its centre after a jump to the end of the section. */
+  let ticking = false, trailing = false;
+  const onScroll = () => {
+    if (ticking) { trailing = true; return; }
+    ticking = true;
+    requestAnimationFrame(() => {
+      ticking = false;
+      update();
+      if (trailing) { trailing = false; onScroll(); }
+    });
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', layout);
   // a viewport can cross the pin threshold without a resize event reaching us — the media queries are the reliable signal
   ['(min-width: 821px)', '(min-height: 561px)', '(max-width: 820px)'].forEach((q) => matchMedia(q).addEventListener('change', layout));
   tabs.forEach((tab, k) => tab.addEventListener('click', () => {
     if (!pinned()) return;
     const travel = root.offsetHeight - stage.offsetHeight;
-    const top = root.getBoundingClientRect().top + scrollY - navH() + travel * (INTRO + k + 0.5) / (N + INTRO);
+    const top = root.getBoundingClientRect().top + scrollY - navH() + travel * (k + 1) / N;
     window.scrollTo({ top, behavior: 'smooth' });
   }));
   layout();

@@ -117,8 +117,11 @@ def section():
         h = data[cid]; img, w, hh = PHOTOS[cid]
         cards.append(f'''
         <article class="ph" data-card="{step}">
-          <div class="ph__shot"><img src="{img}" alt="{h['name']}" width="{w}" height="{hh}" loading="lazy"></div>
-          <h3 class="ph__name">{h['name']}</h3>
+          <a class="ph__shot" href="accommodation.html#{cid}" tabindex="-1" aria-hidden="true">
+            <img src="{img}" alt="{h['name']}" width="{w}" height="{hh}" loading="lazy">
+            <span class="ph__veil"><span class="ph__veil-label">Learn more <span class="arrow" aria-hidden="true">&#8594;</span></span></span>
+          </a>
+          <h3 class="ph__name"><a class="link" href="accommodation.html#{cid}">{h['name']}</a></h3>
           <p class="ph__line">{h['line']}</p>
           <dl class="ph__facts">
             <div><dt>Size</dt><dd>{h['size']}</dd></div>
