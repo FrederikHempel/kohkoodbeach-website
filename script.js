@@ -211,6 +211,10 @@ function initGalleryTabs() {
 }
 
 /* Lightbox, scoped per gallery panel so prev/next stay within one category. */
+/* Set by initLightbox() on pages that carry a .lightbox; the room galleries
+   use it so the big picture opens full-size at the frame being looked at. */
+let openLightbox = null;
+
 function initLightbox() {
   const box = document.querySelector('.lightbox');
   if (!box) return;
@@ -223,6 +227,14 @@ function initLightbox() {
     idx = (idx + delta + items.length) % items.length;
     img.src = items[idx].src;
     img.alt = items[idx].alt;
+  };
+
+  openLightbox = (list, i) => {
+    items = list; idx = i;
+    img.src = items[idx].src;
+    img.alt = items[idx].alt;
+    box.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
   };
 
   document.querySelectorAll('.gal-item').forEach((item) => {
@@ -1262,6 +1274,11 @@ function initRoomGalleries() {
     gal.querySelector('[data-gal-prev]')?.addEventListener('click', () => go(at - 1));
     gal.querySelector('[data-gal-next]')?.addEventListener('click', () => go(at + 1));
     thumbs.forEach((t, n) => t.addEventListener('click', () => go(n)));
+    // The big picture itself opens full-size, at the frame being looked at —
+    // the first thing a visitor tries, and until now it did nothing.
+    gal.querySelector('.viewer__frames')?.addEventListener('click', () => {
+      if (openLightbox) openLightbox(frames, at);
+    });
     gal.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') { e.preventDefault(); go(at - 1); }
       if (e.key === 'ArrowRight') { e.preventDefault(); go(at + 1); }
