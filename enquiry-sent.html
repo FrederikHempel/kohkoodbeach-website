@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thank you — Koh Kood Beach Resort</title>
+<meta name="description" content="We have your enquiry and will reply within 24 hours, usually the same day.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/logo/favicon.svg?v=2" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/logo/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script>document.documentElement.classList.add('js');</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="nav">
+  <a href="index.html" class="nav__logo"><img src="assets/logo/logo.webp" alt="Koh Kood Beach Resort" width="635" height="154"></a>
+  <div class="nav__right">
+    <a href="book.html" class="nav__book">Book Now +</a>
+    <button class="nav__menu" data-menu-open aria-expanded="false" aria-label="Open menu">
+      <span class="nav__menu-label">Menu</span>
+      <span class="nav__burger"><span></span><span></span></span>
+    </button>
+  </div>
+</header>
+
+<div class="menu" role="dialog" aria-modal="true" aria-label="Site menu">
+  <button class="menu__close" data-menu-close>Close <span aria-hidden="true">&times;</span></button>
+  <nav class="menu__nav">
+    <a href="index.html">Home</a>
+    <a href="accommodation.html">Rooms</a>
+    <a href="getting-here.html">Getting Here</a>
+    <a href="activities.html">Activities</a>
+    <a href="facilities.html">Facilities</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <div class="menu__aside" style="background-image:url('assets/gallery/panorama/img4p29.webp')">
+    <div class="menu__contact">
+      <span class="label" style="color:rgba(248,246,241,.6)">Reservations</span>
+      <a href="tel:+66819088966">+66 (0) 8 1908 8966</a>
+      <a href="mailto:reservation@kohkoodbeachresorts.com">reservation@kohkoodbeachresorts.com</a>
+    </div>
+  </div>
+</div>
+
+<section class="sent">
+  <span class="label">Enquiry sent</span>
+  <h1 class="sent__head">Thank you</h1>
+  <p class="sent__lead">
+    We have your enquiry and will reply within 24 hours, usually the same day
+    (Thailand, GMT+7).
+  </p>
+  <div class="sent__panel">
+    <p class="sent__panel-title">Something to add?</p>
+    <p>Reply to the confirmation landing in your inbox, or call the front desk on
+       <a class="link" href="tel:+66819088966">+66 (0) 8 1908 8966</a>.</p>
+  </div>
+  <p class="sent__foot"><a href="index.html" class="link">Back to the resort</a></p>
+</section>
+
+<footer class="footer">
+  <div class="footer-illustration">
+    <div class="footer-illustration__art" role="img" aria-label="Illustration of a thatched parasol, sun loungers, a bungalow and a palm on the beach"></div>
+    </div>
+  <div class="wrap">
+    <div class="footer__logo">
+      <img src="assets/logo/logo-footer.webp" alt="Koh Kood Beach Resort" width="317" height="77">
+    </div>
+    <div class="footer__grid">
+      <div>
+        <h4>Stay</h4>
+        <ul>
+          <li><a href="accommodation.html">Accommodation</a></li>
+          <li><a href="family.html">Family Stays</a></li>
+          <li><a href="book.html">Book Now</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="activities.html">Activities</a></li>
+          <li><a href="gallery.html">Gallery</a></li>
+          <li><a href="getting-here.html">Getting Here</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Resort</h4>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="facilities.html">Facilities &amp; Service</a></li>
+          <li><a href="faq.html">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Find Us</h4>
+        <ul>
+          <li>121 Moo 1, KohKood District,<br>Trat 23000, Thailand</li>
+          <li><a href="tel:+66819088966">+66 (0) 8 1908 8966</a></li>
+          <li><a href="mailto:reservation@kohkoodbeachresorts.com">reservation@kohkoodbeachresorts.com</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="footer__social">
+        <a href="https://www.facebook.com/KohKoodBeachResort/" target="_blank" rel="noopener" aria-label="Facebook">f</a>
+        <a href="https://www.instagram.com/kohkoodbeachresort/" target="_blank" rel="noopener" aria-label="Instagram">ig</a>
+        <a href="https://youtu.be/VrWQOEPs9qI" target="_blank" rel="noopener" aria-label="YouTube">yt</a>
+      </div>
+      <span>© 2026 Koh Kood Beach Resort. All rights reserved.</span>
+      <span>4.3/5 — 331 TripAdvisor reviews</span>
+      <button type="button" class="footer__cookie-link" data-cookie-settings>Cookie settings</button>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+/* ⚠️ THE ONLY PLACE A LEAD IS COUNTED. Reaching this page is the one event that
+   means an enquiry actually left: the form POSTed and Web3Forms confirmed it.
+   It used to fire inside showEnquirySent(), which also runs on the mailto
+   fallback — where the message is a draft nobody has sent yet.
+
+   Registered AFTER script.js, so script.js's own DOMContentLoaded handler runs
+   first and initConsent() has already loaded the pixel and GA. Both define
+   their queueing stub synchronously, so a call made now is kept and flushed
+   when the tag itself arrives. Without consent, trackEnquiry() is a no-op —
+   which is correct, not a bug. */
+(function () {
+  var fire = function () {
+    // Whitelisted, never passed straight through: this value arrives in the URL.
+    var kind = new URLSearchParams(location.search).get('kind');
+    trackEnquiry(kind === 'contact-message' ? 'contact-message' : 'booking-enquiry');
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fire, { once: true });
+  else setTimeout(fire, 0);
+})();
+</script>
+</body>
+</html>

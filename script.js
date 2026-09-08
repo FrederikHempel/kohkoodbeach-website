@@ -340,33 +340,35 @@ function trackEnquiry(kind) {
   }
 }
 
-/* Swaps the form for a confirmation panel. `subject`/`body` are the composed
-   email so the visitor can copy it manually if their mail client never opened. */
-function showEnquirySent(form, subject, body, kind, delivered) {
+/* A confirmed send leaves the page. The thank-you is its own URL so it can be
+   linked, bookmarked and — the reason it exists — counted: `enquiry-sent.html`
+   is the single place a Lead is fired, and it is only reachable when the POST
+   came back successful.
+   ⚠️ UTM parameters are carried across. A redirect starts a fresh navigation,
+   so without this the campaign that paid for the visit is invisible on the one
+   page that records the conversion. `kind` rides along too, so the event on the
+   far side keeps the name it had here. */
+function redirectToSent(kind) {
+  const keep = new URLSearchParams();
+  new URLSearchParams(window.location.search).forEach((value, key) => {
+    if (/^utm_/i.test(key)) keep.set(key, value);
+  });
+  keep.set('kind', kind);
+  window.location.assign(`enquiry-sent.html?${keep}`);
+}
+
+/* Swaps the form for a confirmation panel — the FALLBACK path only. The backend
+   path redirects instead, so nothing here may say the enquiry was sent: this
+   runs when the page has opened the visitor's own mail client and cannot tell
+   whether anything left. `subject`/`body` are the composed email so the visitor
+   can copy it manually if that client never opened. */
+function showEnquirySent(form, subject, body) {
   const panel = document.createElement('div');
   panel.className = 'sent';
   panel.setAttribute('role', 'status');
   panel.setAttribute('tabindex', '-1');
 
-  // Two different truths, and the panel must not confuse them. `delivered` is
-  // true only when the form POSTed to the backend and the backend said yes —
-  // then, and only then, may this say the enquiry has been sent. Without an
-  // access key the page still falls back to opening the visitor's own mail
-  // client, where the message is a draft nobody has sent yet.
-  panel.innerHTML = delivered ? `
-    <span class="label">Enquiry sent</span>
-    <h2 class="sent__head">Thank you</h2>
-    <p class="sent__lead">
-      We look forward to welcoming you to Koh Kood and our resort. You will hear from us
-      as soon as possible, and no later than 24 hours (Thailand, GMT+7).
-    </p>
-    <div class="sent__panel">
-      <p class="sent__panel-title">Something to add?</p>
-      <p>Reply to the confirmation landing in your inbox, or call the front desk on
-         <a class="link" href="tel:+66819088966">${RESORT_PHONE}</a>.</p>
-    </div>
-    <p class="sent__foot"><a href="index.html" class="link">Back to the resort</a></p>
-  ` : `
+  panel.innerHTML = `
     <span class="label">Almost there</span>
     <h2 class="sent__head">Your email is ready to send</h2>
     <p class="sent__lead">
@@ -409,7 +411,10 @@ function showEnquirySent(form, subject, body, kind, delivered) {
   panel.focus({ preventScroll: true });
   const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-h'), 10) || 70;
   window.scrollTo({ top: Math.max(0, panel.getBoundingClientRect().top + window.scrollY - navH), behavior: 'instant' });
-  trackEnquiry(kind);
+  /* ⚠️ No trackEnquiry() here. This panel means "your mail client has a draft",
+     which is not a lead — nobody has sent anything yet. The Lead and
+     generate_lead events fire on enquiry-sent.html, which only a confirmed
+     backend send can reach. */
 }
 
 /* book.html — the room chooser, the "more information" overlays, and the
@@ -963,7 +968,7 @@ function initBookPage() {
     window.location.href = `mailto:${RESORT_EMAIL}`
       + `?subject=${encodeURIComponent(subject)}`
       + `&body=${encodeURIComponent(body)}`;
-    showEnquirySent(form, subject, body, 'booking-enquiry', false);
+    showEnquirySent(form, subject, body);
   };
 
   form.addEventListener('submit', async (e) => {
@@ -997,7 +1002,7 @@ function initBookPage() {
       const res = await fetch(form.dataset.endpoint, { method: 'POST', body: data });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || json.success === false) throw new Error(json.message || 'send failed');
-      showEnquirySent(form, subject, body, 'booking-enquiry', true);
+      redirectToSent('booking-enquiry');
     } catch (err) {
       // The backend is the better path, not the only one. If it is down or the
       // key is wrong, the visitor still gets their enquiry out.
@@ -1027,7 +1032,7 @@ function initContactForm() {
     window.location.href = `mailto:${RESORT_EMAIL}`
       + `?subject=${encodeURIComponent(subject)}`
       + `&body=${encodeURIComponent(body)}`;
-    showEnquirySent(form, subject, body, 'contact-message', false);
+    showEnquirySent(form, subject, body);
   };
 
   // Same pattern as initBookPage(): a real POST if a backend is configured,
@@ -1061,7 +1066,7 @@ function initContactForm() {
       const res = await fetch(form.dataset.endpoint, { method: 'POST', body: data });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || json.success === false) throw new Error(json.message || 'send failed');
-      showEnquirySent(form, subject, body, 'contact-message', true);
+      redirectToSent('contact-message');
     } catch (err) {
       if (btn) { btn.disabled = false; btn.innerHTML = restore; }
       fallbackToMail({ subject, body });

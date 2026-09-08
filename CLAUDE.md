@@ -2250,3 +2250,46 @@ another and had to be measured after settling.
 finds each card's photograph with the first `<img src… width… height…>` inside
 the `<article>`, not by the `.cat__shot` wrapper, so the div → button change
 does not reach it. Verified all three cards still parse (img, line, 3 facts).
+
+### The thank-you is its own page, and the only place a Lead is counted (8 Sep 2026)
+
+A confirmed send now leaves the page: `redirectToSent(kind)` navigates to
+**`enquiry-sent.html`**, and `showEnquirySent()` is the fallback path only.
+Both forms do this — book.html and contact.html post to the same Web3Forms
+key, and one thank-you URL means one place to count.
+
+⚠️ **`trackEnquiry()` is gone from `script.js` entirely** — the only call is the
+inline script at the foot of `enquiry-sent.html`. It used to fire inside
+`showEnquirySent()`, which also runs on the **mailto fallback**, where the
+message is a draft nobody has sent yet: every failed POST was counted as a
+Lead. Now only a page that a confirmed backend send can reach fires anything.
+
+⚠️ **UTM parameters are carried across the redirect**, because a redirect is a
+fresh navigation and the campaign that paid for the visit would otherwise be
+invisible on the one page that records the conversion. Only `utm_*` is
+forwarded, plus `kind` so the event keeps its name — everything else
+(`room=…`, ad click junk) is dropped. Verified: `?utm_source=meta&utm_campaign=
+greenseason&utm_medium=cpc&room=…&junk=…` → `enquiry-sent.html?utm_source=meta&
+utm_campaign=greenseason&utm_medium=cpc&kind=booking-enquiry`.
+
+⚠️ **`kind` arrives in the URL, so it is whitelisted, never passed through** —
+`kind === 'contact-message' ? 'contact-message' : 'booking-enquiry'`. Anyone
+can type anything into a query string; it must not reach an analytics payload.
+
+**The inline script sits AFTER `<script src="script.js">` on purpose.** Script
+order decides listener order, so script.js's `DOMContentLoaded` handler runs
+first and `initConsent()` has already loaded the pixel and GA. Both define
+their queueing stub synchronously, so a call made straight afterwards is kept
+and flushed when the tag itself arrives. **Without consent nothing fires,
+which is correct** — verified all four ways: booking, contact, a junk `kind`,
+and no consent at all.
+
+**Two things done beyond the letter of the request, both stated:** the
+`delivered` parameter and its "Enquiry sent" branch were removed from
+`showEnquirySent()` — unreachable once the success path redirects, and dead
+code that asserts an enquiry was sent is exactly the kind of stale claim this
+file keeps warning about. And contact.html redirects as well as book.html.
+
+The page is `noindex` like the rest of the site and deliberately **not** in
+`sitemap.xml`: a thank-you page has no business in search results, whatever
+happens to the `noindex` decision on the other pages.
