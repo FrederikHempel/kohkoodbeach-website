@@ -36,14 +36,21 @@ LOOPS = {
     'restaurant':  [dict(cx=416, cy=153, rx=38,  ry=33, rot=0.1, n=2.2, shear=0, wob=0.04, seed=15)],
     # the massage hut: the small pavilion on the eastern corner of the sand, a few metres from the water — Frederik, 8 Sep 2026
     'massage':     [dict(cx=735, cy=150, rx=23,  ry=19, rot=0.0, n=2.0, shear=0, wob=0.05, seed=16)],
-    'bali-house':  [dict(cx=604, cy=479, rx=146, ry=82, rot=0.0, n=8,   shear=16, wob=0.015, seed=11),
-                    dict(cx=770, cy=380, rx=36,  ry=26, rot=0.0, n=2,   shear=0,  wob=0.05,  seed=14)],
-    'bali-deluxe': [dict(cx=409, cy=479, rx=53.5, ry=82, rot=0.0, n=6,  shear=16, wob=0.015, seed=12)],
+    # One stroke per row, not one box over both: there are only two Deluxe and they
+    # sit at the left end of the BACK row, so a single rectangle spanning both rows
+    # can no longer describe either house. Measured off the frame — the back row's
+    # huts are visibly larger and carry an extra wing (63 m² against 46), and
+    # accommodation.html gives Bali Deluxe a *partial* sea view, so it cannot be
+    # the sea-facing row. Frederik, 9 Sep 2026.
+    'bali-house':  [dict(cx=528, cy=436, rx=182, ry=36, rot=0.0, n=8, shear=0, wob=0.015, seed=11),   # the sea-facing row, all of it
+                    dict(cx=582, cy=519, rx=112, ry=37, rot=0.0, n=8, shear=0, wob=0.015, seed=17),   # the back row, east of the two Deluxe
+                    dict(cx=770, cy=380, rx=36,  ry=26, rot=0.0, n=2, shear=0, wob=0.05,  seed=14)],  # the one standing on its own
+    'bali-deluxe': [dict(cx=404, cy=519, rx=54,  ry=37, rot=0.0, n=5, shear=0, wob=0.02,  seed=12)],
     'thai-twin':   [dict(cx=762, cy=290, rx=118, ry=55, rot=0.10, n=2.6, shear=0, wob=0.04,  seed=13)],
 }
 # hand-lettered names — desktop position, phone position; '|' breaks a line
 LABELS = {
-    'restaurant':  dict(x=458, y=104, mx=458, my=100, text='Open-air|restaurant'),
+    'restaurant':  dict(x=400, y=216, mx=400, my=216, text='Open-air|restaurant'),
     'massage':     dict(x=764, y=158, mx=764, my=160, text='Massage hut'),
     'bali-house':  dict(x=560, y=374, mx=560, my=374, text='Bali House'),
     'bali-deluxe': dict(x=350, y=386, mx=312, my=388, text='Bali Deluxe'),

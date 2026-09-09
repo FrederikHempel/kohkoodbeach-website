@@ -2293,3 +2293,58 @@ file keeps warning about. And contact.html redirects as well as book.html.
 The page is `noindex` like the rest of the site and deliberately **not** in
 `sitemap.xml`: a thank-you page has no business in search results, whatever
 happens to the `noindex` decision on the other pages.
+
+### Only two Bali Deluxe, and they are in the back row (9 Sep 2026)
+
+Frederik: *"De to forreste Bali i venstre side er ikke Deluxe, det er Bali
+House. Vi har kun to bali deluxe."* The old marking circled four huts — two
+from each row at the left end — and that was wrong twice over.
+
+**Where they actually are, and how it was settled** (not guessed, after the
+restaurant roof):
+
+- The back row's huts are **visibly larger** on the frame — a wider footprint
+  with an extra wing — against the sea-facing row's smaller ones. 63 m² against
+  46 m².
+- `accommodation.html` gives Bali Deluxe exactly one view:
+  `bali-deluxe-partial-sea-view`. A **partial** sea view cannot be the
+  sea-facing row.
+
+Both point the same way: **Deluxe is the pair at the west end of the back
+row.** Everything else in both rows, plus the hut standing on its own to the
+east, is Bali House.
+
+⚠️ **One stroke per row now, and no shear.** A single rounded rectangle across
+both rows could describe neither house once the boundary ran *within* a row.
+Bali House is three strokes (sea-facing row, back row east of the Deluxe, the
+lone hut); Deluxe is one. The shear existed only to lean that combined box —
+each row is level on its own, so it is gone.
+
+⚠️ **The gap between the two Deluxe and the next hut is about 6 viewBox
+units**, and two 3.4-unit strokes cannot both sit in it. The boundary is drawn
+with each loop pulled a few units into its own end hut rather than into the
+grass — a marker line over a roof edge does not read as excluding that hut; a
+line through the middle of one does.
+
+⚠️ **The back row sits ON the frame's bottom edge** (huts end at y≈558, the
+viewBox at 562), so a loop around it has almost no room beneath. `build_plot.py`
+now has a check that walks every generated stroke and asserts it stays inside
+the viewBox — the first cut ran 2 units past the bottom and was clipped.
+
+### The restaurant's name sat where the frame crops first (9 Sep 2026)
+
+Reported as the label running over the top edge. The cause is arithmetic, not
+taste: the frame is bottom-anchored (`xMidYMax` / `object-position: 50% 100%`)
+because the huts sit on its bottom edge, so **everything lost to a short window
+is lost from the top** — and `DRIFT` scaling from the bottom takes another ~39
+units off the top on top of that.
+
+At 1440 wide the stage stops cropping vertically once its aspect is narrower
+than the photo's 16:9 — i.e. a viewport taller than ~883px. Below that it
+crops hard: **at 1440×800 the top 91 units are gone, at 1440×700 the top 156.**
+The label's old top edge was at y≈82, so it was cropped on any laptop window
+shorter than about 880px, which is most of them.
+
+The name now sits **below its own circle** at y=216/246 instead of above it at
+y=104, which puts its top at ~194 — clear at 1440×640 and above. Anything else
+placed near the top of this frame needs the same arithmetic done first.
