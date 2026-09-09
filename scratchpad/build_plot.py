@@ -45,11 +45,15 @@ LOOPS = {
     # ⚠️ ONE continuous line, not a box per row. Bali House is a whole row plus
     # part of the row behind it, so its outline has a notch where the two Deluxe
     # sit — a shape no ellipse can make. Clockwise from the top-left; the segment
-    # along y=477 runs between the rows, just above the Deluxe.
-    'bali-house':  [dict(poly=[(344, 399), (714, 399), (706, 556), (467, 556), (467, 477), (344, 477)],
+    # along y=478 runs between the rows, just above the Deluxe.
+    # ⚠️ THE BACK ROW SITS ~19 UNITS RIGHT OF THE SEA-FACING ONE. Read off the
+    # frame at 20-unit grid: sea-facing row x 356..716, back row x 375..706. A
+    # first pass measured both from one coarse grid, put the Deluxe box 22 units
+    # too far left, and cut its second hut in half. Measure each row's own ends.
+    'bali-house':  [dict(poly=[(350, 405), (722, 405), (714, 557), (492, 557), (492, 478), (350, 478)],
                          r=17, wob=1.2, seed=11),
                     dict(cx=770, cy=380, rx=36, ry=26, rot=0.0, n=2, shear=0, wob=0.05, seed=14)],   # the one standing on its own
-    'bali-deluxe': [dict(cx=404, cy=519, rx=54,  ry=37, rot=0.0, n=5, shear=0, wob=0.02,  seed=12)],
+    'bali-deluxe': [dict(cx=426, cy=521, rx=58,  ry=37, rot=0.0, n=5, shear=0, wob=0.02,  seed=12)],
     'thai-twin':   [dict(cx=762, cy=290, rx=118, ry=55, rot=0.10, n=2.6, shear=0, wob=0.04,  seed=13)],
 }
 # hand-lettered names — desktop position, phone position; '|' breaks a line

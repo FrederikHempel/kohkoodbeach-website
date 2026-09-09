@@ -2359,3 +2359,35 @@ shorter than about 880px, which is most of them.
 The name now sits **below its own circle** at y=216/246 instead of above it at
 y=104, which puts its top at ~194 — clear at 1440×640 and above. Anything else
 placed near the top of this frame needs the same arithmetic done first.
+
+### The two rows are offset from each other by ~19 units (9 Sep 2026)
+
+Frederik: *"Cirklen rundt om deluxe skal rykkes lidt til højre og det samme
+skal den rundt om bali hytterne."* The Deluxe box was cutting its second hut in
+half.
+
+⚠️ **The back row sits about 19 viewBox units EAST of the sea-facing row.**
+Measured on a 20-unit grid, per row, at both ends:
+
+| | left edge | right edge |
+|---|---|---|
+| sea-facing row | 356 | 716 |
+| back row | 375 | 706 |
+
+The first pass read both rows off one coarse grid and carried the sea-facing
+row's left edge over to the back row — which put the Deluxe box 22 units too
+far west. That offset is the same one the original `shear` was modelling before
+the rows got their own strokes; dropping the shear without re-measuring each
+row's own ends is what lost it. **Measure every row separately, at both ends.**
+
+The rows also **tilt up slightly to the east** — the back row's huts end at
+y≈558 at the west end and y≈548 at the east — so a horizontal line is snug at
+one end and loose at the other. Left as is; a tilted line would fight the two
+level rows either side of it.
+
+**A bounds check is in the build now**, listing every hut as a box and
+reporting whether the house's stroke encloses it. All eleven Bali House huts
+are inside. The two Deluxe report as marginally outside by 0.2 and 1.5 units —
+that is the deliberate grazing recorded above (the gap to the next hut is too
+narrow for two strokes and clear grass), not a miss. **Read the number, not the
+verdict.**
