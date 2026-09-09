@@ -2314,11 +2314,22 @@ Both point the same way: **Deluxe is the pair at the west end of the back
 row.** Everything else in both rows, plus the hut standing on its own to the
 east, is Bali House.
 
-⚠️ **One stroke per row now, and no shear.** A single rounded rectangle across
-both rows could describe neither house once the boundary ran *within* a row.
-Bali House is three strokes (sea-facing row, back row east of the Deluxe, the
-lone hut); Deluxe is one. The shear existed only to lean that combined box —
-each row is level on its own, so it is gone.
+⚠️ **Bali House is ONE continuous line with a notch.** Two rectangles — one per
+row — was the first cut and Frederik rejected it on sight: *"Kan vi ikke lave
+det én linje, ikke to cirkler."* He is right; two boxes read as two things.
+The house is the whole sea-facing row plus the row behind it east of the two
+Deluxe, which is a stepped outline no ellipse can make, so `build_plot.py`
+gained **`lasso(poly, r, wob, seed)`** beside `loop()`: it rounds each corner
+with a quadratic, resamples the whole outline to even spacing so the wobble
+reads as one steady hand, then pushes each point along its own normal. The
+wobble is keyed to arc fraction with whole-number frequencies so it closes on
+itself instead of jumping at the seam. `stroke(spec)` picks the shape —
+`poly` means lasso, otherwise superellipse. The shear existed only to lean the
+old combined box; it is gone.
+
+**The hut standing on its own to the east keeps its own small ring**, because
+it genuinely stands apart — a hand marking this plot would circle the rows in
+one pass and ring the odd one out separately. Fold it in only if asked.
 
 ⚠️ **The gap between the two Deluxe and the next hut is about 6 viewBox
 units**, and two 3.4-unit strokes cannot both sit in it. The boundary is drawn

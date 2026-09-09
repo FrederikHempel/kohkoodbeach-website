@@ -42,9 +42,13 @@ LOOPS = {
     # huts are visibly larger and carry an extra wing (63 m² against 46), and
     # accommodation.html gives Bali Deluxe a *partial* sea view, so it cannot be
     # the sea-facing row. Frederik, 9 Sep 2026.
-    'bali-house':  [dict(cx=528, cy=436, rx=182, ry=36, rot=0.0, n=8, shear=0, wob=0.015, seed=11),   # the sea-facing row, all of it
-                    dict(cx=582, cy=519, rx=112, ry=37, rot=0.0, n=8, shear=0, wob=0.015, seed=17),   # the back row, east of the two Deluxe
-                    dict(cx=770, cy=380, rx=36,  ry=26, rot=0.0, n=2, shear=0, wob=0.05,  seed=14)],  # the one standing on its own
+    # ⚠️ ONE continuous line, not a box per row. Bali House is a whole row plus
+    # part of the row behind it, so its outline has a notch where the two Deluxe
+    # sit — a shape no ellipse can make. Clockwise from the top-left; the segment
+    # along y=477 runs between the rows, just above the Deluxe.
+    'bali-house':  [dict(poly=[(344, 399), (714, 399), (706, 556), (467, 556), (467, 477), (344, 477)],
+                         r=17, wob=1.2, seed=11),
+                    dict(cx=770, cy=380, rx=36, ry=26, rot=0.0, n=2, shear=0, wob=0.05, seed=14)],   # the one standing on its own
     'bali-deluxe': [dict(cx=404, cy=519, rx=54,  ry=37, rot=0.0, n=5, shear=0, wob=0.02,  seed=12)],
     'thai-twin':   [dict(cx=762, cy=290, rx=118, ry=55, rot=0.10, n=2.6, shear=0, wob=0.04,  seed=13)],
 }
@@ -86,6 +90,64 @@ def loop(cx, cy, rx, ry, rot, n, shear, wob, seed):
     return 'M' + ' L'.join(f'{x:.1f} {y:.1f}' for x, y in pts)
 
 
+def lasso(poly, r, wob, seed, steps=380):
+    """One continuous marker stroke around an arbitrary outline: corners rounded
+    to radius `r`, a low-frequency wobble of up to `wob` units along the whole
+    length, and the pen overshooting its start the way a hand does.
+
+    `loop()` draws a (super)ellipse and cannot describe a group whose outline
+    steps — Bali House is the whole sea-facing row plus the part of the row
+    behind it east of the two Deluxe. The wobble is keyed to arc fraction with
+    whole-number frequencies, so it closes on itself instead of jumping at the
+    seam."""
+    random.seed(seed)
+    ph = [random.uniform(0, math.tau) for _ in range(3)]
+    amp = [random.uniform(wob * 0.5, wob) for _ in range(3)]
+
+    # 1. round every corner with a quadratic through it
+    pts, n = [], len(poly)
+    for i in range(n):
+        p0, p1, p2 = poly[i - 1], poly[i], poly[(i + 1) % n]
+        v0 = (p1[0] - p0[0], p1[1] - p0[1]); l0 = math.hypot(*v0) or 1
+        v1 = (p2[0] - p1[0], p2[1] - p1[1]); l1 = math.hypot(*v1) or 1
+        rr = min(r, l0 / 2, l1 / 2)
+        a = (p1[0] - v0[0] / l0 * rr, p1[1] - v0[1] / l0 * rr)
+        b = (p1[0] + v1[0] / l1 * rr, p1[1] + v1[1] / l1 * rr)
+        for k in range(9):
+            t = k / 8
+            pts.append(((1 - t) ** 2 * a[0] + 2 * (1 - t) * t * p1[0] + t * t * b[0],
+                        (1 - t) ** 2 * a[1] + 2 * (1 - t) * t * p1[1] + t * t * b[1]))
+
+    # 2. resample to even spacing, so the wobble reads as one steady hand
+    seg = [math.dist(pts[i], pts[(i + 1) % len(pts)]) for i in range(len(pts))]
+    total = sum(seg)
+    even, walked, at = [], 0.0, 0
+    for i in range(steps):
+        target = i / steps * total
+        while walked + seg[at] < target:
+            walked += seg[at]; at = (at + 1) % len(pts)
+        t = (target - walked) / (seg[at] or 1)
+        p, q = pts[at], pts[(at + 1) % len(pts)]
+        even.append((p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t))
+
+    # 3. push each point along its own normal, and overshoot the start
+    out = []
+    for i in range(steps + 13):
+        j = i % steps
+        p, nxt, prv = even[j], even[(j + 1) % steps], even[j - 1]
+        dx, dy = nxt[0] - prv[0], nxt[1] - prv[1]
+        d = math.hypot(dx, dy) or 1
+        f = i / steps
+        off = sum(a * math.sin(k * math.tau * f + q) for k, (a, q) in enumerate(zip(amp, ph), start=2))
+        out.append((p[0] - dy / d * off, p[1] + dx / d * off))
+    return 'M' + ' L'.join(f'{x:.1f} {y:.1f}' for x, y in out)
+
+
+def stroke(spec):
+    """A marker stroke from either shape: an outline (`poly`) or a superellipse."""
+    return lasso(**spec) if 'poly' in spec else loop(**spec)
+
+
 def houses():
     """The three cards on accommodation.html, read as data."""
     s = (ROOT / 'accommodation.html').read_text(encoding='utf-8')
@@ -110,7 +172,7 @@ def section():
     svg_paths, labels, cards, tabs = [], [], [], []
     for key, step, cid in STEPS:
         for L in LOOPS[key]:
-            svg_paths.append(f'<path class="pen" data-loop="{step}" d="{loop(**L)}"/>')
+            svg_paths.append(f'<path class="pen" data-loop="{step}" d="{stroke(L)}"/>')
         Lb = LABELS[key]
         def text(x, y, lh):
             parts = Lb['text'].split('|')
