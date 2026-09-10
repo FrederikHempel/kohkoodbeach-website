@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFlow();
   initRoomChooser();
   initRoomDialogs();
+  initEurPrices();
   initBookPage();
   initContactForm();
   initConsent();
@@ -905,6 +906,30 @@ function initRoomDialogs() {
     // Clicking the backdrop closes it. The check is on the dialog itself being
     // the click target, which only happens outside the inner panel.
     dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  });
+}
+
+/* THB rate fixed at 10 Sep 2026 (0.0261 EUR/THB, checked against a live rate
+   that day) — not a live call, so update this by hand periodically rather
+   than wiring an API in. A guest pricing a stay in a currency she doesn't use
+   daily can't tell 2,900 from 8,200 apart at a glance; "from 2,900 THB" and
+   "from 8,200 THB" read as similarly-sized numbers even though one is a
+   budget stay and the other is not. Every room/view price gets a muted
+   "≈ €NN" alongside it, never replacing the THB figure — that's still what's
+   actually charged. */
+const THB_TO_EUR = 0.0261;
+function initEurPrices() {
+  document.querySelectorAll('.cat__price, .view__price, .pick__price').forEach((el) => {
+    const lead = el.childNodes[0];
+    const match = lead && lead.nodeType === Node.TEXT_NODE && lead.textContent.match(/([\d,]+)/);
+    if (!match) return;
+    const thb = parseInt(match[1].replace(/,/g, ''), 10);
+    if (!thb) return;
+    const eur = Math.round(thb * THB_TO_EUR / 5) * 5;   // nearest €5 — a false-precision "€75.69" reads as a live quote
+    const span = document.createElement('span');
+    span.className = 'price__eur';
+    span.textContent = `≈ €${eur}`;
+    el.appendChild(span);
   });
 }
 

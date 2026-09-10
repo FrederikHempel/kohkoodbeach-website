@@ -1262,6 +1262,10 @@ html { caret-color: var(--gold-dark); }
   font-variant-numeric: tabular-nums; color: var(--charcoal);
 }
 .cat__unit { font-family: var(--font-body); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--warm-gray-strong); margin-left: 6px; }
+/* Shared by .cat__price, .view__price and .pick__price -- initEurPrices()
+   appends it to all three. A rough estimate, so it looks like one: no
+   tabular-nums, no THB's visual weight. */
+.price__eur { font-family: var(--font-body); font-size: 0.72em; color: var(--warm-gray-strong); margin-left: 6px; }
 .cat__actions { margin-top: auto; padding-top: clamp(16px, 1.8vw, 22px); display: flex; gap: 10px; align-items: stretch; }
 .cat__more, .cat__book {
   flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
@@ -1746,7 +1750,25 @@ html { caret-color: var(--gold-dark); }
 }
 @media (max-width: 560px) {
   .guests__grid { grid-template-columns: 1fr 1fr; }
-  .rdlg { width: 100vw; max-width: 100vw; max-height: 100vh; height: 100vh; }
+  /* svh, not vh: iOS Safari measures 100vh against the toolbar-hidden
+     viewport, so a full-screen dialog sized in vh runs taller than what's
+     actually on screen while the address bar is showing. The sticky close
+     button then sits partly under Safari's own chrome — reachable in theory,
+     not in practice, which is how a guest gets trapped mid-booking with no
+     visible way out. svh is measured against the toolbar-SHOWN viewport, so
+     the dialog never claims more height than is guaranteed visible. */
+  .rdlg { width: 100vw; max-width: 100vw; max-height: 100svh; height: 100svh; }
+  /* Belt and braces: the close button also gets its own fixed position, on
+     top of everything, independent of the dialog's internal scroll or
+     whatever is going on with the sticky bar above it. A guest should never
+     have to scroll or hunt to get out of a dialog. env() keeps it clear of
+     the notch/Dynamic Island. */
+  .rdlg__close {
+    position: fixed; z-index: 5;
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+    background: var(--warm-white); box-shadow: var(--shadow-soft);
+  }
 }
 
 /* ==========================================================================

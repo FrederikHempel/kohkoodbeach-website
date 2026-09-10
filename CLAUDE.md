@@ -2391,3 +2391,60 @@ are inside. The two Deluxe report as marginally outside by 0.2 and 1.5 units —
 that is the deliberate grazing recorded above (the gap to the next hut is too
 narrow for two strokes and clear grass), not a miss. **Read the number, not the
 verdict.**
+
+### Nine attempts, zero bookings, all mobile — the trap and three funnel fixes (10 Sep 2026)
+
+Frederik wrote up his own analysis (`BOOKINGFORMULAR — optimering 2026-09-10.md`,
+in the project root) from 28 days of `kohkoodbeach.com` GA4 data: ten sessions,
+eight Dutch visitors, all mobile, `form_start` four times, `form_submit` zero.
+He also sent a screenshot of the actual trap: pressing "See more" on a room
+type and being unable to get back — the close cross stuck at the top of the
+screen. That's not a funnel nit, it's why nobody finished.
+
+⚠️ **The room-detail dialog (`.rdlg`) went full-screen on mobile using
+`height: 100vh`, not `100svh`.** iOS Safari measures `100vh` against the
+toolbar-*hidden* viewport, so while the address bar is showing (which is most
+of the time a visitor is actually reading something, not mid-scroll), the
+dialog claims more height than is actually on screen. `.rdlg__close` sat
+inside the sticky `.rdlg__bar` at the top of that over-tall box — reachable in
+the CSS, not reachable on the glass. This project already knows this class of
+bug (`.hero` uses `svh` for exactly this reason); it just hadn't been applied
+here. Fixed to `100svh`, **and** `.rdlg__close` additionally got its own
+`position: fixed` at the mobile breakpoint, independent of the dialog's
+internal scroll or the bar above it — belt and braces, because a guest must
+never be able to get stuck in a modal with no visible way out. Verified: its
+position doesn't move when the dialog's own content is scrolled.
+
+**Three more fixes from the document, in the order it ranked them:**
+
+1. **EUR alongside THB.** `book.html` said THB 38 times, EUR zero — a Dutch
+   reader can't tell a 2,900 from an 8,200 apart at a glance, and the gap
+   between them is a budget stay versus an expensive one. `initEurPrices()`
+   in `script.js` reads the leading number off `.cat__price`, `.view__price`
+   and `.pick__price` (works on both `accommodation.html` and `book.html`
+   without touching `build_book.py`'s generation) and appends a muted
+   "≈ €NN", rounded to the nearest €5 so it reads as an estimate, never a
+   quote. `THB_TO_EUR = 0.0261`, checked against a live rate on 10 Sep 2026 —
+   **not a live call**; update the constant by hand periodically, the comment
+   above it says so.
+2. **`nationality` is no longer `required`.** It's a check-in field, not a
+   lead field; on a phone it was one more required dropdown in a six-field
+   form. `compose()` already wrote "not given" for an empty value — nothing
+   else needed to change.
+3. **The hero subtext now says what happens next**, not just that there's no
+   payment: *"Tell us your dates and we'll come back with what's free and
+   what it costs — usually within 24 hours, no payment now."* The 24-hour
+   figure already existed on this page and was kept as-is rather than
+   re-confirmed, since re-litigating an existing promise wasn't the ask.
+
+**Still open, deliberately not guessed:** the document's fourth fix — a short
+manual note under the date fields naming which periods are actually open
+(e.g. "We are open from 5 October") — needs real dates from Frederik. Adding
+placeholder dates would be exactly the kind of unconfirmed claim the rest of
+this file argues against. Ask him before writing it.
+
+**Also recorded in the document, not re-explained here:** why live availability
+is out of scope for now (the booking engine's endpoint has no CORS and — more
+to the point — would show allotment, not what's actually free to sell), and
+that `robots.txt: Disallow` still blocks organic discovery while paid traffic
+already runs, which is a separate go-live decision already tracked above.
