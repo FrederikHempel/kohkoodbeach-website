@@ -2448,3 +2448,57 @@ is out of scope for now (the booking engine's endpoint has no CORS and — more
 to the point — would show allotment, not what's actually free to sell), and
 that `robots.txt: Disallow` still blocks organic discovery while paid traffic
 already runs, which is a separate go-live decision already tracked above.
+
+### Two more from the same session — the date picker, and a submit that goes silent (10 Sep 2026)
+
+Frederik, live: arrival's checkmark doesn't open departure; departure lets
+every date through, arrival's included; and separately, pressing "Send
+enquiry" sometimes does nothing at all — no redirect, no error, no email.
+He reported the third one mid-fix on the first two and confirmed a moment
+later "it worked just now" — nothing had been deployed yet at that point, so
+that wasn't a fix landing; see the theory below for why it's still consistent.
+
+**Date auto-advance: `showPicker()` on `change` needs a fresh user gesture,
+and by the time `change` fires after dismissing arrival's own native wheel,
+some engines no longer count it as one.** It threw "requires a user gesture"
+in testing. The `focus()` fallback is the quieter half of the bug:
+`focus()` moves the caret on a date input, it does not open the native
+picker on iOS or Android — so the fallback path *looks like* nothing
+happened, which is exactly what was reported. `.click()` replaces it: a real
+tap sends a click, so it's what the OS actually listens for. Also added:
+`checkout` re-applies its own floor on `pointerdown`/`focus`, not only when
+`checkin` last changed — defensive, in case a dynamically-set `min` doesn't
+reliably re-constrain a picker that rendered earlier.
+
+⚠️ **The silent submit is the more important bug, and it's structural, not a
+one-off.** `initBookPage()`'s `if (!form.reportValidity()) return;` carried a
+comment asserting every required field lives in an open section — true when
+written, and no longer checked since. A `<dialog>` and two-step `<li
+class="step">` structure now exist, and `[data-step-body]` gets the `hidden`
+attribute when a step collapses. A field can be invalid **and** sit inside a
+`hidden` ancestor at the moment Send is pressed — `reportValidity()` then
+returns `false` correctly and shows the visitor **nothing**, because a
+hidden element has no box to put a validation bubble against. That is a
+silent, total dead end: no error, no redirect, no email — precisely what was
+reported. The submit handler now walks every invalid field first and forces
+open whichever step contains it, so `reportValidity()` always has somewhere
+to show its message. Checked against the current markup: `checkin`/`checkout`
+live in the always-visible hero strip, not a collapsible step, so this
+exact path likely wasn't the date fields specifically — but `room` and `you`
+are both real steps, and the fix is general rather than patched to the one
+field pair that was seen failing. **Any future step added to this flow
+inherits the same hidden-field trap unless this stays in place.**
+
+**A second, smaller layer under the same fix:** the catch block's own
+fallback (`fallbackToMail`, which opens `mailto:` and swaps in a
+confirmation panel) is now itself wrapped — if that fails too, a plain
+`alert()` names the phone and email directly, so total silence is no longer
+a reachable outcome from this handler under any failure combination.
+
+**Not fully explained, worth saying plainly:** a full valid submission was
+retested end to end after all three fixes and reached `enquiry-sent.html`
+correctly, same as before — the backend path itself was never broken. The
+mobile-only "nothing happens" is most consistent with the hidden-step theory
+above, but could not be reproduced on a real device from here. If it recurs,
+the next thing to capture is which step was open/closed at the moment Send
+was pressed.

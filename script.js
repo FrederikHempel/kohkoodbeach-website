@@ -810,13 +810,31 @@ function initFlow() {
   });
 
   /* Picking an arrival should open the departure picker, not make the visitor
-     find it. showPicker() needs the user activation the click carries, and is
-     not in every engine — the focus() is what the rest get. */
+     find it. showPicker() needs "fresh" user activation — and on the phones
+     this page actually gets used on, dismissing arrival's own native wheel
+     picker does not reliably count as one for a DIFFERENT field's picker in
+     the change handler that follows. It threw "requires a user gesture" on a
+     real device even though the tap that closed arrival was still warm.
+     click() is the fallback, not focus(): focus() alone does not open a
+     native date picker on iOS/Android, it just moves the caret, which reads
+     as nothing happening — the exact symptom reported ("departure doesn't
+     open"). click() is what a real tap sends, so it is what the OS chrome
+     for a date input actually listens for. */
   form.checkin.addEventListener('change', () => {
     if (!form.checkin.value || form.checkout.value) return;
     applyDateFloors(form);   // ⚠️ before opening — the picker reads `min` once, on open
-    try { form.checkout.showPicker(); } catch (err) { form.checkout.focus(); }
+    try { form.checkout.showPicker(); } catch (err) { form.checkout.click(); }
   });
+
+  /* Defensive, not decorative: re-assert the floor the instant departure is
+     about to be used, not only when arrival last changed. Reported bug: on a
+     real phone, departure would open with every date pickable, arrival's
+     included — min had been set in JS, but the native picker did not carry
+     it into the wheel it rendered. Re-applying right as the field is
+     touched, rather than trusting a value set who-knows-how-long earlier,
+     costs nothing and removes the dependency on that timing entirely. */
+  form.checkout.addEventListener('pointerdown', () => applyDateFloors(form));
+  form.checkout.addEventListener('focus', () => applyDateFloors(form));
 
   // Any step, any time. The flow suggests an order; it does not lock one.
   steps.forEach((s) => {
@@ -1047,8 +1065,28 @@ function initBookPage() {
        entirely. An enquiry with a departure before the arrival went straight
        through. reportValidity() re-runs every constraint, focuses the first
        offender and shows the browser's own message, in the visitor's language.
-       Every required field lives in a section that is open at this point, so
-       there is nothing it cannot focus. */
+
+       That comment used to end there, on the assumption that every required
+       field lives in a section that is open by the time submit is reachable.
+       It doesn't hold: a step that is done collapses (`[data-step-body]`
+       gets `hidden`), and a field inside a hidden ancestor has no box to
+       show a validation bubble against. reportValidity() then does the one
+       thing worse than doing nothing — it returns false, correctly, and
+       shows NOTHING, because there's nowhere to put it. The form just sits
+       there. Reported live: "nothing happens" on Send, no error, no email —
+       traced to exactly this, most likely reached via the date bug above
+       (an unconstrained departure field leaves `checkout` invalid, and by
+       the time Send is pressed that step has usually collapsed). Reveal any
+       step holding an invalid field FIRST, so the browser always has
+       somewhere to put its own error. */
+    Array.from(form.elements).forEach((el) => {
+      if (!el.willValidate || el.checkValidity()) return;
+      const body = el.closest('[data-step-body]');
+      if (!body || !body.hidden) return;
+      body.hidden = false;
+      body.style.height = 'auto';
+      body.closest('.step')?.classList.add('is-open');
+    });
     if (!form.reportValidity()) return;
     const { subject, body, fields } = compose();
     const key = form.querySelector('[name="access_key"]')?.value.trim();
@@ -1076,7 +1114,18 @@ function initBookPage() {
       // The backend is the better path, not the only one. If it is down or the
       // key is wrong, the visitor still gets their enquiry out.
       if (btn) { btn.disabled = false; btn.innerHTML = restore; }
-      fallbackToMail({ subject, body });
+      /* ⚠️ Last resort, not decoration. Reported live: Send did nothing —
+         no redirect, no email, no visible error. fallbackToMail() itself
+         opening mailto and swapping in a confirmation panel is already the
+         fallback; this is the fallback for THAT failing too, however
+         unlikely, because the alternative is a guest staring at an
+         unresponsive button with zero feedback, which is the exact bug
+         being fixed here. */
+      try {
+        fallbackToMail({ subject, body });
+      } catch (fallbackErr) {
+        alert(`Something went wrong sending this. Please email us directly at ${RESORT_EMAIL} or call ${RESORT_PHONE}.`);
+      }
     }
   });
 }
