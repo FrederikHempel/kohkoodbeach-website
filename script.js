@@ -289,12 +289,13 @@ const RESORT_PHONE = '+66 (0) 8 1908 8966';
    died when this pixel was created, and the line outlived it by a day. */
 const META_PIXEL_ID = '1600958241509815';
 
-/* Injects the Meta Pixel base snippet and fires PageView. Only called from
-   initConsent() once the visitor has actually agreed — loading it eagerly in
-   <head> would contradict the consent banner's own "Analytics stay off until
-   you agree" copy. Guarded against double-injection since it can be reached
-   both from a stored prior consent and from clicking Accept in the same
-   session. */
+/* Injects the Meta Pixel base snippet and fires PageView. Only reached once the
+   visitor has actually agreed — from a stored prior consent or from clicking
+   Accept — and guarded against double-injection because both paths exist in the
+   same session. There is deliberately no cookieless mode here: fbq('consent',
+   'revoke') still fetches Meta's script and tells Facebook the page was opened,
+   which is not what the bar promises. GA carries the cookieless measurement
+   instead; see loadGoogleAnalytics(). */
 function loadMetaPixel() {
   if (window.fbq) return;
   /* eslint-disable */
@@ -313,20 +314,63 @@ function loadMetaPixel() {
 
 const GA_MEASUREMENT_ID = 'G-EJN1DGKE8N';
 
-/* Same rule as loadMetaPixel(): only called post-consent, never eagerly in
-   <head>. trackEnquiry() already guards its gtag() call behind
-   `if (window.gtag)`, so it starts working the moment this runs — no
-   changes needed there. */
+/* GA4 running under Google Consent Mode v2. Unlike the Meta Pixel this loads on
+   every page view — but it starts with every storage signal DENIED, so no
+   cookie is written and no identifier is kept. What Google receives in that
+   state is a cookieless ping: page path, referrer and the UTM tags already in
+   the URL, with nothing that can join two of them into a person.
+
+   Why this changed on 10 Sep 2026: while GA only loaded after consent, every
+   visitor who ignored the bar was invisible to us. Meta reported 182 landing
+   page views for a campaign GA could see 11 sessions of, and neither number
+   could be checked against the other. Cookieless pings close that gap without
+   putting anything on the visitor's device before they agree.
+
+   ⚠️ contact.html's privacy section describes exactly this behaviour. Change
+   one and change the other in the same pass. */
 function loadGoogleAnalytics() {
   if (window.gtag) return;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { window.dataLayer.push(arguments); };
+
+  /* Defaults have to be queued BEFORE the library loads, or the first hit goes
+     out under the wrong assumption. `wait_for_update` holds it briefly so a
+     stored "accept" can be applied to that very first page view instead of
+     arriving one hit late. */
+  window.gtag('consent', 'default', {
+    ad_storage: 'denied',
+    analytics_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    functionality_storage: 'denied',
+    personalization_storage: 'denied',
+    security_storage: 'granted',
+    wait_for_update: 500,
+  });
+  /* Strips ad identifiers from the cookieless pings, and carries UTM tags
+     across an internal navigation without needing storage to do it. */
+  window.gtag('set', 'ads_data_redaction', true);
+  window.gtag('set', 'url_passthrough', true);
+
   const s = document.createElement('script');
   s.async = true;
   s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
   document.head.appendChild(s);
-  window.dataLayer = window.dataLayer || [];
-  window.gtag = function () { window.dataLayer.push(arguments); };
   window.gtag('js', new Date());
   window.gtag('config', GA_MEASUREMENT_ID);
+}
+
+/* Raises or lowers the four advertising/analytics signals. Safe to call before
+   the library has finished downloading — commands queue in dataLayer and are
+   replayed in order once it arrives. */
+function updateGoogleConsent(granted) {
+  const value = granted ? 'granted' : 'denied';
+  window.gtag?.('consent', 'update', {
+    ad_storage: value,
+    analytics_storage: value,
+    ad_user_data: value,
+    ad_personalization: value,
+  });
 }
 
 /* Fires the conversion event once a pixel exists. No-op until then, wrapped
@@ -1074,8 +1118,8 @@ function initContactForm() {
   });
 }
 
-/* Cookie consent. Two tools load on "accept" and nothing loads before it:
-   the Meta Pixel and GA4. ⚠️ Both are named individually in contact.html's
+/* Cookie consent. GA4 loads on every page view but stays cookieless until
+   "accept"; the Meta Pixel does not load at all before it. ⚠️ Both are named individually in contact.html's
    privacy section, which is a factual claim about what this site does — add
    or remove a tool here and that section has to change in the same pass. */
 const CONSENT_KEY = 'kkbr_consent';
@@ -1111,7 +1155,7 @@ function showConsentBar() {
   const bar = document.createElement('div');
   bar.className = 'consent';
   bar.innerHTML = `
-    <p>We use cookies to understand how guests use this site. Marketing cookies stay off until you agree — see our <a href="contact.html#privacy">privacy and cookies note</a>.</p>
+    <p>We count page views without cookies so we know which pages are read. Cookies — ours and Meta's — stay off until you agree. See our <a href="contact.html#privacy">privacy and cookies note</a>.</p>
     <div class="consent__actions">
       <button type="button" class="btn btn--ghost" data-consent="decline">Decline</button>
       <button type="button" class="btn" data-consent="accept">Accept</button>
@@ -1120,14 +1164,10 @@ function showConsentBar() {
 
   bar.querySelectorAll('[data-consent]').forEach((btn) => {
     btn.addEventListener('click', () => {
+      const accepted = btn.dataset.consent === 'accept';
       writeConsent(btn.dataset.consent);
-      if (btn.dataset.consent === 'accept') { loadMetaPixel(); loadGoogleAnalytics(); }
-      // window.gtag?.('consent', 'update', {
-      //   analytics_storage:   btn.dataset.consent === 'accept' ? 'granted' : 'denied',
-      //   ad_storage:          btn.dataset.consent === 'accept' ? 'granted' : 'denied',
-      //   ad_user_data:        btn.dataset.consent === 'accept' ? 'granted' : 'denied',
-      //   ad_personalization:  btn.dataset.consent === 'accept' ? 'granted' : 'denied',
-      // });
+      updateGoogleConsent(accepted);
+      if (accepted) loadMetaPixel();
       bar.remove();
     });
   });
@@ -1135,7 +1175,14 @@ function showConsentBar() {
 
 function initConsent() {
   const stored = readConsent();
-  if (stored === 'accept') { loadMetaPixel(); loadGoogleAnalytics(); }
+
+  /* GA starts on every page load and stays cookieless until — and unless —
+     the visitor accepts. Meta stays fully off until then: its pixel has no
+     equivalent cookieless mode, so gating it is the only honest option. */
+  loadGoogleAnalytics();
+  updateGoogleConsent(stored === 'accept');
+  if (stored === 'accept') loadMetaPixel();
+
   if (!stored) showConsentBar();
 
   /* The footer's "Cookie settings" link exists on all 12 pages, so this is
