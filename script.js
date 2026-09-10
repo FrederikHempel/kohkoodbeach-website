@@ -665,6 +665,22 @@ function applyDateFloors(form) {
   checkin.min = today;
   checkout.min = checkin.value ? dayAfter(checkin.value) : today;
   if (checkout.value && checkout.value < checkout.min) checkout.value = '';
+
+  /* Says the floor in words, because iOS's date wheel won't show it any
+     other way — see the CSS comment on .bhero__hint. Only shown once an
+     arrival exists; before that "on or after today" tells a visitor
+     nothing a blank field didn't already. */
+  const hint = form.querySelector('[data-date-hint]');
+  if (hint) {
+    if (checkin.value) {
+      const d = new Date(checkout.min + 'T00:00:00');
+      const nice = isNaN(d) ? '' : d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+      hint.textContent = nice ? `Departure must be on or after ${nice}.` : '';
+      hint.hidden = !nice;
+    } else {
+      hint.hidden = true;
+    }
+  }
 }
 
 /* Wires every form on the page that has both fields. The homepage bar had no
@@ -809,21 +825,28 @@ function initFlow() {
     goto('room');
   });
 
-  /* Picking an arrival should open the departure picker, not make the visitor
-     find it. showPicker() needs "fresh" user activation — and on the phones
-     this page actually gets used on, dismissing arrival's own native wheel
-     picker does not reliably count as one for a DIFFERENT field's picker in
-     the change handler that follows. It threw "requires a user gesture" on a
-     real device even though the tap that closed arrival was still warm.
-     click() is the fallback, not focus(): focus() alone does not open a
-     native date picker on iOS/Android, it just moves the caret, which reads
-     as nothing happening — the exact symptom reported ("departure doesn't
-     open"). click() is what a real tap sends, so it is what the OS chrome
-     for a date input actually listens for. */
+  /* Picking an arrival should draw the eye to departure, not make the
+     visitor hunt for it. Tried, in order, and retired in order:
+     showPicker() needs "fresh" user activation, and dismissing arrival's own
+     native wheel does not reliably count as one for a DIFFERENT field in the
+     change handler right after — threw "requires a user gesture" on a real
+     device. click() was the next attempt, on the theory that a native click
+     is what the OS date-picker chrome actually listens for; also confirmed
+     NOT to open it on a real phone. Both share the same ceiling: no
+     programmatic call carries a trusted gesture, and opening OS-level picker
+     UI is gated on exactly that in the engines this page is actually used
+     on. Fighting it further is not worth it. focus() plus a visible pulse is
+     the part that is guaranteed to work everywhere — it will not pop the
+     picker open, but it puts the visitor's eye and cursor on the right
+     field, which a silent no-op did not. */
   form.checkin.addEventListener('change', () => {
     if (!form.checkin.value || form.checkout.value) return;
-    applyDateFloors(form);   // ⚠️ before opening — the picker reads `min` once, on open
-    try { form.checkout.showPicker(); } catch (err) { form.checkout.click(); }
+    applyDateFloors(form);
+    try { form.checkout.showPicker(); return; } catch (err) { /* fall through */ }
+    form.checkout.focus({ preventScroll: true });
+    form.checkout.scrollIntoView({ block: 'center', behavior: still ? 'auto' : 'smooth' });
+    form.checkout.classList.add('is-nudged');
+    form.checkout.addEventListener('animationend', () => form.checkout.classList.remove('is-nudged'), { once: true });
   });
 
   /* Defensive, not decorative: re-assert the floor the instant departure is

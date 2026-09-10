@@ -1813,8 +1813,25 @@ html { caret-color: var(--gold-dark); }
   gap: clamp(16px, 2.6vw, 44px); align-items: end;
 }
 .bhero__strip .field input { width: 100%; }
+/* The one thing that's guaranteed to work when the native picker won't
+   auto-open: a visible pulse so departure doesn't just quietly gain focus
+   off-screen. Outline, not background — a fill would fight the sand strip's
+   own colour and read as a validation error, which this isn't. */
+.bhero__strip .field input.is-nudged { animation: field-nudge 900ms var(--ease-quick); }
+@keyframes field-nudge {
+  0%, 100% { outline: 2px solid transparent; outline-offset: 2px; }
+  30% { outline-color: var(--gold-dark); }
+}
+.no-motion .bhero__strip .field input.is-nudged { animation: none; }
 .bhero__err { position: relative; z-index: 1; background: var(--sand); color: var(--gold-text);
   margin: 0; padding: 0 var(--gutter) clamp(16px, 2vw, 22px); font-size: 0.9rem; }
+/* Words, not colour, carry the constraint here — iOS's own date wheel does
+   not grey out anything below `min`, it lets you scroll to any date and only
+   corrects on confirm. A visitor can still tap an earlier departure; this
+   line is what tells her it won't hold before she's confused by watching it
+   snap back. */
+.bhero__hint { position: relative; z-index: 1; background: var(--sand); color: var(--warm-gray-strong);
+  margin: 0; padding: 0 var(--gutter) clamp(16px, 2vw, 22px); font-size: 0.85rem; }
 
 /* ---- the flow ---- */
 .flow { list-style: none; margin: 0; padding-block: clamp(40px, 6vw, 84px); display: grid; }

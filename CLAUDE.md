@@ -2502,3 +2502,44 @@ mobile-only "nothing happens" is most consistent with the hidden-step theory
 above, but could not be reproduced on a real device from here. If it recurs,
 the next thing to capture is which step was open/closed at the moment Send
 was pressed.
+
+### The date picker, third pass — the platform ceiling, and words instead (10 Sep 2026)
+
+Frederik retested live: departure still doesn't auto-open, and — the more
+important half — the field visually accepts any date, arrival's included,
+even though `.min` reads back correctly. He could tap 18 September with a 24
+September floor already set.
+
+⚠️ **Stop trying to force an OS date picker open programmatically after
+another one just closed — it has a hard ceiling, not a bug.** Two different
+approaches (`showPicker()`, then `.click()`) both failed on a real phone.
+The common cause: opening native picker chrome is gated on a *trusted* user
+gesture, and no programmatic call — however it's dressed up — produces one.
+`showPicker()` is kept as a free attempt (it does work in some desktop
+engines), but nothing downstream depends on it landing. The fallback is now
+`focus({preventScroll:true})` + `scrollIntoView` + a 900ms outline pulse
+(`.is-nudged` / `@keyframes field-nudge`, skipped under `.no-motion`) —
+guaranteed to draw the eye to the right field even though it can't pop the
+picker itself.
+
+⚠️ **iOS's date wheel does not greying out anything below `min` — it lets you
+scroll anywhere and only corrects on confirm.** That's a platform limitation,
+confirmed by direct report, not something CSS or JS can reach into the OS
+picker to fix. What was already true, retested and still holding: selecting
+an out-of-range departure and confirming it snaps the value to the floor
+immediately (`checkout`'s own `change` listener in `initDateRanges()`) — so
+this was never a data problem, only a visible-constraint one. **The fix for
+a constraint the OS won't display is to say it in words.** `applyDateFloors()`
+now writes `[data-date-hint]` — "Departure must be on or after Thursday 24
+September." — the moment arrival is set, on the same sand strip as the
+step's error line, in the same wording pattern.
+
+**Retested end to end after this pass**: hint text populates correctly, the
+nudge class is applied to `checkout`, an out-of-range pick still snaps to the
+floor, and a full valid submission still reaches `enquiry-sent.html`.
+
+If auto-opening the second picker still matters enough to chase further, the
+next lever is a custom-rendered date picker (a JS calendar UI instead of the
+native `<input type="date">`) — that trades away the OS's own accessibility
+and locale handling for control over exactly this behaviour, and is a real
+scope decision, not a quick follow-up.
