@@ -2543,3 +2543,26 @@ next lever is a custom-rendered date picker (a JS calendar UI instead of the
 native `<input type="date">`) — that trades away the OS's own accessibility
 and locale handling for control over exactly this behaviour, and is a real
 scope decision, not a quick follow-up.
+
+### Domain migration decision: keep the old pixel (16 Sep 2026)
+
+Frederik confirmed: when kohkoodbeachresorts.com starts serving this site,
+`META_PIXEL_ID` gets set to **`876625588428207`** (the pixel already live on
+that domain today), **not** `1600958241509815` (the one this codebase
+currently uses, created 4 Sep for kohkoodbeach.com testing).
+
+Why the old one wins despite its broken Lead history: the retargeting
+audiences documented in `KKBR Meta Ads/00 START HER.md` (video viewers grown
+to 19–22k, page engagers, site visitors) are built from that pixel's data.
+Switching pixel IDs would orphan them and restart from zero — real, weeks of
+lost work, not just "history." The broken measurement (`Lead` firing on
+`showEnquirySent()` display rather than confirmed delivery) is a *code* bug,
+already fixed in this codebase (`trackEnquiry()` fires only from
+`enquiry-sent.html`, reached only on a confirmed Web3Forms send) — it travels
+with whichever pixel ID is configured, so keeping the old ID doesn't bring
+the old bug back.
+
+Do this swap in the SAME pass as the rest of the domain cutover (ORIGIN,
+canonical, noindex, robots.txt) — not before, per the existing rule above.
+The now-unused `1600958241509815` can be archived in Meta Business once the
+swap is confirmed live; no code references it after that point.
