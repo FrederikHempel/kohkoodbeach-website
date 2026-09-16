@@ -2566,3 +2566,41 @@ Do this swap in the SAME pass as the rest of the domain cutover (ORIGIN,
 canonical, noindex, robots.txt) — not before, per the existing rule above.
 The now-unused `1600958241509815` can be archived in Meta Business once the
 swap is confirmed live; no code references it after that point.
+
+### Homepage booking bar: Children field, and skip the redundant click (16 Sep 2026)
+
+Frederik relayed a guest's confusion, then reproduced it himself: filling in
+dates on the homepage bar and pressing "Enquire now" landed on book.html with
+dates pre-filled, but the page still looked like "Choose your room" needed
+pressing — a step that read as required twice. Made worse by the homepage
+bar not having a Children field at all, so anyone with kids had to fix that
+on book.html anyway regardless.
+
+**`.booking__form` on `index.html` now has a Children field**, matching
+`book.html`'s hero strip exactly (name, min/max, hint text). It's a plain
+GET form to `book.html`, so it passes through automatically — no JS change
+needed for the field itself. `.booking__form`'s grid went from
+`repeat(3, ...) auto` to `repeat(4, ...) auto` to fit it; the two mobile
+breakpoints (`1fr 1fr` then `1fr`) already handled any item count and needed
+nothing.
+
+**Arriving at `book.html` with `checkin` in the query string now
+auto-triggers `[data-step-next]`'s own click handler** — same validation,
+same `goto('room')`, same glide. Re-uses the existing button's logic via
+`.click()` rather than duplicating it, so it can't drift from what a manual
+press does. Room happens to already be the default-open step, so the visible
+effect is just the glide down past the hero — which is exactly the one click
+this was meant to remove.
+
+⚠️ **The Browser pane used to verify this does not run
+`requestAnimationFrame` at all** — confirmed directly (a self-scheduling rAF
+loop: 0 callbacks after 500ms, window focused or not). `glideTo()`'s animated
+path depends on it entirely, so nothing scrolls when tested there, which
+looks exactly like a broken feature and is not one. Verified instead via the
+`still=true` branch, which calls `window.scrollTo` directly with no rAF
+involved: target computed at 543px for a fresh load, landed exactly there,
+room step's body correctly visible. That confirms the target math and the
+button-triggered path both work; only the eased, frame-by-frame animation
+itself is unverifiable from this tool. Don't read a static scrollY of 0 in
+that pane as this feature being broken — check the `still=true` path or a
+real device instead.

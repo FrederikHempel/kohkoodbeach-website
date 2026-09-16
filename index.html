@@ -137,8 +137,12 @@
       <input type="date" name="checkout" required>
     </label>
     <label class="field">
-      <span class="label">N&deg; of Guests</span>
-      <input type="number" name="adults" min="1" max="12" value="2" required>
+      <span class="label">Adults <span class="label__hint">13+</span></span>
+      <input type="number" name="adults" min="1" max="12" value="2" required inputmode="numeric">
+    </label>
+    <label class="field">
+      <span class="label">Children <span class="label__hint">2&ndash;12</span></span>
+      <input type="number" name="children" min="0" max="10" value="0" inputmode="numeric">
     </label>
     <button type="submit" class="btn">Enquire now <span class="arrow" aria-hidden="true">&#8594;</span></button>
   </form>

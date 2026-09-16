@@ -997,6 +997,17 @@ function initBookPage() {
      re-run by hand. */
   applyDateFloors(form);
 
+  /* Arriving with dates already means the visitor already answered "when" —
+     on the homepage's own booking bar, not just anywhere. Landing here and
+     still being shown a "Choose your room" button to press read as a
+     redundant extra click, reported directly: dates were pre-filled, but it
+     still looked like a step had to be repeated. Re-uses the button's own
+     click handler (validation included) rather than duplicating its logic —
+     it already knows how to open "room" and glide there correctly. */
+  if (params.get('checkin')) {
+    document.querySelector('[data-step-next]')?.click();
+  }
+
   /* The transport request, in words rather than a field name. It is the one
      answer here the resort has to act on separately from the room. */
   const transferLine = () => {

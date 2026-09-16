@@ -434,8 +434,8 @@ p { color: var(--ink-muted); }
 }
 .booking__form {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-  gap: clamp(20px, 3.6vw, 60px);
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: clamp(16px, 2.6vw, 44px);
   align-items: end;
   max-width: 1560px;
   margin-inline: auto;
