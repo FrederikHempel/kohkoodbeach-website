@@ -77,7 +77,7 @@ similar pressure framing are explicitly rejected.
   No scarcity, no exclamation marks, no invented claims.
 - Photography is the resort's own; the drone footage in
   `assets/hero-carousel/New/` and `../For SoMe/Fra Simon/` is real and usable.
-- The typefaces (Fraunces, Work Sans), palette (charcoal / warm-white / sand /
+- The typeface (Work Sans, headings and body alike — Fraunces retired 6 Oct 2026), palette (charcoal / warm-white / sand /
   gold) and the footer illustration are settled and binding.
 
 ## Evidence on Hand

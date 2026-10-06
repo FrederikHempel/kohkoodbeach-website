@@ -4,12 +4,6 @@
     "ignoreFiles": [],
     "ignoreValues": [
       {
-        "rule": "overused-font",
-        "value": "fraunces",
-        "createdAt": "2026-08-20T10:55:23.598Z",
-        "reason": "Fraunces is KKBR's established brand display face (with Work Sans), documented in the project handover and carried across v1/v2/v3 — project design system, not a generic default"
-      },
-      {
         "rule": "layout-transition",
         "value": "height",
         "files": [

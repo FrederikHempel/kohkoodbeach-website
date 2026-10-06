@@ -27,7 +27,7 @@ if we could build the look of the website in similar fashion"* — i.e. borrow t
   colour sections, hairline-separated numbered lists, vertical rotated
   Previous/Next labels, asymmetric two-column editorial text.
 - **Kept from Koh Kood:** the palette (charcoal / warm-white / sand / gold), the
-  typefaces (Fraunces + Work Sans), the logo, the photography, and the beach
+  typeface (Work Sans — Fraunces was retired 6 Oct 2026, see the end of this file), the logo, the photography, and the beach
   illustration above the footer.
 
 The one new colour is `--sage` (#7D8F6F) with `--sage-deep`. The brand's palm
@@ -2604,3 +2604,53 @@ button-triggered path both work; only the eased, frame-by-frame animation
 itself is unverifiable from this tool. Don't read a static scrollY of 0 in
 that pane as this feature being broken — check the `still=true` path or a
 real device instead.
+
+### One typeface: Work Sans everywhere (6 Oct 2026)
+
+Frederik was not a fan of the display face, and named the symptom exactly:
+how it set "Highlights & Experiences". That is Fraunces's own character — the
+swash ampersand and the leaning, quirky letterforms — not a sizing problem.
+Three homepage previews (Work Sans, Instrument Serif, Jost) were built and
+compared on the real page before anything sitewide moved; he chose **Work
+Sans for everything**. The previews and their generator were deleted.
+
+**What changed in `style.css`:** `--font-display` is now Work Sans, the same
+family as `--font-body`, so every rule that reads the variable follows without
+being touched. Fraunces's two `@import`s are gone; the one remaining import
+adds Work Sans's italic (300), which the hand-lettered map names need. Every
+`font-variation-settings: 'opsz' ...` was deleted — Work Sans has no optical
+size axis, so they were dead weight.
+
+⚠️ **The type scale was re-tuned, not just re-pointed.** Work Sans runs wider
+than Fraunces Light, so the old clamps would have set every headline a line
+longer. `h1` is now `clamp(2.4rem, 6.4vw, 5.6rem)` and `h2`
+`clamp(1.9rem, 4.4vw, 3.7rem)` (were `2.9rem, 9vw, 8rem` and `2.2rem, 6vw,
+5rem`), headings take `letter-spacing: -0.04em` (was `-0.02em`) and
+`line-height: 1.05`, `h3` `-0.02em`. The homepage `.hero h1` is
+`clamp(2.3rem, 6vw, 5.2rem)` at `-0.045em`, `.rs__h` and `.quote blockquote`
+tightened to match. **If a headline looks too big or loose on some page, those
+are the numbers to look at — not the font.**
+
+**Behaviour change worth knowing:** the homepage hero title now wraps to two
+lines ("Koh Kood / Beach Resort") at desktop widths where Fraunces Light held
+it to one. Intentional, not a bug — the face is wider and the `max-width: 15ch`
+stayed.
+
+**The hand-lettered map names** (`.hand`, "Where you'll stay") are now Work
+Sans Light italic at 28px rather than Fraunces's italic with `SOFT`/`WONK`.
+Checked on the homepage at desktop and phone width: nothing runs outside the
+SVG. They read less "hand-written" than before and more like plain italic
+captions — the cost of dropping the one quirky face, and the loop strokes
+around each house still carry the hand-drawn feel.
+
+**Verified:** all 12 pages at desktop width and at 375px — no horizontal
+overflow, no heading wider than its box, no map label outside its SVG. One
+flag worth knowing so it isn't chased again: on `book.html` the second step
+heading reports `scrollWidth` 339 against 335. That is the rotated chevron
+beside the title, not the text (the title itself is 196px wide), and the
+first step shows the same effect at 1px.
+
+**Retired alongside:** the `overused-font=fraunces` entry in
+`.impeccable/config.json` (the face is gone, so the reason it recorded is
+stale) and the "Fraunces, Work Sans" line in `PRODUCT.md`. A superseded
+instruction reads as a current one — same lesson as the pixel comment.
