@@ -2654,3 +2654,21 @@ first step shows the same effect at 1px.
 `.impeccable/config.json` (the face is gone, so the reason it recorded is
 stale) and the "Fraunces, Work Sans" line in `PRODUCT.md`. A superseded
 instruction reads as a current one — same lesson as the pixel comment.
+
+### Route-map vehicle icons redrawn (6 Oct 2026)
+
+Frederik: the car on the route map "skulle ligne at være en bil" — it read as a
+blob. The bus (toaster) and ferry (box and pole) had the same fault, so all
+three glyphs were redrawn: a bus with four windows and wheel arches, a ferry
+with hull, cabin and bridge, and a car with a cabin, two windows and wheel
+arches. They are drawn inside the 32px disc and were checked at 32px, the size
+they actually render at, not just enlarged.
+
+⚠️ **The glyphs live in three places:** `scratchpad/build_route.py`, and the
+`<g class="route__glyph" data-glyph="N">` groups in `index.html` and
+`getting-here.html`. Change one and change all three, same as the rest of the
+route SVG. The wheel-arch "cuts" are warm-white circles over the body, in the
+disc's colour, so they stay in step with `.route__ico-cut`.
+
+Verified statically on the homepage (glyphs forced visible); the ride animation
+itself cannot run in the preview pane (no rAF).
