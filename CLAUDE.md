@@ -901,7 +901,7 @@ are not committed, because Thailand's is 1.1 MB.
 
 | what | source | detail |
 |---|---|---|
-| Thailand outline | OpenStreetMap via Nominatim | 50,452 pts → **471** at 0.022° |
+| Thailand outline | ~~OpenStreetMap via Nominatim~~ — **Natural Earth 10m** since 6 Oct 2026, see the entry at the end of this file | 2,879 pts → **481** at 0.022° |
 | Koh Kood, national scale | same island polygon | 1,069 pts → **43** |
 | Koh Kood, inset | same | → **271** at 0.00045° (~0.8 drawn px) |
 
@@ -2721,3 +2721,38 @@ dense, end the clip earlier (the pool is still clear at ~11s) by lowering
 Verified: attaches and decodes (16.03s, 1280x720), the last frame is
 green-dominant (the grove, not the pool), `loop` is off. The motion itself was
 not watched — the pane keeps the page `hidden`, so autoplay waits there.
+
+
+### The map said Koh Kood was on the mainland (6 Oct 2026)
+
+Frederik: "kortet indikerer at øen ligger på fastlandet." He was right, and the
+cause was in the data, not the drawing.
+
+⚠️ **OpenStreetMap's Thailand polygon is not a coastline on its Gulf side — it is
+the maritime boundary.** Between Chanthaburi and the Cambodian border it runs
+as one straight line through the sea *south of* Koh Kood, so the island (and the
+whole water around it) sits **inside** the country outline. A point-in-polygon
+test confirmed it: Ao Salad, the island's centre and the Laem Sok pier all came
+back "inside Thailand". Long straight segments (over 0.08°) litter the same
+polygon down the whole Gulf and the south — 44 of them — so the national
+silhouette was wrong in many more places than the one that was noticed.
+
+**The outline now comes from Natural Earth 10m** (`world-atlas@2`
+`countries-10m.json`, public domain), which follows the shoreline.
+`scratchpad/ne_ring.py` decodes the TopoJSON and returns the mainland ring;
+`build_route.py` uses it for Thailand and still uses the OSM polygon for Koh
+Kood itself (small ring and inset). Checked the same way afterwards: the island
+centre and Ao Salad are outside the mainland ring, in open water.
+
+The magnifier ring around the island is smaller (r 7, was 9) so it no longer
+overlaps the pier dot or the coast, and its two hairlines were moved to match.
+At national scale the island really is only ~8 units off the coast, so it still
+sits close — that is the true distance, not a drawing fault.
+
+The SVG was regenerated and spliced into **both** `index.html` and
+`getting-here.html`. The Gulf of Thailand now has its real shape, with Bangkok
+at the head of it. The build's inputs (`countries-10m.json`, `kood_nom.json`)
+are git-ignored; the header of `build_route.py` has the two `curl` commands.
+
+**Not changed, and slightly untidy:** the "Laem Sok" label leader crosses the
+lower magnifier hairline. It did before as well.

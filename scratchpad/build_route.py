@@ -2,14 +2,14 @@
 Generates the <svg> for the homepage "Journey" band, and prints it to
 scratchpad/route_svg.html for splicing into index.html.
 
-The two source polygons are NOT committed (Thailand's is 1.1 MB). Re-fetch them
+The two source files are NOT committed (Thailand's is 3.7 MB). Re-fetch them
 into this directory first — Nominatim asks for a real User-Agent:
 
+  curl -L "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-10m.json" -o countries-10m.json   # Thailand's coast (Natural Earth)
   UA="KKBR-site-illustration/1.0 (frja91@outlook.com)"
-  curl -A "$UA" "https://nominatim.openstreetmap.org/search?q=Thailand&polygon_geojson=1&format=json&limit=1" -o tha_nom.json
   curl -A "$UA" "https://nominatim.openstreetmap.org/search?q=Ko%20Kut%20island,%20Trat,%20Thailand&polygon_geojson=1&format=json&limit=5" -o kood_nom.json
 
-Coastlines are REAL: Thailand and Koh Kood come from OpenStreetMap, projected
+Coastlines are REAL: Thailand comes from Natural Earth and Koh Kood from OpenStreetMap, projected
 equirectangular with a cos(lat) correction and simplified with Douglas-Peucker
 to a tolerance just under one drawn pixel. Every marked place is a real geocode,
 and the two island markers are snapped onto the island's own coastline so they
@@ -123,7 +123,8 @@ RESORT   = (102.5344968, 11.6672478)  # the resort itself: OSM `hotel`, house
                                      # JSON-LD address. Near Hin Dam Pier at
                                      # Hat Taphao, roughly 47% down the island.
 
-tha_r  = ring('tha_nom.json')
+from ne_ring import thailand_ring
+tha_r  = thailand_ring()[0]   # Natural Earth: a real shoreline (see ne_ring.py for why not OSM's Thailand polygon)
 kood_r = ring('kood_nom.json')
 
 # ---------- layout, in the 1000 x 640 viewBox ----------
@@ -204,9 +205,9 @@ svg = f'''      <svg class="route__map" viewBox="0 0 1000 640" fill="none" prese
                hairlines to the panel it is enlarged in. Without them the ring
                sits 14px below Laem Sok's dot and reads as part of that marker —
                at this scale the pier and the island really are that close. -->
-          <path class="route__zoom" d="M{pts['koodT'][0]+9:.1f} {pts['koodT'][1]-5:.1f}L{px} {py}M{pts['koodT'][0]+9:.1f} {pts['koodT'][1]+5:.1f}L{px} {py+ph}"/>
+          <path class="route__zoom" d="M{pts['koodT'][0]+7:.1f} {pts['koodT'][1]-4:.1f}L{px} {py}M{pts['koodT'][0]+7:.1f} {pts['koodT'][1]+4:.1f}L{px} {py+ph}"/>
           <rect class="route__panel" x="{px}" y="{py}" width="{pw}" height="{ph}" rx="3"/>
-          <circle class="route__ring" cx="{pts['koodT'][0]:.1f}" cy="{pts['koodT'][1]:.1f}" r="9"/>
+          <circle class="route__ring" cx="{pts['koodT'][0]:.1f}" cy="{pts['koodT'][1]:.1f}" r="7"/>
           <text class="route__name route__name--panel" x="{px+18}" y="{py+28}">Koh Kood</text>
         </g>
         <path class="route__line route__coast route__isle" data-draw="isle" d="{P['KOOD_BIG']}"/>

@@ -24,3 +24,10 @@ assets/**/*.mov
 # The directory's CONTENTS are ignored, not the directory, so one file can be
 # re-included: build_plot.py generates staging-plot.html at the root.
 scratchpad/staging/
+
+# route-map build inputs and outputs (regenerate with scratchpad/build_route.py)
+scratchpad/countries-10m.json
+scratchpad/kood_nom.json
+scratchpad/route_geo.json
+scratchpad/route_svg.html
+scratchpad/book-hero-5s-original.mp4
