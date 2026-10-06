@@ -2681,25 +2681,43 @@ Both are gone, along with their now-unused `.rooms-top` and `.rev--top` rules.
 Breakfast is still stated in each house's amenities, and the Diveguy70 review
 below the cards stays. The page reads: slider · three cards · review · good to know.
 
-### The booking hero video no longer restarts with a cut (6 Oct 2026)
+### The booking hero video plays once and holds its last frame (6 Oct 2026)
 
 Frederik: the looping drone clip was short and jumped abruptly back to the
-start. It was 5.2s of a pull-back from the pool, so every loop ended in palms
-and cut straight back to the pool.
+start (the 5.2s pull-back from the pool ended in palms and cut back to the
+pool). A there-and-back loop was tried first and he found it "lidt sjovt"; his
+own idea replaced it: *run the clip so we get an overview of the place, then
+freeze.* That is what `assets/book-hero.mp4` does now — no `loop` attribute, so
+the video simply rests on its last frame when it ends.
 
-It is now one **there-and-back cycle of 13s** (`assets/book-hero.mp4`, 2.4 MB):
-pool, pull back, pool again, so the loop point is the same frame on both sides.
-`scratchpad/pingpong.swift <in> <out> <bitrate> <cycleSeconds>` makes it, from
-the old 5.2s clip (kept as `scratchpad/book-hero-5s-original.mp4`).
+**It is the whole 15s source, not the first 5s.** The clip is the "162 Beautiful
+and tropical pool…" file in `For SoMe/Fra Simon/Frede Koh Kood/` (3840x2160,
+30fps), a continuous pull-back: pool fills the frame at 0s, the grove opens up
+around it by 9s, and by 14.9s it is a true overview — bungalow roofs, the
+palm-filled grounds, jungle hills. The earlier cut stopped at 5.2s because the
+later seconds were "just palms"; as a *destination* rather than a loop, those
+seconds are the point.
 
-⚠️ **A straight forward-then-reverse bounces**: the drone would reverse at full
-speed at the far end. Position follows a raised cosine instead, so it slows to a
-stop at each end, and fractional positions blend the two nearest frames so the
-slow ends do not step. Peak speed is about 1.3x the original, average 0.8x.
-The poster is still the first frame, which is also the last, so nothing jumps
-when playback starts. Markup, `loop` and the attach rules in `initBookHero()`
-are unchanged.
+⚠️ **The tail eases to a stop; it does not freeze mid-motion.** The drone is
+still moving at about 70% of its early speed at 14.9s, so a plain hold would
+look like the footage hit a wall. `scratchpad/holdend.swift` plays the source at
+its own speed until 13.55s, then slows linearly to zero over the last 2.5s of
+output (16.03s total, 3.3 MB), blending the two nearest frames at fractional
+positions so the slow tail does not step. Measured: motion per second falls from
+~26 to ~21 to ~5 across the last seconds. Usage:
+`swift scratchpad/holdend.swift <in> <out.mp4> <bitrate> <w> <h> <endSeconds> <tailSeconds>`.
 
-Verified: it attaches and decodes (13s, 1280x720), frames at 0 / 6.5 / 13s are
-pool / palms / pool. The motion itself was not watched; the pane keeps the page
-`hidden`, so autoplay waits and playback was started by hand there.
+The poster is still the first frame, so nothing jumps when playback starts; with
+reduced motion, on a phone or on save-data the visitor sees only that poster
+(the pool), not the overview. Earlier versions are in the scratchpad
+(`book-hero-5s-original.mp4`, and `scratchpad/pingpong.swift` for the loop).
+
+⚠️ **The held frame is busier and darker than the poster**: the headline sits
+right over where the pool is. Checked by laying the last frame behind the live
+hero at 1024px wide — the headline and strip stay legible. If it ever feels too
+dense, end the clip earlier (the pool is still clear at ~11s) by lowering
+`<endSeconds>`.
+
+Verified: attaches and decodes (16.03s, 1280x720), the last frame is
+green-dominant (the grove, not the pool), `loop` is off. The motion itself was
+not watched — the pane keeps the page `hidden`, so autoplay waits there.
