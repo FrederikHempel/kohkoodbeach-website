@@ -2680,3 +2680,26 @@ slider and the room cards, so the page's one decision started a screen late.
 Both are gone, along with their now-unused `.rooms-top` and `.rev--top` rules.
 Breakfast is still stated in each house's amenities, and the Diveguy70 review
 below the cards stays. The page reads: slider · three cards · review · good to know.
+
+### The booking hero video no longer restarts with a cut (6 Oct 2026)
+
+Frederik: the looping drone clip was short and jumped abruptly back to the
+start. It was 5.2s of a pull-back from the pool, so every loop ended in palms
+and cut straight back to the pool.
+
+It is now one **there-and-back cycle of 13s** (`assets/book-hero.mp4`, 2.4 MB):
+pool, pull back, pool again, so the loop point is the same frame on both sides.
+`scratchpad/pingpong.swift <in> <out> <bitrate> <cycleSeconds>` makes it, from
+the old 5.2s clip (kept as `scratchpad/book-hero-5s-original.mp4`).
+
+⚠️ **A straight forward-then-reverse bounces**: the drone would reverse at full
+speed at the far end. Position follows a raised cosine instead, so it slows to a
+stop at each end, and fractional positions blend the two nearest frames so the
+slow ends do not step. Peak speed is about 1.3x the original, average 0.8x.
+The poster is still the first frame, which is also the last, so nothing jumps
+when playback starts. Markup, `loop` and the attach rules in `initBookHero()`
+are unchanged.
+
+Verified: it attaches and decodes (13s, 1280x720), frames at 0 / 6.5 / 13s are
+pool / palms / pool. The motion itself was not watched; the pane keeps the page
+`hidden`, so autoplay waits and playback was started by hand there.
