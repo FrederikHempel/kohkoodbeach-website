@@ -2672,3 +2672,11 @@ disc's colour, so they stay in step with `.route__ico-cut`.
 
 Verified statically on the homepage (glyphs forced visible); the ride animation
 itself cannot run in the preview pane (no rAF).
+
+### Rooms page: nothing between the slider and the three houses (6 Oct 2026)
+
+The intro line ("Three bungalow styles…") and the Gina B review sat between the
+slider and the room cards, so the page's one decision started a screen late.
+Both are gone, along with their now-unused `.rooms-top` and `.rev--top` rules.
+Breakfast is still stated in each house's amenities, and the Diveguy70 review
+below the cards stays. The page reads: slider · three cards · review · good to know.

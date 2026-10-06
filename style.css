@@ -1074,14 +1074,6 @@ html { caret-color: var(--gold-dark); }
    one shared panel below the row, so the page reads as a choice rather than a
    scroll, and "Good to know" is simply pushed down when it opens.
    ========================================================================== */
-.rooms-top { text-align: center; }
-.rooms-top__lead {
-  font-family: var(--font-display); font-weight: 300;
-  font-size: clamp(1.4rem, 2.9vw, 2.3rem); line-height: 1.26;
-  letter-spacing: -0.015em; color: var(--charcoal);
-  max-width: 34ch; margin-inline: auto; text-wrap: balance;
-}
-
 /* ---------- the slider, promoted to this page's hero ----------
    Was a mid-page block below a separate page-hero photo; that photo was a
    generic 750x500 arrival shot doing the same job worse (soft, one more
@@ -1204,7 +1196,6 @@ html { caret-color: var(--gold-dark); }
 
 /* ---------- reviews ---------- */
 .rev { background: var(--charcoal); color: var(--warm-white); padding-block: clamp(46px, 6vw, 84px); }
-.rev--top { padding-block: clamp(40px, 5vw, 68px); }
 .rev__inner { text-align: center; }
 .rev__stars { color: var(--gold); font-size: 0.95rem; letter-spacing: 0.28em; }
 .rev__text {
