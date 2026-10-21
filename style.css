@@ -2109,3 +2109,103 @@ button.link { font: inherit; background: none; border: 0; padding: 0; cursor: po
 .no-motion .ph { order: 3; padding-top: 28px; }
 .no-motion .ph__cta { background: var(--charcoal); color: var(--warm-white); }
 .no-motion [data-loop], .no-motion .mark { opacity: 1 !important; }
+
+/* Room comparison and permanent room landing pages. */
+.room-jump { display: block; padding: 100px 24px 18px; text-align: center; background: var(--warm-white); }
+.room-page { padding: 130px 0 70px; }
+.room-page h1 { margin: 18px 0 40px; font-size: clamp(38px, 6vw, 72px); }
+.room-page h2 { margin: 28px 0 16px; }
+.room-page p { margin-bottom: 20px; }
+.room-page .panel { display: block; }
+.room-page .pick { scroll-margin-top: 110px; }
+.room-page__next { margin-top: 44px; }
+.renovation-notice { margin: 32px 0 48px; padding: 28px; border: 1px solid #b8ab8f; background: #f2ede3; }
+.renovation-notice h2 { margin-top: 0; }
+.extras__h:not(:first-child) { margin-top: 24px; }
+@media (max-width: 640px) {
+  .room-jump { padding-top: 92px; }
+  .room-jump + .rs .rs__stage { height: 78svh; min-height: 540px; }
+  .room-page { padding-top: 110px; }
+}
+.booking-policy { font-size: 14px; line-height: 1.7; }
+.room-page > .wrap > .cat__facts { max-width: 620px; margin-bottom: 32px; }
+
+/* One room overview, linked to the permanent house pages. */
+.rooms-intro { margin-bottom: 36px; }
+.rooms-intro p { max-width: 700px; margin-top: 18px; }
+.rooms-note { margin-top: 32px; }
+a.cat__shot { display: block; }
+.room-nav { display: flex; flex-wrap: wrap; gap: 10px 26px; margin: 28px 0 38px; padding: 18px 0; border-block: 1px solid #d8d2c7; }
+.room-nav a { padding: 8px 0; text-decoration: none; border-bottom: 2px solid transparent; }
+.room-nav a:hover, .room-nav a[aria-current="page"] { border-bottom-color: currentColor; }
+.room-nav a[aria-current="page"] { font-weight: 600; }
+#compare-rooms { scroll-margin-top: 72px; }
+
+/* Consistent booking accent, using the existing logo gold with dark text. */
+:root a[href^="book.html"],
+:root .booking__form button[type="submit"],
+:root [data-book-form] button[type="submit"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold);
+  color: var(--charcoal);
+  border: 1px solid var(--gold);
+  padding: 14px 20px;
+  text-decoration: none;
+  opacity: 1;
+  min-height: 44px;
+  transition: background var(--t-control) var(--ease-quick), transform var(--t-press) var(--ease-quick);
+}
+@media (hover: hover) and (pointer: fine) {
+  :root a[href^="book.html"]:hover,
+  :root .booking__form button[type="submit"]:hover,
+  :root [data-book-form] button[type="submit"]:hover {
+    background: #DBA359;
+    border-color: #DBA359;
+    color: var(--charcoal);
+    opacity: 1;
+  }
+}
+:root a[href^="book.html"]:focus-visible,
+:root .booking__form button[type="submit"]:focus-visible,
+:root [data-book-form] button[type="submit"]:focus-visible {
+  outline: 2px solid var(--charcoal);
+  outline-offset: 4px;
+}
+.cats .cat__actions { flex-direction: column; }
+.room-nav {
+  position: sticky;
+  top: var(--nav-h, 74px);
+  z-index: 50;
+  background: var(--warm-white);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 24px;
+  margin-top: 20px;
+  padding-block: 12px;
+  box-shadow: 0 5px 12px rgba(43,41,38,0.04);
+}
+.room-nav a { flex-shrink: 0; white-space: nowrap; }
+.room-page .pick { scroll-margin-top: calc(var(--nav-h, 74px) + 90px); }
+@media (max-width: 640px) {
+  :root .nav__book { padding: 10px 12px; }
+  .room-nav { gap: 20px; }
+}
+
+/* Clip sideways overflow without creating a scroll ancestor for sticky tabs. */
+body.room-document { overflow-x: clip; }
+
+/* A compact booking button in the header; larger CTAs remain in the content. */
+:root .nav .nav__book {
+  padding: 6px 13px;
+  min-height: 44px;
+  font-size: clamp(0.8rem, 1vw, 0.9rem);
+  line-height: 1.3;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+@media (max-width: 380px) {
+  .nav__right { gap: 14px; }
+  .nav__menu-label { display: none; }
+}

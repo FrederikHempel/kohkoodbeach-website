@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <script>document.documentElement.classList.add('js');</script>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20261021-header2">
 </head>
 <body>
 
@@ -117,7 +117,7 @@
   </div>
 </footer>
 
-<script src="script.js"></script>
+<script src="script.js?v=20261021-rooms"></script>
 <script>
 /* ⚠️ THE ONLY PLACE A LEAD IS COUNTED. Reaching this page is the one event that
    means an enquiry actually left: the form POSTed and Web3Forms confirmed it.
@@ -131,9 +131,18 @@
    which is correct, not a bug. */
 (function () {
   var fire = function () {
-    // Whitelisted, never passed straight through: this value arrives in the URL.
-    var kind = new URLSearchParams(location.search).get('kind');
-    trackEnquiry(kind === 'contact-message' ? 'contact-message' : 'booking-enquiry');
+    var receipt = consumeEnquiryReceipt();
+    if (receipt && receipt.fresh) trackEnquiry(receipt.kind);
+    if (!receipt) {
+      document.querySelector('.sent > .label').textContent = 'Your enquiry';
+      document.querySelector('.sent__head').textContent = 'Planning your stay?';
+      document.querySelector('.sent__lead').textContent =
+        'Send us your dates through our enquiry form. If you have already sent a message, please allow up to 24 hours for our reply.';
+      document.querySelector('.sent__panel').hidden = true;
+      var link = document.querySelector('.sent__foot a');
+      link.href = 'book.html';
+      link.textContent = 'Enquire about your stay';
+    }
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fire, { once: true });
   else setTimeout(fire, 0);

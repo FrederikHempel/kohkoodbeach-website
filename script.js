@@ -387,19 +387,40 @@ function trackEnquiry(kind) {
 
 /* A confirmed send leaves the page. The thank-you is its own URL so it can be
    linked, bookmarked and — the reason it exists — counted: `enquiry-sent.html`
-   is the single place a Lead is fired, and it is only reachable when the POST
-   came back successful.
+   is the single place a Lead is fired, and a short-lived session receipt verifies that the POST
+   came back successful before counting it.
    ⚠️ UTM parameters are carried across. A redirect starts a fresh navigation,
    so without this the campaign that paid for the visit is invisible on the one
    page that records the conversion. `kind` rides along too, so the event on the
    far side keeps the name it had here. */
 function redirectToSent(kind) {
+  // A receipt is created only after the submission service accepts the request.
+  // No personal data is stored. Direct visits and refreshes must not count leads.
+  try {
+    sessionStorage.setItem('kkbr-enquiry-receipt', JSON.stringify({
+      kind: kind === 'contact-message' ? 'contact-message' : 'booking-enquiry',
+      createdAt: Date.now(), counted: false
+    }));
+  } catch (_) { /* The confirmation still works if storage is unavailable. */ }
   const keep = new URLSearchParams();
   new URLSearchParams(window.location.search).forEach((value, key) => {
     if (/^utm_/i.test(key)) keep.set(key, value);
   });
   keep.set('kind', kind);
   window.location.assign(`enquiry-sent.html?${keep}`);
+}
+
+function consumeEnquiryReceipt() {
+  try {
+    const receipt = JSON.parse(sessionStorage.getItem('kkbr-enquiry-receipt'));
+    if (!receipt || !['booking-enquiry', 'contact-message'].includes(receipt.kind) ||
+        !Number.isFinite(receipt.createdAt) || Date.now() < receipt.createdAt ||
+        Date.now() - receipt.createdAt > 30 * 60 * 1000) return null;
+    const fresh = receipt.counted === false;
+    receipt.counted = true;
+    sessionStorage.setItem('kkbr-enquiry-receipt', JSON.stringify(receipt));
+    return { kind: receipt.kind, fresh };
+  } catch (_) { return null; }
 }
 
 /* Swaps the form for a confirmation panel — the FALLBACK path only. The backend
@@ -822,7 +843,8 @@ function initFlow() {
       err.textContent = 'Departure has to be after arrival.'; err.hidden = false; form.checkout.focus(); return;
     }
     err.hidden = true;
-    goto('room');
+    const selected = form.querySelector('input[name="room"]:checked');
+    goto(selected && selected.value ? 'you' : 'room');
   });
 
   /* Picking an arrival should draw the eye to departure, not make the
@@ -889,7 +911,7 @@ function initFlow() {
     });
   }
 
-  window.__flow = { markDone, goto, roomSummary };
+  window.__flow = { markDone, goto, roomSummary, open };
 }
 
 /* The houses inside step 2. "Choose this room" unfolds that house's views;
@@ -922,15 +944,30 @@ function initRoomChooser() {
     });
   });
 
+  // A house-level CTA opens its view choices without silently choosing a view.
+  const requestedHouse = new URLSearchParams(window.location.search).get('house');
+  const house = houses.find((h) => h.dataset.house === requestedHouse);
+  if (house) openHouse(house);
   const wanted = new URLSearchParams(window.location.search).get('room');
   if (wanted) {
-    const radio = form.querySelector(`input[name="room"][value="${wanted}"]`);
+    const radio = Array.from(form.querySelectorAll('input[name="room"]')).find((r) => r.value === wanted);
     if (radio) {
       radio.checked = true;
       openHouse(radio.closest('.cat'));
-      if (window.__flow) window.__flow.markDone('room', window.__flow.roomSummary());
+      if (window.__flow) {
+        window.__flow.markDone('room', window.__flow.roomSummary());
+        window.__flow.open('you');
+      }
     }
   }
+  const next = document.querySelector('[data-step-next]');
+  const updateNext = () => {
+    if (!next) return;
+    const selected = form.querySelector('input[name="room"]:checked');
+    next.firstChild.textContent = selected && selected.value ? 'Continue with this room ' : 'Choose your room ';
+  };
+  form.querySelectorAll('input[name="room"]').forEach((r) => r.addEventListener('change', updateNext));
+  updateNext();
 }
 
 /* Native <dialog>: Escape and the backdrop come free, and focus is trapped for
@@ -1069,6 +1106,7 @@ function initBookPage() {
       ['Nights', nights > 0 ? String(nights) : null],
       ['Dates', flexible ? 'Flexible by 2–3 days either way' : 'Fixed'],
       ['Guests', who.join(', ')],
+      ['Children_ages', get('child_ages') || (ch || inf ? 'Please confirm' : null)],
       ['Extra_bed', get('extrabed') === 'yes' ? 'Yes, please' : 'No'],
       ['Transport_from_Bangkok', wantsTransfer
         ? `Yes, please quote${routeName ? ` — ${routeName}` : ''}`
@@ -1318,8 +1356,24 @@ function initMarquee() {
    links in this way, so the fix matters beyond this page.
    Re-running it after `load` puts the visitor where the link promised. */
 function initHashLanding() {
-  const id = decodeURIComponent(window.location.hash.slice(1));
+  let id;
+  try { id = decodeURIComponent(window.location.hash.slice(1)); } catch (_) { return; }
   if (!id) return;
+  // Keep previously shared variant links working after moving the details.
+  const legacyRooms = {
+    'bali-house-garden-view': 'bali-house',
+    'bali-house-partial-sea-view': 'bali-house',
+    'bali-house-partial-sea-view-twin': 'bali-house',
+    'bali-house-sea-view': 'bali-house',
+    'bali-deluxe-partial-sea-view': 'bali-deluxe',
+    'thai-twin-house-garden-view': 'thai-twin-house',
+    'thai-twin-house-partial-sea-view': 'thai-twin-house',
+    'thai-twin-house-sea-view': 'thai-twin-house'
+  };
+  if (window.location.pathname.endsWith('/accommodation.html') && Object.hasOwn(legacyRooms, id)) {
+    window.location.replace(`${legacyRooms[id]}.html${window.location.search}#${id}`);
+    return;
+  }
   const target = document.getElementById(id);
   if (!target) return;
 
@@ -1563,12 +1617,22 @@ function initRoomDetail() {
     });
   });
 
-  /* Arriving with a house in the hash — the homepage's "Learn more" links this
-     way — opens that house's panel, so nobody lands on the card only to have
-     to click once more for what they came for. initHashLanding() has already
-     put the card at the top; the panel unfolds beneath it. */
-  const fromHash = decodeURIComponent(window.location.hash.slice(1));
-  if (fromHash && buttons.some((b) => b.dataset.expand === fromHash)) openFor(fromHash);
+  // Legacy variant links from family pages must open the matching house too.
+  // Resolve against known panels rather than constructing a CSS selector from a URL.
+  const landOnRoom = () => {
+    let hash;
+    try { hash = decodeURIComponent(window.location.hash.slice(1)); } catch (_) { return; }
+    const panel = panels.find((p) => hash === p.dataset.panel || hash.startsWith(p.dataset.panel + '-'));
+    if (!panel) return;
+    openFor(panel.dataset.panel);
+    panel.tabIndex = -1;
+    panel.focus({ preventScroll: true });
+    const nav = document.querySelector('.nav')?.offsetHeight || 70;
+    window.scrollTo({ top: Math.max(0, region.getBoundingClientRect().top + window.scrollY - nav - 18), behavior: 'instant' });
+  };
+  landOnRoom();
+  window.addEventListener('hashchange', landOnRoom);
+  window.addEventListener('load', landOnRoom, { once: true });
 }
 
 /* ==========================================================================

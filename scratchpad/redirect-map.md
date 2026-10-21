@@ -59,3 +59,30 @@ tilsvarende side, ikke en 404:
 kategorier på v3's `gallery.html` (Panorama/Facilities/Restaurant/Activities/
 Events), er en mere præcis pr.-album-omdirigering mulig, men albummernes
 rækkefølge/indhold er ikke bekræftet fra den gamle side endnu.
+
+## Tilføjelse 20. oktober 2026 — offentlige .html-værelsessider
+
+Den oprindelige PHP-liste ovenfor er ikke en komplet URL-inventarliste.
+Disse offentlige HTML-adresser skal også håndteres. Målene nedenfor er lokale
+sider, som nu findes i v3. Brug det endeligt valgte hoveddomæne foran målstien.
+Opsæt serverbaserede permanente omdirigeringer og test både www/non-www og
+HTTP/HTTPS; ingen omdirigeringer er aktiveret af denne lokale ændring.
+
+| Gammel sti | Ny sti |
+|---|---|
+| `/room-balihousegardenview-1-1.html` | `/bali-house.html#bali-house-garden-view` |
+| `/room-balihouseseaview-1-2.html` | `/bali-house.html#bali-house-sea-view` |
+| `/room-balihousepartialseaview-1-3.html` | `/bali-house.html#bali-house-partial-sea-view` |
+| `/room-balideluxepartialseaview-5-9.html` | `/bali-deluxe.html#bali-deluxe-partial-sea-view` |
+| `/room-thaitwinhousegardenview-2-4.html` | `/thai-twin-house.html#thai-twin-house-garden-view` |
+| `/room-thaitwinhouseseaview-2-5.html` | `/thai-twin-house.html#thai-twin-house-sea-view` |
+| `/room-thaitwinhousepartialseaview-2-6.html` | `/thai-twin-house.html#thai-twin-house-partial-sea-view` |
+| `/room-sunsethouselower-3-7.html` | `/sunset-house.html` |
+| `/room-sunsethouseupper-3-8.html` | `/sunset-house.html` |
+
+Før lancering: Udvid listen med Search Console-landingssider, backlinks,
+serverlogs og aktuelle sitemaps. Bekræft særskilt twin-varianten og de thailandske
+URL'er. Engelske erstatningssider bevarer ikke nødvendigvis thailandske placeringer.
+Undgå at sende alle udgåede URL'er til forsiden. Test statuskode, slutmål,
+query-parametre og ingen redirect-loops. Bevar hoveddomænet hvis muligt;
+domæneoverdragelse alene er ikke en garanti for bevaret Googletrafik.

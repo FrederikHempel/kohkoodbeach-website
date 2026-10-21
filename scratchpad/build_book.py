@@ -12,6 +12,7 @@ import re, pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 acc = (ROOT / 'accommodation.html').read_text(encoding='utf-8')
+acc += (ROOT / 'scratchpad/room-panels.html').read_text(encoding='utf-8') + '</section>'
 gh = (ROOT / 'getting-here.html').read_text(encoding='utf-8')
 
 # The transport overlay's content comes from getting-here.html's own numbered
@@ -286,6 +287,8 @@ BODY = f'''<!-- ============ THE ENQUIRY ============
               </div>
             </div>
           </div>
+          <p class="booking-policy">Staying on 24 or 31 December? Dinner is compulsory on each date: 2,000 THB per adult and 1,000 THB per child aged 2–11, per dinner. Extra beds are on request at 800 THB per person. We confirm all supplements in your quote.</p>
+          <label><span class="label">Children’s ages at arrival, if travelling with children</span><input type="text" name="child_ages" maxlength="120" placeholder="For example: 3 and 8 years"><small>Breakfast and festive dinner child rates apply at ages 2–11. Room capacity rules differ; we will confirm your family’s arrangements.</small></label>
           <label><span class="label">Anything else we should know?</span><textarea name="message" rows="4"></textarea></label>
           <div class="step__send">
             <button type="submit" class="btn">Send enquiry <span class="arrow" aria-hidden="true">&#8594;</span></button>
